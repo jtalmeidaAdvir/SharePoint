@@ -1,0 +1,338 @@
+﻿[16/01/25 17:26:11] info: Program: Starting Squirrel Updater: --update https://dl.pstmn.io/update/WIN64/11.23.3/stable?installationId=93bcab86-f60d-4bdf-9826-e2714f8a6601&userId=38718036&syncEnabled=true&teamPlan=&teamId=0
+[16/01/25 17:26:12] info: Program: Starting update, downloading from https://dl.pstmn.io/update/WIN64/11.23.3/stable?installationId=93bcab86-f60d-4bdf-9826-e2714f8a6601&userId=38718036&syncEnabled=true&teamPlan=&teamId=0
+[16/01/25 17:26:12] info: Program: About to update to: C:\Users\jtalm\AppData\Local\Postman
+[16/01/25 17:26:12] info: CheckForUpdateImpl: Using existing staging user ID: 33a5a728-77e6-5738-97f3-6a84c9f593fd
+[16/01/25 17:26:12] info: CheckForUpdateImpl: Downloading RELEASES file from https://dl.pstmn.io/update/WIN64/11.23.3/stable?installationId=93bcab86-f60d-4bdf-9826-e2714f8a6601&userId=38718036&syncEnabled=true&teamPlan=&teamId=0
+[16/01/25 17:26:12] info: FileDownloader: Downloading url: https://dl.pstmn.io/update/WIN64/11.23.3/stable/RELEASES?installationId=93bcab86-f60d-4bdf-9826-e2714f8a6601&userId=38718036&syncEnabled=true&teamPlan=&teamId=0&id=Postman&localVersion=11.23.3&arch=amd64
+[16/01/25 17:26:14] info: FileDownloader: Downloading file: https://dl.pstmn.io/download/11.28.3/Postman-win64-11.28.3-full.nupkg
+[16/01/25 17:27:35] info: ApplyReleasesImpl: Writing files to app directory: C:\Users\jtalm\AppData\Local\Postman\app-11.28.3
+[16/01/25 17:27:49] info: LogHost: Rigging execution stub for Postman_ExecutionStub.exe to C:\Users\jtalm\AppData\Local\Postman\Postman.exe
+[16/01/25 17:28:07] info: ApplyReleasesImpl: Squirrel Enabled Apps: []
+[16/01/25 17:28:07] warn: ApplyReleasesImpl: No apps are marked as Squirrel-aware! Going to run them all
+[16/01/25 17:28:07] info: ApplyReleasesImpl: About to create shortcuts for Postman.exe, rootAppDir C:\Users\jtalm\AppData\Local\Postman\
+[16/01/25 17:28:07] info: ApplyReleasesImpl: Creating shortcut for Postman.exe => C:\Users\jtalm\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Postman\Postman.lnk
+[16/01/25 17:28:07] info: ApplyReleasesImpl: About to save shortcut: C:\Users\jtalm\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Postman\Postman.lnk (target C:\Users\jtalm\AppData\Local\Postman\Postman.exe, workingDir C:\Users\jtalm\AppData\Local\Postman\app-11.28.3, args , toastActivatorCSLID d56d0ae8-2c2a-5b45-bd3b-9973bc69da9e)
+[16/01/25 17:28:08] info: ApplyReleasesImpl: Creating shortcut for Postman.exe => C:\Users\jtalm\Desktop\Postman.lnk
+[16/01/25 17:28:08] info: ApplyReleasesImpl: About to save shortcut: C:\Users\jtalm\Desktop\Postman.lnk (target C:\Users\jtalm\AppData\Local\Postman\Postman.exe, workingDir C:\Users\jtalm\AppData\Local\Postman\app-11.28.3, args , toastActivatorCSLID d56d0ae8-2c2a-5b45-bd3b-9973bc69da9e)
+[16/01/25 17:28:08] info: ApplyReleasesImpl: Examining Pin: AnyDesk.lnk
+[16/01/25 17:28:08] info: ApplyReleasesImpl: Examining Pin: File Explorer.lnk
+[16/01/25 17:28:08] info: ApplyReleasesImpl: Examining Pin: Google Chrome.lnk
+[16/01/25 17:28:08] info: ApplyReleasesImpl: Examining Pin: Microsoft Edge.lnk
+[16/01/25 17:28:08] info: ApplyReleasesImpl: Examining Pin: OpenVPN Connect.lnk
+[16/01/25 17:28:08] info: ApplyReleasesImpl: Examining Pin: Outlook (classic).lnk
+[16/01/25 17:28:08] info: ApplyReleasesImpl: Examining Pin: PRIMAVERA Evolution - Administrador.lnk
+[16/01/25 17:28:08] info: ApplyReleasesImpl: Examining Pin: PRIMAVERA Evolution - ERP.lnk
+[16/01/25 17:28:08] info: ApplyReleasesImpl: Examining Pin: Remote Desktop Connection.lnk
+[16/01/25 17:28:08] info: ApplyReleasesImpl: Examining Pin: Smart VPN Client.lnk
+[16/01/25 17:28:08] info: ApplyReleasesImpl: Examining Pin: SQL Server Management Studio 20.lnk
+[16/01/25 17:28:08] info: ApplyReleasesImpl: Examining Pin: Visual Studio 2022.lnk
+[16/01/25 17:28:08] info: ApplyReleasesImpl: Starting fixPinnedExecutables
+[16/01/25 17:28:08] info: ApplyReleasesImpl: Examining Pin: AnyDesk.lnk
+[16/01/25 17:28:08] info: ApplyReleasesImpl: Examining Pin: File Explorer.lnk
+[16/01/25 17:28:08] info: ApplyReleasesImpl: Examining Pin: Google Chrome.lnk
+[16/01/25 17:28:08] info: ApplyReleasesImpl: Examining Pin: Microsoft Edge.lnk
+[16/01/25 17:28:08] info: ApplyReleasesImpl: Examining Pin: OpenVPN Connect.lnk
+[16/01/25 17:28:08] info: ApplyReleasesImpl: Examining Pin: Outlook (classic).lnk
+[16/01/25 17:28:08] info: ApplyReleasesImpl: Examining Pin: PRIMAVERA Evolution - Administrador.lnk
+[16/01/25 17:28:08] info: ApplyReleasesImpl: Examining Pin: PRIMAVERA Evolution - ERP.lnk
+[16/01/25 17:28:08] info: ApplyReleasesImpl: Examining Pin: Remote Desktop Connection.lnk
+[16/01/25 17:28:08] info: ApplyReleasesImpl: Examining Pin: Smart VPN Client.lnk
+[16/01/25 17:28:08] info: ApplyReleasesImpl: Examining Pin: SQL Server Management Studio 20.lnk
+[16/01/25 17:28:08] info: ApplyReleasesImpl: Examining Pin: Visual Studio 2022.lnk
+[16/01/25 17:28:08] info: ApplyReleasesImpl: Fixing up tray icons
+[16/01/25 17:28:08] info: ApplyReleasesImpl: cleanDeadVersions: checking for version 11.28.3
+[16/01/25 17:28:08] info: ApplyReleasesImpl: cleanDeadVersions: exclude current version folder app-11.23.3
+[16/01/25 17:28:08] info: ApplyReleasesImpl: cleanDeadVersions: exclude new version folder app-11.28.3
+[16/01/25 17:28:12] info: Program: Finished Squirrel Updater
+[23/01/25 13:03:32] info: Program: Starting Squirrel Updater: --update https://dl.pstmn.io/update/WIN64/11.28.3/stable?installationId=93bcab86-f60d-4bdf-9826-e2714f8a6601&userId=38718036&syncEnabled=true&teamPlan=&teamId=0
+[23/01/25 13:03:32] info: Program: Starting update, downloading from https://dl.pstmn.io/update/WIN64/11.28.3/stable?installationId=93bcab86-f60d-4bdf-9826-e2714f8a6601&userId=38718036&syncEnabled=true&teamPlan=&teamId=0
+[23/01/25 13:03:32] info: Program: About to update to: C:\Users\jtalm\AppData\Local\Postman
+[23/01/25 13:03:32] info: CheckForUpdateImpl: Using existing staging user ID: 33a5a728-77e6-5738-97f3-6a84c9f593fd
+[23/01/25 13:03:32] info: CheckForUpdateImpl: Downloading RELEASES file from https://dl.pstmn.io/update/WIN64/11.28.3/stable?installationId=93bcab86-f60d-4bdf-9826-e2714f8a6601&userId=38718036&syncEnabled=true&teamPlan=&teamId=0
+[23/01/25 13:03:32] info: FileDownloader: Downloading url: https://dl.pstmn.io/update/WIN64/11.28.3/stable/RELEASES?installationId=93bcab86-f60d-4bdf-9826-e2714f8a6601&userId=38718036&syncEnabled=true&teamPlan=&teamId=0&id=Postman-win64&localVersion=11.28.3&arch=amd64
+[23/01/25 13:03:33] info: FileDownloader: Downloading file: https://dl.pstmn.io/download/11.28.4/Postman-win64-11.28.4-full.nupkg
+[23/01/25 13:03:54] info: ApplyReleasesImpl: Writing files to app directory: C:\Users\jtalm\AppData\Local\Postman\app-11.28.4
+[23/01/25 13:03:57] info: LogHost: Rigging execution stub for Postman_ExecutionStub.exe to C:\Users\jtalm\AppData\Local\Postman\Postman.exe
+[23/01/25 13:04:01] info: ApplyReleasesImpl: Squirrel Enabled Apps: []
+[23/01/25 13:04:01] warn: ApplyReleasesImpl: No apps are marked as Squirrel-aware! Going to run them all
+[23/01/25 13:04:01] info: ApplyReleasesImpl: About to create shortcuts for Postman.exe, rootAppDir C:\Users\jtalm\AppData\Local\Postman\
+[23/01/25 13:04:01] info: ApplyReleasesImpl: Creating shortcut for Postman.exe => C:\Users\jtalm\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Postman\Postman.lnk
+[23/01/25 13:04:01] info: ApplyReleasesImpl: About to save shortcut: C:\Users\jtalm\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Postman\Postman.lnk (target C:\Users\jtalm\AppData\Local\Postman\Postman.exe, workingDir C:\Users\jtalm\AppData\Local\Postman\app-11.28.4, args , toastActivatorCSLID d56d0ae8-2c2a-5b45-bd3b-9973bc69da9e)
+[23/01/25 13:04:01] info: ApplyReleasesImpl: Creating shortcut for Postman.exe => C:\Users\jtalm\Desktop\Postman.lnk
+[23/01/25 13:04:01] info: ApplyReleasesImpl: About to save shortcut: C:\Users\jtalm\Desktop\Postman.lnk (target C:\Users\jtalm\AppData\Local\Postman\Postman.exe, workingDir C:\Users\jtalm\AppData\Local\Postman\app-11.28.4, args , toastActivatorCSLID d56d0ae8-2c2a-5b45-bd3b-9973bc69da9e)
+[23/01/25 13:04:01] info: ApplyReleasesImpl: Examining Pin: AnyDesk.lnk
+[23/01/25 13:04:01] info: ApplyReleasesImpl: Examining Pin: File Explorer.lnk
+[23/01/25 13:04:01] info: ApplyReleasesImpl: Examining Pin: Google Chrome.lnk
+[23/01/25 13:04:01] info: ApplyReleasesImpl: Examining Pin: Microsoft Edge.lnk
+[23/01/25 13:04:01] info: ApplyReleasesImpl: Examining Pin: OpenVPN Connect.lnk
+[23/01/25 13:04:01] info: ApplyReleasesImpl: Examining Pin: Outlook (classic).lnk
+[23/01/25 13:04:01] info: ApplyReleasesImpl: Examining Pin: PRIMAVERA Evolution - Administrador.lnk
+[23/01/25 13:04:02] info: ApplyReleasesImpl: Examining Pin: PRIMAVERA Evolution - ERP.lnk
+[23/01/25 13:04:02] info: ApplyReleasesImpl: Examining Pin: Remote Desktop Connection.lnk
+[23/01/25 13:04:02] info: ApplyReleasesImpl: Examining Pin: Smart VPN Client.lnk
+[23/01/25 13:04:02] info: ApplyReleasesImpl: Examining Pin: SQL Server Management Studio 20.lnk
+[23/01/25 13:04:02] info: ApplyReleasesImpl: Examining Pin: Visual Studio 2022.lnk
+[23/01/25 13:04:02] info: ApplyReleasesImpl: Starting fixPinnedExecutables
+[23/01/25 13:04:02] info: ApplyReleasesImpl: Examining Pin: AnyDesk.lnk
+[23/01/25 13:04:02] info: ApplyReleasesImpl: Examining Pin: File Explorer.lnk
+[23/01/25 13:04:02] info: ApplyReleasesImpl: Examining Pin: Google Chrome.lnk
+[23/01/25 13:04:02] info: ApplyReleasesImpl: Examining Pin: Microsoft Edge.lnk
+[23/01/25 13:04:02] info: ApplyReleasesImpl: Examining Pin: OpenVPN Connect.lnk
+[23/01/25 13:04:02] info: ApplyReleasesImpl: Examining Pin: Outlook (classic).lnk
+[23/01/25 13:04:02] info: ApplyReleasesImpl: Examining Pin: PRIMAVERA Evolution - Administrador.lnk
+[23/01/25 13:04:02] info: ApplyReleasesImpl: Examining Pin: PRIMAVERA Evolution - ERP.lnk
+[23/01/25 13:04:02] info: ApplyReleasesImpl: Examining Pin: Remote Desktop Connection.lnk
+[23/01/25 13:04:02] info: ApplyReleasesImpl: Examining Pin: Smart VPN Client.lnk
+[23/01/25 13:04:02] info: ApplyReleasesImpl: Examining Pin: SQL Server Management Studio 20.lnk
+[23/01/25 13:04:02] info: ApplyReleasesImpl: Examining Pin: Visual Studio 2022.lnk
+[23/01/25 13:04:02] info: ApplyReleasesImpl: Fixing up tray icons
+[23/01/25 13:04:02] info: ApplyReleasesImpl: cleanDeadVersions: checking for version 11.28.4
+[23/01/25 13:04:02] info: ApplyReleasesImpl: cleanDeadVersions: exclude current version folder app-11.28.3
+[23/01/25 13:04:02] info: ApplyReleasesImpl: cleanDeadVersions: exclude new version folder app-11.28.4
+[23/01/25 13:04:03] info: Program: Finished Squirrel Updater
+[10/03/25 18:46:09] info: Program: Starting Squirrel Updater: --update https://dl.pstmn.io/update/WIN64/11.28.4/stable?installationId=93bcab86-f60d-4bdf-9826-e2714f8a6601&userId=38718036&syncEnabled=true&teamPlan=&teamId=0
+[10/03/25 18:46:09] info: Program: Starting update, downloading from https://dl.pstmn.io/update/WIN64/11.28.4/stable?installationId=93bcab86-f60d-4bdf-9826-e2714f8a6601&userId=38718036&syncEnabled=true&teamPlan=&teamId=0
+[10/03/25 18:46:09] info: Program: About to update to: C:\Users\jtalm\AppData\Local\Postman
+[10/03/25 18:46:09] info: CheckForUpdateImpl: Using existing staging user ID: 33a5a728-77e6-5738-97f3-6a84c9f593fd
+[10/03/25 18:46:09] info: CheckForUpdateImpl: Downloading RELEASES file from https://dl.pstmn.io/update/WIN64/11.28.4/stable?installationId=93bcab86-f60d-4bdf-9826-e2714f8a6601&userId=38718036&syncEnabled=true&teamPlan=&teamId=0
+[10/03/25 18:46:09] info: FileDownloader: Downloading url: https://dl.pstmn.io/update/WIN64/11.28.4/stable/RELEASES?installationId=93bcab86-f60d-4bdf-9826-e2714f8a6601&userId=38718036&syncEnabled=true&teamPlan=&teamId=0&id=Postman-win64&localVersion=11.28.4&arch=amd64
+[10/03/25 18:46:10] info: FileDownloader: Downloading file: https://dl.pstmn.io/download/11.36.0/Postman-win64-11.36.0-full.nupkg
+[10/03/25 18:46:26] info: ApplyReleasesImpl: Writing files to app directory: C:\Users\jtalm\AppData\Local\Postman\app-11.36.0
+[10/03/25 18:46:30] info: LogHost: Rigging execution stub for Postman_ExecutionStub.exe to C:\Users\jtalm\AppData\Local\Postman\Postman.exe
+[10/03/25 18:46:34] info: ApplyReleasesImpl: Squirrel Enabled Apps: []
+[10/03/25 18:46:34] warn: ApplyReleasesImpl: No apps are marked as Squirrel-aware! Going to run them all
+[10/03/25 18:46:34] info: ApplyReleasesImpl: About to create shortcuts for Postman.exe, rootAppDir C:\Users\jtalm\AppData\Local\Postman\
+[10/03/25 18:46:34] info: ApplyReleasesImpl: Creating shortcut for Postman.exe => C:\Users\jtalm\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Postman\Postman.lnk
+[10/03/25 18:46:34] info: ApplyReleasesImpl: About to save shortcut: C:\Users\jtalm\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Postman\Postman.lnk (target C:\Users\jtalm\AppData\Local\Postman\Postman.exe, workingDir C:\Users\jtalm\AppData\Local\Postman\app-11.36.0, args , toastActivatorCSLID d56d0ae8-2c2a-5b45-bd3b-9973bc69da9e)
+[10/03/25 18:46:34] info: ApplyReleasesImpl: Creating shortcut for Postman.exe => C:\Users\jtalm\Desktop\Postman.lnk
+[10/03/25 18:46:34] info: ApplyReleasesImpl: About to save shortcut: C:\Users\jtalm\Desktop\Postman.lnk (target C:\Users\jtalm\AppData\Local\Postman\Postman.exe, workingDir C:\Users\jtalm\AppData\Local\Postman\app-11.36.0, args , toastActivatorCSLID d56d0ae8-2c2a-5b45-bd3b-9973bc69da9e)
+[10/03/25 18:46:34] info: ApplyReleasesImpl: Examining Pin: AnyDesk.lnk
+[10/03/25 18:46:34] info: ApplyReleasesImpl: Examining Pin: File Explorer.lnk
+[10/03/25 18:46:34] info: ApplyReleasesImpl: Examining Pin: Google Chrome.lnk
+[10/03/25 18:46:34] info: ApplyReleasesImpl: Examining Pin: Microsoft Edge.lnk
+[10/03/25 18:46:34] info: ApplyReleasesImpl: Examining Pin: OneNote.lnk
+[10/03/25 18:46:34] info: ApplyReleasesImpl: Examining Pin: OpenVPN Connect.lnk
+[10/03/25 18:46:34] info: ApplyReleasesImpl: Examining Pin: Outlook (classic).lnk
+[10/03/25 18:46:34] info: ApplyReleasesImpl: Examining Pin: PRIMAVERA Evolution - Administrador.lnk
+[10/03/25 18:46:34] info: ApplyReleasesImpl: Examining Pin: PRIMAVERA Evolution - ERP.lnk
+[10/03/25 18:46:34] info: ApplyReleasesImpl: Examining Pin: Remote Desktop Connection.lnk
+[10/03/25 18:46:34] info: ApplyReleasesImpl: Examining Pin: Smart VPN Client.lnk
+[10/03/25 18:46:34] info: ApplyReleasesImpl: Examining Pin: SQL Server Management Studio 20.lnk
+[10/03/25 18:46:34] info: ApplyReleasesImpl: Examining Pin: Visual Studio 2022.lnk
+[10/03/25 18:46:34] info: ApplyReleasesImpl: Starting fixPinnedExecutables
+[10/03/25 18:46:34] info: ApplyReleasesImpl: Examining Pin: AnyDesk.lnk
+[10/03/25 18:46:34] info: ApplyReleasesImpl: Examining Pin: File Explorer.lnk
+[10/03/25 18:46:34] info: ApplyReleasesImpl: Examining Pin: Google Chrome.lnk
+[10/03/25 18:46:34] info: ApplyReleasesImpl: Examining Pin: Microsoft Edge.lnk
+[10/03/25 18:46:34] info: ApplyReleasesImpl: Examining Pin: OneNote.lnk
+[10/03/25 18:46:34] info: ApplyReleasesImpl: Examining Pin: OpenVPN Connect.lnk
+[10/03/25 18:46:34] info: ApplyReleasesImpl: Examining Pin: Outlook (classic).lnk
+[10/03/25 18:46:34] info: ApplyReleasesImpl: Examining Pin: PRIMAVERA Evolution - Administrador.lnk
+[10/03/25 18:46:34] info: ApplyReleasesImpl: Examining Pin: PRIMAVERA Evolution - ERP.lnk
+[10/03/25 18:46:34] info: ApplyReleasesImpl: Examining Pin: Remote Desktop Connection.lnk
+[10/03/25 18:46:34] info: ApplyReleasesImpl: Examining Pin: Smart VPN Client.lnk
+[10/03/25 18:46:34] info: ApplyReleasesImpl: Examining Pin: SQL Server Management Studio 20.lnk
+[10/03/25 18:46:34] info: ApplyReleasesImpl: Examining Pin: Visual Studio 2022.lnk
+[10/03/25 18:46:34] info: ApplyReleasesImpl: Fixing up tray icons
+[10/03/25 18:46:34] info: ApplyReleasesImpl: cleanDeadVersions: checking for version 11.36.0
+[10/03/25 18:46:34] info: ApplyReleasesImpl: cleanDeadVersions: exclude current version folder app-11.28.4
+[10/03/25 18:46:34] info: ApplyReleasesImpl: cleanDeadVersions: exclude new version folder app-11.36.0
+[10/03/25 18:46:36] info: Program: Finished Squirrel Updater
+[19/03/25 12:54:44] info: Program: Starting Squirrel Updater: --update https://dl.pstmn.io/update/WIN64/11.36.0/stable?installationId=93bcab86-f60d-4bdf-9826-e2714f8a6601&userId=38718036&syncEnabled=true&teamPlan=&teamId=0
+[19/03/25 12:54:44] info: Program: Starting update, downloading from https://dl.pstmn.io/update/WIN64/11.36.0/stable?installationId=93bcab86-f60d-4bdf-9826-e2714f8a6601&userId=38718036&syncEnabled=true&teamPlan=&teamId=0
+[19/03/25 12:54:44] info: Program: About to update to: C:\Users\jtalm\AppData\Local\Postman
+[19/03/25 12:54:44] info: CheckForUpdateImpl: Using existing staging user ID: 33a5a728-77e6-5738-97f3-6a84c9f593fd
+[19/03/25 12:54:44] info: CheckForUpdateImpl: Downloading RELEASES file from https://dl.pstmn.io/update/WIN64/11.36.0/stable?installationId=93bcab86-f60d-4bdf-9826-e2714f8a6601&userId=38718036&syncEnabled=true&teamPlan=&teamId=0
+[19/03/25 12:54:44] info: FileDownloader: Downloading url: https://dl.pstmn.io/update/WIN64/11.36.0/stable/RELEASES?installationId=93bcab86-f60d-4bdf-9826-e2714f8a6601&userId=38718036&syncEnabled=true&teamPlan=&teamId=0&id=Postman-win64&localVersion=11.36.0&arch=amd64
+[19/03/25 12:54:44] info: FileDownloader: Downloading file: https://dl.pstmn.io/download/11.37.1/Postman-win64-11.37.1-full.nupkg
+[19/03/25 12:55:06] info: ApplyReleasesImpl: Writing files to app directory: C:\Users\jtalm\AppData\Local\Postman\app-11.37.1
+[19/03/25 12:55:09] info: LogHost: Rigging execution stub for Postman_ExecutionStub.exe to C:\Users\jtalm\AppData\Local\Postman\Postman.exe
+[19/03/25 12:55:14] info: ApplyReleasesImpl: Squirrel Enabled Apps: []
+[19/03/25 12:55:14] warn: ApplyReleasesImpl: No apps are marked as Squirrel-aware! Going to run them all
+[19/03/25 12:55:14] info: ApplyReleasesImpl: About to create shortcuts for Postman.exe, rootAppDir C:\Users\jtalm\AppData\Local\Postman\
+[19/03/25 12:55:14] info: ApplyReleasesImpl: Creating shortcut for Postman.exe => C:\Users\jtalm\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Postman\Postman.lnk
+[19/03/25 12:55:14] info: ApplyReleasesImpl: About to save shortcut: C:\Users\jtalm\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Postman\Postman.lnk (target C:\Users\jtalm\AppData\Local\Postman\Postman.exe, workingDir C:\Users\jtalm\AppData\Local\Postman\app-11.37.1, args , toastActivatorCSLID d56d0ae8-2c2a-5b45-bd3b-9973bc69da9e)
+[19/03/25 12:55:14] info: ApplyReleasesImpl: Creating shortcut for Postman.exe => C:\Users\jtalm\Desktop\Postman.lnk
+[19/03/25 12:55:14] info: ApplyReleasesImpl: About to save shortcut: C:\Users\jtalm\Desktop\Postman.lnk (target C:\Users\jtalm\AppData\Local\Postman\Postman.exe, workingDir C:\Users\jtalm\AppData\Local\Postman\app-11.37.1, args , toastActivatorCSLID d56d0ae8-2c2a-5b45-bd3b-9973bc69da9e)
+[19/03/25 12:55:14] info: ApplyReleasesImpl: Examining Pin: AnyDesk.lnk
+[19/03/25 12:55:14] info: ApplyReleasesImpl: Examining Pin: File Explorer.lnk
+[19/03/25 12:55:14] info: ApplyReleasesImpl: Examining Pin: Google Chrome.lnk
+[19/03/25 12:55:14] info: ApplyReleasesImpl: Examining Pin: Microsoft Edge.lnk
+[19/03/25 12:55:14] info: ApplyReleasesImpl: Examining Pin: OneNote.lnk
+[19/03/25 12:55:14] info: ApplyReleasesImpl: Examining Pin: OpenVPN Connect.lnk
+[19/03/25 12:55:14] info: ApplyReleasesImpl: Examining Pin: Outlook (classic).lnk
+[19/03/25 12:55:14] info: ApplyReleasesImpl: Examining Pin: PRIMAVERA Evolution - Administrador.lnk
+[19/03/25 12:55:14] info: ApplyReleasesImpl: Examining Pin: PRIMAVERA Evolution - ERP.lnk
+[19/03/25 12:55:14] info: ApplyReleasesImpl: Examining Pin: Remote Desktop Connection.lnk
+[19/03/25 12:55:14] info: ApplyReleasesImpl: Examining Pin: Smart VPN Client.lnk
+[19/03/25 12:55:14] info: ApplyReleasesImpl: Examining Pin: SQL Server Management Studio 20.lnk
+[19/03/25 12:55:14] info: ApplyReleasesImpl: Examining Pin: Visual Studio 2022.lnk
+[19/03/25 12:55:14] info: ApplyReleasesImpl: Starting fixPinnedExecutables
+[19/03/25 12:55:14] info: ApplyReleasesImpl: Examining Pin: AnyDesk.lnk
+[19/03/25 12:55:14] info: ApplyReleasesImpl: Examining Pin: File Explorer.lnk
+[19/03/25 12:55:14] info: ApplyReleasesImpl: Examining Pin: Google Chrome.lnk
+[19/03/25 12:55:14] info: ApplyReleasesImpl: Examining Pin: Microsoft Edge.lnk
+[19/03/25 12:55:14] info: ApplyReleasesImpl: Examining Pin: OneNote.lnk
+[19/03/25 12:55:14] info: ApplyReleasesImpl: Examining Pin: OpenVPN Connect.lnk
+[19/03/25 12:55:14] info: ApplyReleasesImpl: Examining Pin: Outlook (classic).lnk
+[19/03/25 12:55:14] info: ApplyReleasesImpl: Examining Pin: PRIMAVERA Evolution - Administrador.lnk
+[19/03/25 12:55:14] info: ApplyReleasesImpl: Examining Pin: PRIMAVERA Evolution - ERP.lnk
+[19/03/25 12:55:14] info: ApplyReleasesImpl: Examining Pin: Remote Desktop Connection.lnk
+[19/03/25 12:55:14] info: ApplyReleasesImpl: Examining Pin: Smart VPN Client.lnk
+[19/03/25 12:55:14] info: ApplyReleasesImpl: Examining Pin: SQL Server Management Studio 20.lnk
+[19/03/25 12:55:14] info: ApplyReleasesImpl: Examining Pin: Visual Studio 2022.lnk
+[19/03/25 12:55:14] info: ApplyReleasesImpl: Fixing up tray icons
+[19/03/25 12:55:14] info: ApplyReleasesImpl: cleanDeadVersions: checking for version 11.37.1
+[19/03/25 12:55:14] info: ApplyReleasesImpl: cleanDeadVersions: exclude current version folder app-11.36.0
+[19/03/25 12:55:14] info: ApplyReleasesImpl: cleanDeadVersions: exclude new version folder app-11.37.1
+[19/03/25 12:55:16] info: Program: Finished Squirrel Updater
+[21/03/25 11:02:18] info: Program: Starting Squirrel Updater: --update https://dl.pstmn.io/update/WIN64/11.37.1/stable?installationId=93bcab86-f60d-4bdf-9826-e2714f8a6601&userId=38718036&syncEnabled=true&teamPlan=&teamId=0
+[21/03/25 11:02:18] info: Program: Starting update, downloading from https://dl.pstmn.io/update/WIN64/11.37.1/stable?installationId=93bcab86-f60d-4bdf-9826-e2714f8a6601&userId=38718036&syncEnabled=true&teamPlan=&teamId=0
+[21/03/25 11:02:18] info: Program: About to update to: C:\Users\jtalm\AppData\Local\Postman
+[21/03/25 11:02:18] info: CheckForUpdateImpl: Using existing staging user ID: 33a5a728-77e6-5738-97f3-6a84c9f593fd
+[21/03/25 11:02:18] info: CheckForUpdateImpl: Downloading RELEASES file from https://dl.pstmn.io/update/WIN64/11.37.1/stable?installationId=93bcab86-f60d-4bdf-9826-e2714f8a6601&userId=38718036&syncEnabled=true&teamPlan=&teamId=0
+[21/03/25 11:02:18] info: FileDownloader: Downloading url: https://dl.pstmn.io/update/WIN64/11.37.1/stable/RELEASES?installationId=93bcab86-f60d-4bdf-9826-e2714f8a6601&userId=38718036&syncEnabled=true&teamPlan=&teamId=0&id=Postman-win64&localVersion=11.37.1&arch=amd64
+[21/03/25 11:02:19] info: FileDownloader: Downloading file: https://dl.pstmn.io/download/11.37.5/Postman-win64-11.37.5-full.nupkg
+[21/03/25 11:02:42] info: ApplyReleasesImpl: Writing files to app directory: C:\Users\jtalm\AppData\Local\Postman\app-11.37.5
+[21/03/25 11:02:56] info: LogHost: Rigging execution stub for Postman_ExecutionStub.exe to C:\Users\jtalm\AppData\Local\Postman\Postman.exe
+[21/03/25 11:03:08] info: ApplyReleasesImpl: Squirrel Enabled Apps: []
+[21/03/25 11:03:08] warn: ApplyReleasesImpl: No apps are marked as Squirrel-aware! Going to run them all
+[21/03/25 11:03:08] info: ApplyReleasesImpl: About to create shortcuts for Postman.exe, rootAppDir C:\Users\jtalm\AppData\Local\Postman\
+[21/03/25 11:03:08] info: ApplyReleasesImpl: Creating shortcut for Postman.exe => C:\Users\jtalm\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Postman\Postman.lnk
+[21/03/25 11:03:08] info: ApplyReleasesImpl: About to save shortcut: C:\Users\jtalm\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Postman\Postman.lnk (target C:\Users\jtalm\AppData\Local\Postman\Postman.exe, workingDir C:\Users\jtalm\AppData\Local\Postman\app-11.37.5, args , toastActivatorCSLID d56d0ae8-2c2a-5b45-bd3b-9973bc69da9e)
+[21/03/25 11:03:08] info: ApplyReleasesImpl: Creating shortcut for Postman.exe => C:\Users\jtalm\Desktop\Postman.lnk
+[21/03/25 11:03:08] info: ApplyReleasesImpl: About to save shortcut: C:\Users\jtalm\Desktop\Postman.lnk (target C:\Users\jtalm\AppData\Local\Postman\Postman.exe, workingDir C:\Users\jtalm\AppData\Local\Postman\app-11.37.5, args , toastActivatorCSLID d56d0ae8-2c2a-5b45-bd3b-9973bc69da9e)
+[21/03/25 11:03:09] info: ApplyReleasesImpl: Examining Pin: AnyDesk.lnk
+[21/03/25 11:03:09] info: ApplyReleasesImpl: Examining Pin: File Explorer.lnk
+[21/03/25 11:03:09] info: ApplyReleasesImpl: Examining Pin: Google Chrome.lnk
+[21/03/25 11:03:09] info: ApplyReleasesImpl: Examining Pin: Microsoft Azure Storage Explorer.lnk
+[21/03/25 11:03:09] info: ApplyReleasesImpl: Examining Pin: Microsoft Edge.lnk
+[21/03/25 11:03:09] info: ApplyReleasesImpl: Examining Pin: OneNote.lnk
+[21/03/25 11:03:09] info: ApplyReleasesImpl: Examining Pin: OpenVPN Connect.lnk
+[21/03/25 11:03:09] info: ApplyReleasesImpl: Examining Pin: Outlook (classic).lnk
+[21/03/25 11:03:09] info: ApplyReleasesImpl: Examining Pin: PRIMAVERA Evolution - Administrador.lnk
+[21/03/25 11:03:09] info: ApplyReleasesImpl: Examining Pin: PRIMAVERA Evolution - ERP.lnk
+[21/03/25 11:03:09] info: ApplyReleasesImpl: Examining Pin: Remote Desktop Connection.lnk
+[21/03/25 11:03:09] info: ApplyReleasesImpl: Examining Pin: Smart VPN Client.lnk
+[21/03/25 11:03:09] info: ApplyReleasesImpl: Examining Pin: SQL Server Management Studio 20.lnk
+[21/03/25 11:03:09] info: ApplyReleasesImpl: Examining Pin: Visual Studio 2022.lnk
+[21/03/25 11:03:09] info: ApplyReleasesImpl: Starting fixPinnedExecutables
+[21/03/25 11:03:09] info: ApplyReleasesImpl: Examining Pin: AnyDesk.lnk
+[21/03/25 11:03:09] info: ApplyReleasesImpl: Examining Pin: File Explorer.lnk
+[21/03/25 11:03:09] info: ApplyReleasesImpl: Examining Pin: Google Chrome.lnk
+[21/03/25 11:03:09] info: ApplyReleasesImpl: Examining Pin: Microsoft Azure Storage Explorer.lnk
+[21/03/25 11:03:09] info: ApplyReleasesImpl: Examining Pin: Microsoft Edge.lnk
+[21/03/25 11:03:09] info: ApplyReleasesImpl: Examining Pin: OneNote.lnk
+[21/03/25 11:03:09] info: ApplyReleasesImpl: Examining Pin: OpenVPN Connect.lnk
+[21/03/25 11:03:09] info: ApplyReleasesImpl: Examining Pin: Outlook (classic).lnk
+[21/03/25 11:03:09] info: ApplyReleasesImpl: Examining Pin: PRIMAVERA Evolution - Administrador.lnk
+[21/03/25 11:03:09] info: ApplyReleasesImpl: Examining Pin: PRIMAVERA Evolution - ERP.lnk
+[21/03/25 11:03:09] info: ApplyReleasesImpl: Examining Pin: Remote Desktop Connection.lnk
+[21/03/25 11:03:09] info: ApplyReleasesImpl: Examining Pin: Smart VPN Client.lnk
+[21/03/25 11:03:09] info: ApplyReleasesImpl: Examining Pin: SQL Server Management Studio 20.lnk
+[21/03/25 11:03:09] info: ApplyReleasesImpl: Examining Pin: Visual Studio 2022.lnk
+[21/03/25 11:03:09] info: ApplyReleasesImpl: Fixing up tray icons
+[21/03/25 11:03:09] info: ApplyReleasesImpl: cleanDeadVersions: checking for version 11.37.5
+[21/03/25 11:03:09] info: ApplyReleasesImpl: cleanDeadVersions: exclude current version folder app-11.37.1
+[21/03/25 11:03:09] info: ApplyReleasesImpl: cleanDeadVersions: exclude new version folder app-11.37.5
+[21/03/25 11:03:14] info: Program: Finished Squirrel Updater
+[15/04/25 14:18:55] info: Program: Starting Squirrel Updater: --update https://dl.pstmn.io/update/WIN64/11.37.5/stable?installationId=93bcab86-f60d-4bdf-9826-e2714f8a6601&userId=38718036&syncEnabled=true&teamPlan=&teamId=0
+[15/04/25 14:18:55] info: Program: Starting update, downloading from https://dl.pstmn.io/update/WIN64/11.37.5/stable?installationId=93bcab86-f60d-4bdf-9826-e2714f8a6601&userId=38718036&syncEnabled=true&teamPlan=&teamId=0
+[15/04/25 14:18:55] info: Program: About to update to: C:\Users\jtalm\AppData\Local\Postman
+[15/04/25 14:18:55] info: CheckForUpdateImpl: Using existing staging user ID: 33a5a728-77e6-5738-97f3-6a84c9f593fd
+[15/04/25 14:18:55] info: CheckForUpdateImpl: Downloading RELEASES file from https://dl.pstmn.io/update/WIN64/11.37.5/stable?installationId=93bcab86-f60d-4bdf-9826-e2714f8a6601&userId=38718036&syncEnabled=true&teamPlan=&teamId=0
+[15/04/25 14:18:56] info: FileDownloader: Downloading url: https://dl.pstmn.io/update/WIN64/11.37.5/stable/RELEASES?installationId=93bcab86-f60d-4bdf-9826-e2714f8a6601&userId=38718036&syncEnabled=true&teamPlan=&teamId=0&id=Postman-win64&localVersion=11.37.5&arch=amd64
+[15/04/25 14:18:57] info: FileDownloader: Downloading file: https://dl.pstmn.io/download/11.40.4/Postman-win64-11.40.4-full.nupkg
+[15/04/25 14:19:12] info: ApplyReleasesImpl: Writing files to app directory: C:\Users\jtalm\AppData\Local\Postman\app-11.40.4
+[15/04/25 14:19:15] info: LogHost: Rigging execution stub for Postman_ExecutionStub.exe to C:\Users\jtalm\AppData\Local\Postman\Postman.exe
+[15/04/25 14:19:19] info: ApplyReleasesImpl: Squirrel Enabled Apps: []
+[15/04/25 14:19:19] warn: ApplyReleasesImpl: No apps are marked as Squirrel-aware! Going to run them all
+[15/04/25 14:19:19] info: ApplyReleasesImpl: About to create shortcuts for Postman.exe, rootAppDir C:\Users\jtalm\AppData\Local\Postman\
+[15/04/25 14:19:19] info: ApplyReleasesImpl: Creating shortcut for Postman.exe => C:\Users\jtalm\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Postman\Postman.lnk
+[15/04/25 14:19:19] info: ApplyReleasesImpl: About to save shortcut: C:\Users\jtalm\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Postman\Postman.lnk (target C:\Users\jtalm\AppData\Local\Postman\Postman.exe, workingDir C:\Users\jtalm\AppData\Local\Postman\app-11.40.4, args , toastActivatorCSLID d56d0ae8-2c2a-5b45-bd3b-9973bc69da9e)
+[15/04/25 14:19:19] info: ApplyReleasesImpl: Creating shortcut for Postman.exe => C:\Users\jtalm\Desktop\Postman.lnk
+[15/04/25 14:19:19] info: ApplyReleasesImpl: About to save shortcut: C:\Users\jtalm\Desktop\Postman.lnk (target C:\Users\jtalm\AppData\Local\Postman\Postman.exe, workingDir C:\Users\jtalm\AppData\Local\Postman\app-11.40.4, args , toastActivatorCSLID d56d0ae8-2c2a-5b45-bd3b-9973bc69da9e)
+[15/04/25 14:19:19] info: ApplyReleasesImpl: Examining Pin: AnyDesk.lnk
+[15/04/25 14:19:19] info: ApplyReleasesImpl: Examining Pin: File Explorer.lnk
+[15/04/25 14:19:19] info: ApplyReleasesImpl: Examining Pin: GlobalProtect.lnk
+[15/04/25 14:19:19] info: ApplyReleasesImpl: Examining Pin: Google Chrome.lnk
+[15/04/25 14:19:19] info: ApplyReleasesImpl: Examining Pin: Microsoft Azure Storage Explorer.lnk
+[15/04/25 14:19:19] info: ApplyReleasesImpl: Examining Pin: OneNote.lnk
+[15/04/25 14:19:19] info: ApplyReleasesImpl: Examining Pin: OpenVPN Connect.lnk
+[15/04/25 14:19:19] info: ApplyReleasesImpl: Examining Pin: Outlook (classic).lnk
+[15/04/25 14:19:19] info: ApplyReleasesImpl: Examining Pin: PRIMAVERA Evolution - Administrador.lnk
+[15/04/25 14:19:19] info: ApplyReleasesImpl: Examining Pin: PRIMAVERA Evolution - ERP.lnk
+[15/04/25 14:19:19] info: ApplyReleasesImpl: Examining Pin: Remote Desktop Connection.lnk
+[15/04/25 14:19:19] info: ApplyReleasesImpl: Examining Pin: Smart VPN Client.lnk
+[15/04/25 14:19:19] info: ApplyReleasesImpl: Examining Pin: SQL Server Management Studio 20.lnk
+[15/04/25 14:19:19] info: ApplyReleasesImpl: Examining Pin: Visual Studio 2022.lnk
+[15/04/25 14:19:19] info: ApplyReleasesImpl: Starting fixPinnedExecutables
+[15/04/25 14:19:19] info: ApplyReleasesImpl: Examining Pin: AnyDesk.lnk
+[15/04/25 14:19:19] info: ApplyReleasesImpl: Examining Pin: File Explorer.lnk
+[15/04/25 14:19:19] info: ApplyReleasesImpl: Examining Pin: GlobalProtect.lnk
+[15/04/25 14:19:19] info: ApplyReleasesImpl: Examining Pin: Google Chrome.lnk
+[15/04/25 14:19:19] info: ApplyReleasesImpl: Examining Pin: Microsoft Azure Storage Explorer.lnk
+[15/04/25 14:19:19] info: ApplyReleasesImpl: Examining Pin: OneNote.lnk
+[15/04/25 14:19:19] info: ApplyReleasesImpl: Examining Pin: OpenVPN Connect.lnk
+[15/04/25 14:19:19] info: ApplyReleasesImpl: Examining Pin: Outlook (classic).lnk
+[15/04/25 14:19:19] info: ApplyReleasesImpl: Examining Pin: PRIMAVERA Evolution - Administrador.lnk
+[15/04/25 14:19:19] info: ApplyReleasesImpl: Examining Pin: PRIMAVERA Evolution - ERP.lnk
+[15/04/25 14:19:19] info: ApplyReleasesImpl: Examining Pin: Remote Desktop Connection.lnk
+[15/04/25 14:19:19] info: ApplyReleasesImpl: Examining Pin: Smart VPN Client.lnk
+[15/04/25 14:19:19] info: ApplyReleasesImpl: Examining Pin: SQL Server Management Studio 20.lnk
+[15/04/25 14:19:19] info: ApplyReleasesImpl: Examining Pin: Visual Studio 2022.lnk
+[15/04/25 14:19:19] info: ApplyReleasesImpl: Fixing up tray icons
+[15/04/25 14:19:19] info: ApplyReleasesImpl: cleanDeadVersions: checking for version 11.40.4
+[15/04/25 14:19:19] info: ApplyReleasesImpl: cleanDeadVersions: exclude current version folder app-11.37.5
+[15/04/25 14:19:19] info: ApplyReleasesImpl: cleanDeadVersions: exclude new version folder app-11.40.4
+[15/04/25 14:19:21] info: Program: Finished Squirrel Updater
+[16/04/25 09:22:02] info: Program: Starting Squirrel Updater: --update https://dl.pstmn.io/update/WIN64/11.40.4/stable?installationId=93bcab86-f60d-4bdf-9826-e2714f8a6601&userId=38718036&syncEnabled=true&teamPlan=&teamId=0
+[16/04/25 09:22:02] info: Program: Starting update, downloading from https://dl.pstmn.io/update/WIN64/11.40.4/stable?installationId=93bcab86-f60d-4bdf-9826-e2714f8a6601&userId=38718036&syncEnabled=true&teamPlan=&teamId=0
+[16/04/25 09:22:02] info: Program: About to update to: C:\Users\jtalm\AppData\Local\Postman
+[16/04/25 09:22:02] info: CheckForUpdateImpl: Using existing staging user ID: 33a5a728-77e6-5738-97f3-6a84c9f593fd
+[16/04/25 09:22:02] info: CheckForUpdateImpl: Downloading RELEASES file from https://dl.pstmn.io/update/WIN64/11.40.4/stable?installationId=93bcab86-f60d-4bdf-9826-e2714f8a6601&userId=38718036&syncEnabled=true&teamPlan=&teamId=0
+[16/04/25 09:22:02] info: FileDownloader: Downloading url: https://dl.pstmn.io/update/WIN64/11.40.4/stable/RELEASES?installationId=93bcab86-f60d-4bdf-9826-e2714f8a6601&userId=38718036&syncEnabled=true&teamPlan=&teamId=0&id=Postman-win64&localVersion=11.40.4&arch=amd64
+[16/04/25 09:22:03] info: FileDownloader: Downloading file: https://dl.pstmn.io/download/11.40.5/Postman-win64-11.40.5-full.nupkg
+[16/04/25 09:22:23] info: ApplyReleasesImpl: Writing files to app directory: C:\Users\jtalm\AppData\Local\Postman\app-11.40.5
+[16/04/25 09:22:28] info: LogHost: Rigging execution stub for Postman_ExecutionStub.exe to C:\Users\jtalm\AppData\Local\Postman\Postman.exe
+[16/04/25 09:22:32] info: ApplyReleasesImpl: Squirrel Enabled Apps: []
+[16/04/25 09:22:32] warn: ApplyReleasesImpl: No apps are marked as Squirrel-aware! Going to run them all
+[16/04/25 09:22:32] info: ApplyReleasesImpl: About to create shortcuts for Postman.exe, rootAppDir C:\Users\jtalm\AppData\Local\Postman\
+[16/04/25 09:22:32] info: ApplyReleasesImpl: Creating shortcut for Postman.exe => C:\Users\jtalm\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Postman\Postman.lnk
+[16/04/25 09:22:32] info: ApplyReleasesImpl: About to save shortcut: C:\Users\jtalm\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Postman\Postman.lnk (target C:\Users\jtalm\AppData\Local\Postman\Postman.exe, workingDir C:\Users\jtalm\AppData\Local\Postman\app-11.40.5, args , toastActivatorCSLID d56d0ae8-2c2a-5b45-bd3b-9973bc69da9e)
+[16/04/25 09:22:32] info: ApplyReleasesImpl: Creating shortcut for Postman.exe => C:\Users\jtalm\Desktop\Postman.lnk
+[16/04/25 09:22:32] info: ApplyReleasesImpl: About to save shortcut: C:\Users\jtalm\Desktop\Postman.lnk (target C:\Users\jtalm\AppData\Local\Postman\Postman.exe, workingDir C:\Users\jtalm\AppData\Local\Postman\app-11.40.5, args , toastActivatorCSLID d56d0ae8-2c2a-5b45-bd3b-9973bc69da9e)
+[16/04/25 09:22:32] info: ApplyReleasesImpl: Examining Pin: AnyDesk.lnk
+[16/04/25 09:22:32] info: ApplyReleasesImpl: Examining Pin: File Explorer.lnk
+[16/04/25 09:22:32] info: ApplyReleasesImpl: Examining Pin: GlobalProtect.lnk
+[16/04/25 09:22:32] info: ApplyReleasesImpl: Examining Pin: Google Chrome.lnk
+[16/04/25 09:22:32] info: ApplyReleasesImpl: Examining Pin: Microsoft Azure Storage Explorer.lnk
+[16/04/25 09:22:32] info: ApplyReleasesImpl: Examining Pin: OneNote.lnk
+[16/04/25 09:22:32] info: ApplyReleasesImpl: Examining Pin: OpenVPN Connect.lnk
+[16/04/25 09:22:32] info: ApplyReleasesImpl: Examining Pin: Outlook (classic).lnk
+[16/04/25 09:22:32] info: ApplyReleasesImpl: Examining Pin: PRIMAVERA Evolution - Administrador.lnk
+[16/04/25 09:22:32] info: ApplyReleasesImpl: Examining Pin: PRIMAVERA Evolution - ERP.lnk
+[16/04/25 09:22:32] info: ApplyReleasesImpl: Examining Pin: Remote Desktop Connection.lnk
+[16/04/25 09:22:32] info: ApplyReleasesImpl: Examining Pin: Smart VPN Client.lnk
+[16/04/25 09:22:32] info: ApplyReleasesImpl: Examining Pin: SQL Server Management Studio 20.lnk
+[16/04/25 09:22:32] info: ApplyReleasesImpl: Examining Pin: Visual Studio 2022.lnk
+[16/04/25 09:22:32] info: ApplyReleasesImpl: Starting fixPinnedExecutables
+[16/04/25 09:22:32] info: ApplyReleasesImpl: Examining Pin: AnyDesk.lnk
+[16/04/25 09:22:32] info: ApplyReleasesImpl: Examining Pin: File Explorer.lnk
+[16/04/25 09:22:32] info: ApplyReleasesImpl: Examining Pin: GlobalProtect.lnk
+[16/04/25 09:22:32] info: ApplyReleasesImpl: Examining Pin: Google Chrome.lnk
+[16/04/25 09:22:33] info: ApplyReleasesImpl: Examining Pin: Microsoft Azure Storage Explorer.lnk
+[16/04/25 09:22:33] info: ApplyReleasesImpl: Examining Pin: OneNote.lnk
+[16/04/25 09:22:33] info: ApplyReleasesImpl: Examining Pin: OpenVPN Connect.lnk
+[16/04/25 09:22:33] info: ApplyReleasesImpl: Examining Pin: Outlook (classic).lnk
+[16/04/25 09:22:33] info: ApplyReleasesImpl: Examining Pin: PRIMAVERA Evolution - Administrador.lnk
+[16/04/25 09:22:33] info: ApplyReleasesImpl: Examining Pin: PRIMAVERA Evolution - ERP.lnk
+[16/04/25 09:22:33] info: ApplyReleasesImpl: Examining Pin: Remote Desktop Connection.lnk
+[16/04/25 09:22:33] info: ApplyReleasesImpl: Examining Pin: Smart VPN Client.lnk
+[16/04/25 09:22:33] info: ApplyReleasesImpl: Examining Pin: SQL Server Management Studio 20.lnk
+[16/04/25 09:22:33] info: ApplyReleasesImpl: Examining Pin: Visual Studio 2022.lnk
+[16/04/25 09:22:33] info: ApplyReleasesImpl: Fixing up tray icons
+[16/04/25 09:22:33] info: ApplyReleasesImpl: cleanDeadVersions: checking for version 11.40.5
+[16/04/25 09:22:33] info: ApplyReleasesImpl: cleanDeadVersions: exclude current version folder app-11.40.4
+[16/04/25 09:22:33] info: ApplyReleasesImpl: cleanDeadVersions: exclude new version folder app-11.40.5
+[16/04/25 09:22:34] info: Program: Finished Squirrel Updater
