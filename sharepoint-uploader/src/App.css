@@ -1,38 +1,260 @@
-.App {
-  text-align: center;
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+body {
+    background: #f0f2f5;
+    color: #252423;
+    line-height: 1.6;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+/* Modern header */
+.header {
+    background: linear-gradient(135deg, #0078d4 0%, #106ebe 100%);
+    padding: 24px;
+    color: white;
+    margin-bottom: 32px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+    .header h2 {
+        font-size: 24px;
+        font-weight: 500;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+/* Main container */
+.upload-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px 48px;
 }
 
-.App-link {
-  color: #61dafb;
+/* Form grid */
+.form-grid {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    padding: 32px;
+    margin-bottom: 32px;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Form controls */
+.form-group {
+    margin-bottom: 28px;
+}
+
+    .form-group:last-child {
+        margin-bottom: 0;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        color: #252423;
+    }
+
+select, .form-control {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #edebe9;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #252423;
+    background: white;
+    transition: all 0.2s;
+    margin-bottom: 16px;
+}
+
+    select:focus, .form-control:focus {
+        border-color: #0078d4;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(0,120,212,0.1);
+    }
+
+input[type="text"],
+input[type="date"],
+input[type="number"] {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #edebe9;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-bottom: 16px;
+    transition: all 0.2s;
+}
+
+    input[type="text"]:focus,
+    input[type="date"]:focus,
+    input[type="number"]:focus {
+        border-color: #0078d4;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(0,120,212,0.1);
+    }
+
+/* Dropzone */
+.dropzone {
+    border: 2px dashed #c8c6c4;
+    border-radius: 12px;
+    padding: 40px;
+    text-align: center;
+    background: #fafafa;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 20px;
+}
+
+    .dropzone:hover {
+        border-color: #0078d4;
+        background: #f0f9ff;
+    }
+
+    .dropzone.active {
+        border-color: #0078d4;
+        background: #f0f9ff;
+        transform: scale(1.01);
+    }
+
+.dropzone-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    color: #0078d4;
+}
+
+.dropzone-hint {
+    color: #605e5c;
+    font-size: 14px;
+    margin-top: 12px;
+}
+
+/* Command bar buttons */
+.command-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+    .command-bar button {
+        padding: 12px 24px;
+        border: none;
+        background: #0078d4;
+        color: white;
+        font-size: 14px;
+        font-weight: 600;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+    }
+
+        .command-bar button:hover {
+            background: #106ebe;
+            transform: translateY(-1px);
+        }
+
+/* Documents list */
+.docs-list {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    overflow: hidden;
+    margin-top: 24px;
+}
+
+    .docs-list li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 24px;
+        border-bottom: 1px solid #edebe9;
+        transition: background 0.2s;
+    }
+
+        .docs-list li:last-child {
+            border-bottom: none;
+        }
+
+        .docs-list li:hover {
+            background: #f8f8f8;
+        }
+
+/* Status indicators */
+.status-enviado {
+    color: #107c10;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.status-nao-enviado {
+    color: #d83b01;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Messages */
+.message {
+    padding: 16px;
+    margin: 16px 0;
+    border-radius: 8px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+    .message.success {
+        background: #dff6dd;
+        color: #107c10;
+        border: 1px solid #bad80a;
+    }
+
+    .message.error {
+        background: #fde7e9;
+        color: #d83b01;
+        border: 1px solid #fdb8c8;
+    }
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .upload-container {
+        padding: 0 16px;
+        margin: 16px auto;
+    }
+
+    .header {
+        padding: 16px;
+        margin-bottom: 16px;
+    }
+
+    .form-grid {
+        padding: 20px;
+    }
+
+    .dropzone {
+        padding: 24px;
+    }
+
+    .command-bar {
+        flex-direction: column;
+    }
+
+        .command-bar button {
+            width: 100%;
+        }
 }

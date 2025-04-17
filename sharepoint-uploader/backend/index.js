@@ -118,6 +118,10 @@ app.get("/files/:clienteId", async (req, res) => {
         let folderPath = `Subempreiteiros/${encodeURIComponent(clienteId)}/${category}`;
         if (category === "Trabalhadores" && trabalhador) {
             folderPath += `/${encodeURIComponent(trabalhador)}`;
+        } else if (category === "Equipamentos" && req.query.equipamento) {
+            folderPath += `/${encodeURIComponent(req.query.equipamento)}`;
+        } else if (category === "Autorizações" && req.query.obra) {
+            folderPath += `/${encodeURIComponent(req.query.obra)}`;
         }
 
         const listFilesUrl = `https://graph.microsoft.com/v1.0/sites/${process.env.SITE_ID}/drive/root:/${folderPath}:/children`;
@@ -179,5 +183,27 @@ app.get("/trabalhadores/:clienteId", async (req, res) => {
     }
 });
 
+app.get("/equipamentos/:clienteId", async (req, res) => {
+    try {
+        const token = await getAccessToken();
+        const clienteId = req.params.clienteId;
+        const folderPath = `Subempreiteiros/${encodeURIComponent(clienteId)}/Equipamentos`;
+
+        const listUrl = `https://graph.microsoft.com/v1.0/sites/${process.env.SITE_ID}/drive/root:/${folderPath}:/children`;
+
+        const response = await axios.get(listUrl, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const subfolders = response.data.value
+            .filter(item => item.folder)
+            .map(item => item.name);
+
+        res.json({ equipamentos: subfolders });
+    } catch (err) {
+        console.error("❌ Erro ao listar equipamentos:", err.response?.data || err.message);
+        res.status(500).json({ error: "Erro ao listar equipamentos" });
+    }
+});
 
 app.listen(PORT, () => console.log(`✅ Backend rodando em http://localhost:${PORT}`));

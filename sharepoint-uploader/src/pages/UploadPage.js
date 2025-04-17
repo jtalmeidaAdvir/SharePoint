@@ -36,6 +36,8 @@ const UploadPage = () => {
     const [dataNascimento, setDataNascimento] = useState('');
 
     // Equipamento
+    const [equipamentosExistentes, setEquipamentosExistentes] = useState([]);
+    const [equipamentoSelecionado, setEquipamentoSelecionado] = useState('');
     const [marcaModelo, setMarcaModelo] = useState('');
     const [tipoMaquina, setTipoMaquina] = useState('');
     const [numeroSerie, setNumeroSerie] = useState('');
@@ -53,14 +55,21 @@ const UploadPage = () => {
             axios.get(`http://localhost:5000/trabalhadores/${clienteId}`)
                 .then(res => setTrabalhadoresExistentes(res.data.trabalhadores))
                 .catch(err => console.error("Erro ao buscar trabalhadores:", err));
+        } else if (category === "Equipamentos") {
+            axios.get(`http://localhost:5000/equipamentos/${clienteId}`)
+                .then(res => setEquipamentosExistentes(res.data.equipamentos))
+                .catch(err => console.error("Erro ao buscar equipamentos:", err));
         }
     }, [category, clienteId]);
 
     useEffect(() => {
-        if (category !== "Trabalhadores" || nomeCompleto || trabalhadorSelecionado) {
+        if ((category !== "Trabalhadores" && category !== "Equipamentos" && category !== "Autorizações") ||
+            nomeCompleto || trabalhadorSelecionado ||
+            marcaModelo || equipamentoSelecionado ||
+            obraSelecionada) {
             fetchDocsStatus();
         }
-    }, [category, nomeCompleto, trabalhadorSelecionado]);
+    }, [category, nomeCompleto, trabalhadorSelecionado, marcaModelo, equipamentoSelecionado, obraSelecionada]);
 
     const fetchDocsStatus = async () => {
         try {
@@ -69,6 +78,12 @@ const UploadPage = () => {
                 const nome = trabalhadorSelecionado || nomeCompleto;
                 if (!nome) return;
                 endpoint += `&trabalhador=${encodeURIComponent(nome)}`;
+            } else if (category === "Equipamentos") {
+                const nomeEquip = equipamentoSelecionado || marcaModelo;
+                if (!nomeEquip) return;
+                endpoint += `&equipamento=${encodeURIComponent(nomeEquip)}`;
+            } else if (category === "Autorizações" && obraSelecionada) {
+                endpoint += `&obra=${encodeURIComponent(obraSelecionada)}`;
             }
             const res = await axios.get(endpoint);
             const docsMap = {};
@@ -78,7 +93,8 @@ const UploadPage = () => {
             setDocsStatus(docsMap);
         } catch (err) {
             console.error('Erro ao buscar documentos:', err);
-            setMessage('❌ Erro ao buscar documentos.');
+            // Não mostra mensagem de erro, apenas limpa o status dos documentos
+            setDocsStatus({});
         }
     };
 
@@ -119,7 +135,11 @@ const UploadPage = () => {
             const folderPath =
                 category === "Trabalhadores"
                     ? `Subempreiteiros/${clienteId}/Trabalhadores/${nomeFinal}`
-                    : `Subempreiteiros/${clienteId}/${category}`;
+                    : category === "Equipamentos"
+                        ? `Subempreiteiros/${clienteId}/Equipamentos/${equipamentoSelecionado || marcaModelo}`
+                        : category === "Autorizações"
+                            ? `Subempreiteiros/${clienteId}/Autorizações/${obraSelecionada}`
+                            : `Subempreiteiros/${clienteId}/${category}`;
 
             const res = await axios.post(
                 `http://localhost:5000/upload?folder=${encodeURIComponent(folderPath)}`,
@@ -135,76 +155,85 @@ const UploadPage = () => {
     };
 
     return (
-        <div style={{ padding: 20 }}>
-            <h2>Envio de Documentos - Subempreiteiro {clienteId}</h2>
+        <div className="container mt-4">
+            <div className="bg-primary text-white p-4 rounded mb-4">
+                <h2>Envio de Documentos - Subempreiteiro {clienteId}</h2>
+            </div>
 
-            <label>Categoria:</label>
-            <select value={category} onChange={(e) => setCategory(e.target.value)} style={{ marginBottom: 20 }}>
-                {Object.keys(requiredDocsByCategory).map((cat, idx) => (
-                    <option key={idx} value={cat}>{cat}</option>
-                ))}
-            </select>
+            <div className="card p-4 mb-4">
+                <div className="form-group">
+                    <label>Categoria:</label>
+                    <select value={category} onChange={(e) => setCategory(e.target.value)} style={{ marginBottom: 20 }}>
+                        {Object.keys(requiredDocsByCategory).map((cat, idx) => (
+                            <option key={idx} value={cat}>{cat}</option>
+                        ))}
+                    </select>
 
-            {/* Campos dinâmicos */}
-            {category === 'Empresas' && (
-                <EmpresaForm
-                    nomeEmpresa={nomeEmpresa}
-                    sede={sede}
-                    nif={nif}
-                    setNomeEmpresa={setNomeEmpresa}
-                    setSede={setSede}
-                    setNif={setNif}
-                />
-            )}
+                    {/* Campos dinâmicos */}
+                    {category === 'Empresas' && (
+                        <EmpresaForm
+                            nomeEmpresa={nomeEmpresa}
+                            sede={sede}
+                            nif={nif}
+                            setNomeEmpresa={setNomeEmpresa}
+                            setSede={setSede}
+                            setNif={setNif}
+                        />
+                    )}
 
-            {category === 'Trabalhadores' && (
-                <TrabalhadorForm
-                    nomeCompleto={nomeCompleto}
-                    setNomeCompleto={setNomeCompleto}
-                    funcao={funcao}
-                    setFuncao={setFuncao}
-                    contribuinte={contribuinte}
-                    setContribuinte={setContribuinte}
-                    segSocial={segSocial}
-                    setSegSocial={setSegSocial}
-                    dataNascimento={dataNascimento}
-                    setDataNascimento={setDataNascimento}
-                    trabalhadoresExistentes={trabalhadoresExistentes}
-                    trabalhadorSelecionado={trabalhadorSelecionado}
-                    setTrabalhadorSelecionado={setTrabalhadorSelecionado}
-                />
-            )}
+                    {category === 'Trabalhadores' && (
+                        <TrabalhadorForm
+                            nomeCompleto={nomeCompleto}
+                            setNomeCompleto={setNomeCompleto}
+                            funcao={funcao}
+                            setFuncao={setFuncao}
+                            contribuinte={contribuinte}
+                            setContribuinte={setContribuinte}
+                            segSocial={segSocial}
+                            setSegSocial={setSegSocial}
+                            dataNascimento={dataNascimento}
+                            setDataNascimento={setDataNascimento}
+                            trabalhadoresExistentes={trabalhadoresExistentes}
+                            trabalhadorSelecionado={trabalhadorSelecionado}
+                            setTrabalhadorSelecionado={setTrabalhadorSelecionado}
+                        />
+                    )}
 
-            {category === 'Equipamentos' && (
-                <EquipamentoForm
-                    marcaModelo={marcaModelo}
-                    setMarcaModelo={setMarcaModelo}
-                    tipoMaquina={tipoMaquina}
-                    setTipoMaquina={setTipoMaquina}
-                    numeroSerie={numeroSerie}
-                    setNumeroSerie={setNumeroSerie}
-                />
-            )}
+                    {category === 'Equipamentos' && (
+                        <EquipamentoForm
+                            equipamentosExistentes={equipamentosExistentes}
+                            equipamentoSelecionado={equipamentoSelecionado}
+                            setEquipamentoSelecionado={setEquipamentoSelecionado}
+                            marcaModelo={marcaModelo}
+                            setMarcaModelo={setMarcaModelo}
+                            tipoMaquina={tipoMaquina}
+                            setTipoMaquina={setTipoMaquina}
+                            numeroSerie={numeroSerie}
+                            setNumeroSerie={setNumeroSerie}
+                        />
+                    )}
 
-            {category === 'Autorizações' && (
-                <AutorizacaoForm
-                    obrasDisponiveis={obrasDisponiveis}
-                    obraSelecionada={obraSelecionada}
-                    setObraSelecionada={setObraSelecionada}
-                    dataEntrada={dataEntrada}
-                    setDataEntrada={setDataEntrada}
-                    dataSaida={dataSaida}
-                    setDataSaida={setDataSaida}
-                />
-            )}
+                    {category === 'Autorizações' && (
+                        <AutorizacaoForm
+                            obrasDisponiveis={obrasDisponiveis}
+                            obraSelecionada={obraSelecionada}
+                            setObraSelecionada={setObraSelecionada}
+                            dataEntrada={dataEntrada}
+                            setDataEntrada={setDataEntrada}
+                            dataSaida={dataSaida}
+                            setDataSaida={setDataSaida}
+                        />
+                    )}
 
-            {/* Seleção de Documento e Upload */}
-            <DocumentosSelector docType={docType} setDocType={setDocType} requiredDocs={requiredDocs} />
-            <FileUploader onFileChange={(e) => setFile(e.target.files[0])} onUpload={handleUpload} />
+                    {/* Seleção de Documento e Upload */}
+                    <DocumentosSelector docType={docType} setDocType={setDocType} requiredDocs={requiredDocs} />
+                    <FileUploader onFileChange={(e) => setFile(e.target.files[0])} onUpload={handleUpload} />
 
-            <p>{message}</p>
+                    <p>{message}</p>
 
-            <DocumentosList requiredDocs={requiredDocs} docsStatus={docsStatus} />
+                    <DocumentosList requiredDocs={requiredDocs} docsStatus={docsStatus} />
+                </div>
+            </div>
         </div>
     );
 };

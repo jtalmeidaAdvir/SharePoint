@@ -1,8 +1,11 @@
 {
   "ExpandedNodes": [
     "",
-    "\\sharepoint-uploader"
+    "\\sharepoint-uploader",
+    "\\sharepoint-uploader\\backend",
+    "\\sharepoint-uploader\\src",
+    "\\sharepoint-uploader\\src\\components",
+    "\\sharepoint-uploader\\src\\pages"
   ],
-  "SelectedNode": "\\sharepoint-uploader",
   "PreviewInSolutionExplorer": false
 }

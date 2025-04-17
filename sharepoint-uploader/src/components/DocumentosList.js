@@ -1,13 +1,18 @@
 ﻿import React from 'react';
 
 const DocumentosList = ({ requiredDocs, docsStatus }) => (
-    <ul>
-        {requiredDocs.map((doc, index) => (
-            <li key={index} style={{ color: docsStatus[doc] === '✅ Enviado' ? 'green' : 'red' }}>
-                {doc} <span>{docsStatus[doc] || '❌ Não enviado'}</span>
-            </li>
-        ))}
-    </ul>
+    <div className="docs-list">
+        <ul style={{ listStyle: 'none', padding: 0 }}>
+            {requiredDocs.map((doc, index) => (
+                <li key={index}>
+                    {doc}
+                    <span className={docsStatus[doc] === '✅ Enviado' ? 'status-enviado' : 'status-nao-enviado'}>
+                        {docsStatus[doc] || '❌ Não enviado'}
+                    </span>
+                </li>
+            ))}
+        </ul>
+    </div>
 );
 
 export default DocumentosList;
