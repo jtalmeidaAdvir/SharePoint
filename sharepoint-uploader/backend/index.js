@@ -82,8 +82,7 @@ const requiredDocsByCategory = {
         "Seguro de Responsabilidade Civil",
         "Condições do Seguro de Acidentes de Trabalho",
         "Alvará/Certificado de Construção ou Atividade",
-        "Certidão de não dívida à Segurança Social",
-        "XPTO"
+        "Certidão de não dívida à Segurança Social"
     ],
     Trabalhadores: [
         "Cartão de Cidadão ou residência",

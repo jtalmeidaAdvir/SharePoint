@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 
 const EquipamentoForm = ({
     equipamentosExistentes,
@@ -11,43 +11,46 @@ const EquipamentoForm = ({
     setTipoMaquina,
     numeroSerie,
     setNumeroSerie
-}) => (
-    <div>
-        <h3>Selecione um equipamento existente ou cadastre um novo:</h3>
-        <select
-            value={equipamentoSelecionado}
-            onChange={(e) => setEquipamentoSelecionado(e.target.value)}
-            style={{ marginBottom: 10 }}
-        >
-            <option value="">Novo equipamento</option>
-            {equipamentosExistentes.map((equip, idx) => (
-                <option key={idx} value={equip}>{equip}</option>
-            ))}
-        </select>
+}) => {
+    const [showError, setShowError] = useState(false);
 
-        {!equipamentoSelecionado && (
-            <>
+    const handleMarcaModeloChange = (e) => {
+        setMarcaModelo(e.target.value);
+        setShowError(e.target.value.trim() === '');
+    };
+
+    return (
+        <div>
+            <select className="form-control" value={equipamentoSelecionado} onChange={(e) => setEquipamentoSelecionado(e.target.value)}>
+                <option value="">-- Selecione um equipamento existente --</option>
+                {equipamentosExistentes.map((e, i) => (
+                    <option key={i} value={e}>{e}</option>
+                ))}
+            </select>
+            <div className="mt-3">
+                <label>Ou insira novo equipamento:</label>
                 <input
                     type="text"
-                    placeholder="Marca/Modelo"
+                    className="form-control"
+                    placeholder="Marca / Modelo *"
                     value={marcaModelo}
-                    onChange={(e) => setMarcaModelo(e.target.value)}
-                /><br />
-                <input
-                    type="text"
-                    placeholder="Tipo de M·quina"
-                    value={tipoMaquina}
-                    onChange={(e) => setTipoMaquina(e.target.value)}
-                /><br />
-                <input
-                    type="text"
-                    placeholder="N˙mero de SÈrie"
-                    value={numeroSerie}
-                    onChange={(e) => setNumeroSerie(e.target.value)}
-                /><br />
-            </>
-        )}
-    </div>
-);
+                    onChange={handleMarcaModeloChange}
+                    onBlur={() => setShowError(marcaModelo.trim() === '')}
+                    style={{
+                        borderColor: showError ? '#dc3545' : '',
+                        boxShadow: showError ? '0 0 0 0.2rem rgba(220, 53, 69, 0.25)' : ''
+                    }}
+                />
+                {showError && (
+                    <div className="text-danger" style={{ fontSize: '0.875em', marginTop: '0.25rem' }}>
+                        O campo Marca/Modelo √© obrigat√≥rio
+                    </div>
+                )}
+                <input type="text" className="form-control" placeholder="Tipo de M√°quina" value={tipoMaquina} onChange={(e) => setTipoMaquina(e.target.value)} />
+                <input type="text" className="form-control" placeholder="N√∫mero de S√©rie" value={numeroSerie} onChange={(e) => setNumeroSerie(e.target.value)} />
+            </div>
+        </div>
+    );
+};
 
 export default EquipamentoForm;

@@ -5,6 +5,7 @@
     "\\sharepoint-uploader\\backend",
     "\\sharepoint-uploader\\src",
     "\\sharepoint-uploader\\src\\components",
+    "\\sharepoint-uploader\\src\\constants",
     "\\sharepoint-uploader\\src\\pages"
   ],
   "PreviewInSolutionExplorer": false

@@ -11,6 +11,7 @@ import AutorizacaoForm from '../components/AutorizacaoForm';
 import DocumentosSelector from '../components/DocumentosSelector';
 import FileUploader from '../components/FileUploader';
 import DocumentosList from '../components/DocumentosList';
+import AlertModal from '../components/AlertModal';
 
 const UploadPage = () => {
     const { clienteId } = useParams();
@@ -25,6 +26,7 @@ const UploadPage = () => {
     const [nomeEmpresa, setNomeEmpresa] = useState('');
     const [sede, setSede] = useState('');
     const [nif, setNif] = useState('');
+    const [validade, setValidade] = useState('');
 
     // Trabalhadores
     const [trabalhadoresExistentes, setTrabalhadoresExistentes] = useState([]);
@@ -98,8 +100,30 @@ const UploadPage = () => {
         }
     };
 
+    const [showModal, setShowModal] = useState(false);
+    const [tempValidade, setTempValidade] = useState('');
+
+    const [alertModal, setAlertModal] = useState({ show: false, message: '', type: 'warning' });
+
+    const showAlert = (message, type = 'warning') => {
+        setAlertModal({ show: true, message, type });
+    };
+
     const handleUpload = async () => {
-        if (!file || !docType) return alert("Selecione um ficheiro e o tipo de documento");
+        if (!file || !docType) {
+            showAlert("Selecione um ficheiro e o tipo de documento");
+            return;
+        }
+
+        if (category === "Equipamentos" && !marcaModelo && !equipamentoSelecionado) {
+            showAlert("Por favor, selecione um equipamento existente ou insira a marca/modelo do novo equipamento");
+            return;
+        }
+
+        if (category === "Empresas" || (category === "Equipamentos" && docType === "Seguro") || category === "Trabalhadores") {
+            setShowModal(true);
+            return;
+        }
 
         const nomeFinal = category === "Trabalhadores" ? (trabalhadorSelecionado || nomeCompleto) : null;
         if (category === "Trabalhadores" && !nomeFinal) return alert("Selecione ou digite o nome do trabalhador");
@@ -114,6 +138,7 @@ const UploadPage = () => {
             formData.append("nomeEmpresa", nomeEmpresa);
             formData.append("sede", sede);
             formData.append("nif", nif);
+            formData.append("validade", validade);
         } else if (category === "Trabalhadores") {
             formData.append("nomeCompleto", nomeFinal);
             formData.append("funcao", funcao);
@@ -154,8 +179,101 @@ const UploadPage = () => {
         }
     };
 
+    const handleConfirmUpload = () => {
+        if (!tempValidade) {
+            alert("Por favor, insira a data de validade do documento");
+            return;
+        }
+        setValidade(tempValidade);
+        setShowModal(false);
+        proceedWithUpload();
+    };
+
+    const proceedWithUpload = async () => {
+        const nomeFinal = category === "Trabalhadores" ? (trabalhadorSelecionado || nomeCompleto) : null;
+        if (category === "Trabalhadores" && !nomeFinal) return alert("Selecione ou digite o nome do trabalhador");
+
+        const renamedFile = new File([file], `${docType}`, { type: file.type });
+        const formData = new FormData();
+        formData.append("file", renamedFile);
+        formData.append("docType", docType);
+
+        if (category === "Empresas") {
+            formData.append("nomeEmpresa", nomeEmpresa);
+            formData.append("sede", sede);
+            formData.append("nif", nif);
+            formData.append("validade", validade);
+        } else if (category === "Trabalhadores") {
+            formData.append("nomeCompleto", nomeFinal);
+            formData.append("funcao", funcao);
+            formData.append("contribuinte", contribuinte);
+            formData.append("segSocial", segSocial);
+            formData.append("dataNascimento", dataNascimento);
+        } else if (category === "Equipamentos") {
+            formData.append("marcaModelo", marcaModelo);
+            formData.append("tipoMaquina", tipoMaquina);
+            formData.append("numeroSerie", numeroSerie);
+        } else if (category === "Autorizações") {
+            formData.append("obra", obraSelecionada);
+            formData.append("dataEntrada", dataEntrada);
+            if (dataSaida) formData.append("dataSaida", dataSaida);
+        }
+
+        try {
+            setMessage("A enviar...");
+            const folderPath =
+                category === "Trabalhadores"
+                    ? `Subempreiteiros/${clienteId}/Trabalhadores/${nomeFinal}`
+                    : category === "Equipamentos"
+                        ? `Subempreiteiros/${clienteId}/Equipamentos/${equipamentoSelecionado || marcaModelo}`
+                        : category === "Autorizações"
+                            ? `Subempreiteiros/${clienteId}/Autorizações/${obraSelecionada}`
+                            : `Subempreiteiros/${clienteId}/${category}`;
+
+            const res = await axios.post(
+                `http://localhost:5000/upload?folder=${encodeURIComponent(folderPath)}`,
+                formData
+            );
+            setMessage("✅ " + res.data.message);
+            fetchDocsStatus();
+        } catch (err) {
+            console.error(err);
+            setMessage("❌ Erro: " + (err.response?.data?.error || err.message));
+        }
+    };
+
     return (
         <div className="container mt-4">
+            <AlertModal
+                show={alertModal.show}
+                message={alertModal.message}
+                type={alertModal.type}
+                onClose={() => setAlertModal({ show: false, message: '', type: 'warning' })}
+            />
+            {showModal && (
+                <div className="modal" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Insira a Validade do Documento {category}</h5>
+                                <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
+                            </div>
+                            <div className="modal-body">
+                                <input
+                                    type="date"
+                                    className="form-control"
+                                    value={tempValidade}
+                                    onChange={(e) => setTempValidade(e.target.value)}
+                                />
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancelar</button>
+                                <button type="button" className="btn btn-primary" onClick={handleConfirmUpload}>Confirmar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
             <div className="bg-primary text-white p-4 rounded mb-4">
                 <h2>Envio de Documentos - Subempreiteiro {clienteId}</h2>
             </div>
@@ -163,7 +281,7 @@ const UploadPage = () => {
             <div className="card p-4 mb-4">
                 <div className="form-group">
                     <label>Categoria:</label>
-                    <select value={category} onChange={(e) => setCategory(e.target.value)} style={{ marginBottom: 20 }}>
+                    <select className="form-control" value={category} onChange={(e) => setCategory(e.target.value)} style={{ marginBottom: 20 }}>
                         {Object.keys(requiredDocsByCategory).map((cat, idx) => (
                             <option key={idx} value={cat}>{cat}</option>
                         ))}
@@ -178,6 +296,8 @@ const UploadPage = () => {
                             setNomeEmpresa={setNomeEmpresa}
                             setSede={setSede}
                             setNif={setNif}
+                            validade={validade}
+                            setValidade={setValidade}
                         />
                     )}
 
