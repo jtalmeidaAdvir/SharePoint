@@ -8,13 +8,10 @@ const fs = require("fs");
 
 dotenv.config();
 const app = express();
+app.use(express.json());
 const upload = multer({ dest: "uploads/" });
 
-app.use(cors({
-    origin: "http://localhost:3000",
-    methods: ["GET", "POST"],
-    credentials: true
-}));
+app.use(cors());
 
 const PORT = 5000;
 
@@ -205,4 +202,37 @@ app.get("/equipamentos/:clienteId", async (req, res) => {
     }
 });
 
-app.listen(PORT, () => console.log(`✅ Backend rodando em http://localhost:${PORT}`));
+// Armazenamento temporário (em produção, use um banco de dados)
+let subempreiteiros = [];
+let nextId = 1;
+
+app.get('/subempreiteiros', (req, res) => {
+    res.json({ subempreiteiros });
+});
+
+app.post('/subempreiteiros', (req, res) => {
+    const { nome, username, password } = req.body;
+    if (!nome || !username || !password) {
+        return res.status(400).json({ error: 'Nome e credenciais são obrigatórios' });
+    }
+
+    const novoSubempreiteiro = {
+        id: nextId++,
+        nome,
+        username,
+        password,
+        dataCriacao: new Date()
+    };
+
+    subempreiteiros.push(novoSubempreiteiro);
+    res.status(201).json(novoSubempreiteiro);
+});
+
+app.listen(PORT, () => console.log(`✅ Backend rodando em http://0.0.0.0:${PORT}`));
+app.post('/verificar-credenciais', (req, res) => {
+    const { username, password } = req.body;
+    const subempreiteiro = subempreiteiros.find(s => 
+        s.username === username && s.password === password
+    );
+    res.json({ valid: !!subempreiteiro });
+});

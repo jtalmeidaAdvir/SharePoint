@@ -1,5 +1,5 @@
 ﻿import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 import requiredDocsByCategory from '../constants/requiredDocsByCategory';
@@ -15,6 +15,14 @@ import AlertModal from '../components/AlertModal';
 
 const UploadPage = () => {
     const { clienteId } = useParams();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const isAuthenticated = localStorage.getItem('uploadAuth_' + clienteId);
+        if (!isAuthenticated) {
+            navigate('/login?redirect=/upload/' + clienteId);
+        }
+    }, [clienteId, navigate]);
 
     const [category, setCategory] = useState('Empresas');
     const [docType, setDocType] = useState('');

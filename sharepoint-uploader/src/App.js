@@ -2,16 +2,17 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import UploadPage from './pages/UploadPage';
+import AdminPage from './pages/AdminPage';
+import LoginPage from './pages/LoginPage';
 
 function App() {
     return (
         <Router>
             <Routes>
-                {/* Rota dinâmica: /upload/:clienteId */}
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/admin" element={<AdminPage />} />
                 <Route path="/upload/:clienteId" element={<UploadPage />} />
-
-                {/* Página inicial opcional (pode personalizar depois) */}
-                <Route path="*" element={<div style={{ padding: 20 }}><h2>404 - Página não encontrada</h2></div>} />
+                <Route path="/" element={<LoginPage />} />
             </Routes>
         </Router>
     );
