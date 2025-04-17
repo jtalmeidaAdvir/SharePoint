@@ -6,6 +6,12 @@ const axios = require("axios");
 const dotenv = require("dotenv");
 const fs = require("fs");
 
+// Função para mensagens de sucesso no console
+const logSuccess = (message) => {
+    const timestamp = new Date().toLocaleTimeString();
+    console.log('\x1b[42m\x1b[30m SUCCESS \x1b[0m \x1b[32m[%s]\x1b[0m %s', timestamp, message);
+};
+
 dotenv.config();
 const app = express();
 app.use(express.json());
@@ -58,7 +64,7 @@ app.post("/upload", upload.single("file"), async (req, res) => {
         });
 
         fs.unlinkSync(renamedFilePath);
-        console.log("✅ Upload concluído e ficheiro local apagado.");
+        logSuccess("Upload concluído e ficheiro local apagado");
 
         res.json({ message: "Ficheiro enviado com sucesso!" });
     } catch (err) {
@@ -206,6 +212,8 @@ app.get("/equipamentos/:clienteId", async (req, res) => {
 let subempreiteiros = [];
 let nextId = 1;
 
+
+
 app.get('/subempreiteiros', (req, res) => {
     res.json({ subempreiteiros });
 });
@@ -229,10 +237,88 @@ app.post('/subempreiteiros', (req, res) => {
 });
 
 app.listen(PORT, () => console.log(`✅ Backend rodando em http://0.0.0.0:${PORT}`));
-app.post('/verificar-credenciais', (req, res) => {
+async function getERPToken() {
+    try {
+        logSuccess("Iniciando autenticação no ERP");
+
+        const tokenResponse = await axios.post(`http://194.65.139.112:2018/WebApi/token`, new URLSearchParams({
+            username: 'Advir',
+            password: 'Code495@',
+            company: 'JPA',
+            instance: 'DEFAULT',
+            line: 'Professional',
+            grant_type: 'password'
+        }), {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        });
+
+        if (tokenResponse.data.access_token) {
+            logSuccess("Token ERP obtido com sucesso");
+            return tokenResponse.data.access_token;
+        } else {
+            console.error('\x1b[41m\x1b[37m ERRO \x1b[0m Token ERP não encontrado na resposta');
+            return null;
+        }
+    } catch (error) {
+        console.error('\x1b[41m\x1b[37m ERRO \x1b[0m Falha na autenticação ERP:', error.response?.data || error.message);
+        return null;
+    }
+}
+app.get('/listar-entidades', async (req, res) => {
+    try {
+        const token = await getERPToken();
+        if (!token) {
+            return res.status(401).json({ error: 'Erro na autenticação ERP' });
+        }
+
+        const response = await axios.get('http://194.65.139.112:2018/WebApi/SharePoint/ListarEntidadesSGS', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+
+        res.json(response.data);
+    } catch (error) {
+        console.error('Erro ao listar entidades:', error);
+        res.status(500).json({ error: 'Erro ao obter entidades do ERP' });
+    }
+});
+app.post('/verificar-credenciais', async (req, res) => {
     const { username, password } = req.body;
-    const subempreiteiro = subempreiteiros.find(s => 
+    const subempreiteiro = subempreiteiros.find(s =>
         s.username === username && s.password === password
     );
-    res.json({ valid: !!subempreiteiro });
+
+    if (subempreiteiro) {
+        const erpToken = await getERPToken();
+        res.json({
+            valid: true,
+            id: subempreiteiro.id,
+            nome: subempreiteiro.nome,
+            erpToken
+        });
+    } else {
+        if (username === 'admin' && password === 'admin123') {
+            const erpToken = await getERPToken();
+            res.json({ valid: true, isAdmin: true, erpToken });
+        } else {
+            res.json({ valid: false });
+        }
+    }
+});
+
+app.delete('/subempreiteiros/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+    const index = subempreiteiros.findIndex(s => s.id === id);
+
+    if (index === -1) {
+        return res.status(404).json({ error: 'Subempreiteiro não encontrado' });
+    }
+
+    subempreiteiros.splice(index, 1);
+    res.json({ message: 'Subempreiteiro removido com sucesso' });
 });

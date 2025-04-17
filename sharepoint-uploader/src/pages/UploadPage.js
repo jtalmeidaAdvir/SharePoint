@@ -14,7 +14,8 @@ import DocumentosList from '../components/DocumentosList';
 import AlertModal from '../components/AlertModal';
 
 const UploadPage = () => {
-    const { clienteId } = useParams();
+    const { clienteId: fullClientId } = useParams();
+    const clienteId = fullClientId.split('-').pop();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -282,8 +283,19 @@ const UploadPage = () => {
                     </div>
                 </div>
             )}
-            <div className="bg-primary text-white p-4 rounded mb-4">
+            <div className="bg-primary text-white p-4 rounded mb-4 d-flex justify-content-between align-items-center">
                 <h2>Envio de Documentos - Subempreiteiro {clienteId}</h2>
+                <button
+                    className="btn btn-outline-light"
+                    onClick={() => {
+                        localStorage.removeItem('uploadAuth_' + clienteId);
+                        localStorage.removeItem('isAuthenticated');
+                        localStorage.removeItem('authExpiration');
+                        navigate('/login');
+                    }}
+                >
+                    <i className="bi bi-box-arrow-right"></i> Terminar Sessão
+                </button>
             </div>
 
             <div className="card p-4 mb-4">

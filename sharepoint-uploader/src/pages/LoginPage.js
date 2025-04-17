@@ -21,11 +21,21 @@ const LoginPage = () => {
                 const expirationTime = Date.now() + (24 * 60 * 60 * 1000);
                 localStorage.setItem('isAuthenticated', 'true');
                 localStorage.setItem('authExpiration', expirationTime.toString());
+                if (response.data.erpToken) {
+                    localStorage.setItem('erpToken', response.data.erpToken);
+                }
 
-                if (redirectPath && redirectPath.startsWith('/upload/')) {
+                if (response.data.isAdmin) {
+                    localStorage.setItem('isAdmin', 'true');
+                    navigate('/admin');
+                } else if (redirectPath && redirectPath.startsWith('/upload/')) {
                     const clientId = redirectPath.split('/').pop();
-                    localStorage.setItem('uploadAuth_' + clientId, 'true');
-                    navigate(redirectPath);
+                    if (response.data.id === parseInt(clientId)) {
+                        localStorage.setItem('uploadAuth_' + clientId, 'true');
+                        navigate(redirectPath);
+                    } else {
+                        setShowAlert(true);
+                    }
                 } else {
                     navigate('/admin');
                 }
