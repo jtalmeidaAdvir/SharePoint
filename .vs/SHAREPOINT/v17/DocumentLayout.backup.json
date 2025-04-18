@@ -3,16 +3,16 @@
   "WorkspaceRootPath": "C:\\Users\\jtalm\\Desktop\\SHAREPOINT\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\jtalm\\Desktop\\SHAREPOINT\\sharepoint-uploader\\src\\pages\\AdminPage.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:sharepoint-uploader\\src\\pages\\AdminPage.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\jtalm\\Desktop\\SHAREPOINT\\sharepoint-uploader\\backend\\index.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:sharepoint-uploader\\backend\\index.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\jtalm\\Desktop\\SHAREPOINT\\sharepoint-uploader\\src\\pages\\LoginPage.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:sharepoint-uploader\\src\\pages\\LoginPage.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\jtalm\\Desktop\\SHAREPOINT\\sharepoint-uploader\\src\\pages\\AdminPage.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:sharepoint-uploader\\src\\pages\\AdminPage.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\jtalm\\Desktop\\SHAREPOINT\\sharepoint-uploader\\src\\pages\\UploadPage.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
@@ -34,17 +34,17 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 5,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "index.js",
               "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\SHAREPOINT\\sharepoint-uploader\\backend\\index.js",
               "RelativeDocumentMoniker": "sharepoint-uploader\\backend\\index.js",
               "ToolTip": "C:\\Users\\jtalm\\Desktop\\SHAREPOINT\\sharepoint-uploader\\backend\\index.js",
               "RelativeToolTip": "sharepoint-uploader\\backend\\index.js",
-              "ViewState": "AgIAAGkAAAAAAAAAAAAcwO4AAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAPcAAAAAAAAAAAAqwAYBAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
               "WhenOpened": "2025-04-17T10:51:25.374Z",
               "EditorCaption": ""
@@ -57,20 +57,20 @@
               "RelativeDocumentMoniker": "sharepoint-uploader\\src\\pages\\UploadPage.js",
               "ToolTip": "C:\\Users\\jtalm\\Desktop\\SHAREPOINT\\sharepoint-uploader\\src\\pages\\UploadPage.js",
               "RelativeToolTip": "sharepoint-uploader\\src\\pages\\UploadPage.js",
-              "ViewState": "AgIAAE0BAAAAAAAAAAAowGgBAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAFgBAAAAAAAAAAAswHYBAAAWAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
               "WhenOpened": "2025-04-17T10:47:38.833Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "LoginPage.js",
               "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\SHAREPOINT\\sharepoint-uploader\\src\\pages\\LoginPage.js",
               "RelativeDocumentMoniker": "sharepoint-uploader\\src\\pages\\LoginPage.js",
               "ToolTip": "C:\\Users\\jtalm\\Desktop\\SHAREPOINT\\sharepoint-uploader\\src\\pages\\LoginPage.js",
               "RelativeToolTip": "sharepoint-uploader\\src\\pages\\LoginPage.js",
-              "ViewState": "AgIAAFAAAAAAAAAAAAAqwGoAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAE8AAAAAAAAAAAAqwHQAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
               "WhenOpened": "2025-04-17T10:42:07.064Z",
               "EditorCaption": ""
@@ -85,8 +85,7 @@
               "RelativeToolTip": "sharepoint-uploader\\public\\manifest.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-04-17T10:29:43.949Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-04-17T10:29:43.949Z"
             },
             {
               "$type": "Document",
@@ -98,18 +97,17 @@
               "RelativeToolTip": "sharepoint-uploader\\public\\index.html",
               "ViewState": "AgIAABcAAAAAAAAAAAAAwCoAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
-              "WhenOpened": "2025-04-17T10:28:46.841Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-04-17T10:28:46.841Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 0,
               "Title": "AdminPage.js",
               "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\SHAREPOINT\\sharepoint-uploader\\src\\pages\\AdminPage.js",
               "RelativeDocumentMoniker": "sharepoint-uploader\\src\\pages\\AdminPage.js",
               "ToolTip": "C:\\Users\\jtalm\\Desktop\\SHAREPOINT\\sharepoint-uploader\\src\\pages\\AdminPage.js",
               "RelativeToolTip": "sharepoint-uploader\\src\\pages\\AdminPage.js",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAA/AAAAAAAAAA==",
+              "ViewState": "AgIAADEAAAAAAAAAAAAAADkAAAA+AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
               "WhenOpened": "2025-04-17T10:26:02Z",
               "EditorCaption": ""

@@ -219,13 +219,18 @@ app.get('/subempreiteiros', (req, res) => {
 });
 
 app.post('/subempreiteiros', (req, res) => {
-    const { nome, username, password } = req.body;
-    if (!nome || !username || !password) {
-        return res.status(400).json({ error: 'Nome e credenciais são obrigatórios' });
+    const { nome, username, password, entidadeId } = req.body;
+    if (!nome || !username || !password || !entidadeId) {
+        return res.status(400).json({ error: 'Nome, credenciais e ID da entidade são obrigatórios' });
+    }
+
+    // Verifica se já existe um subempreiteiro com esse username
+    if (subempreiteiros.find(s => s.username === username)) {
+        return res.status(400).json({ error: 'Username já existe' });
     }
 
     const novoSubempreiteiro = {
-        id: nextId++,
+        id: entidadeId,
         nome,
         username,
         password,
@@ -233,6 +238,7 @@ app.post('/subempreiteiros', (req, res) => {
     };
 
     subempreiteiros.push(novoSubempreiteiro);
+    console.log('Novo subempreiteiro cadastrado:', novoSubempreiteiro);
     res.status(201).json(novoSubempreiteiro);
 });
 
@@ -289,12 +295,16 @@ app.get('/listar-entidades', async (req, res) => {
 });
 app.post('/verificar-credenciais', async (req, res) => {
     const { username, password } = req.body;
+    console.log('Tentativa de login:', { username, password });
+    console.log('Subempreiteiros cadastrados:', subempreiteiros);
+
     const subempreiteiro = subempreiteiros.find(s =>
         s.username === username && s.password === password
     );
 
     if (subempreiteiro) {
         const erpToken = await getERPToken();
+        console.log('Login bem sucedido para:', subempreiteiro.nome);
         res.json({
             valid: true,
             id: subempreiteiro.id,
@@ -304,8 +314,10 @@ app.post('/verificar-credenciais', async (req, res) => {
     } else {
         if (username === 'admin' && password === 'admin123') {
             const erpToken = await getERPToken();
+            console.log('Login admin bem sucedido');
             res.json({ valid: true, isAdmin: true, erpToken });
         } else {
+            console.log('Login falhou');
             res.json({ valid: false });
         }
     }

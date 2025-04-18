@@ -14,8 +14,7 @@ import DocumentosList from '../components/DocumentosList';
 import AlertModal from '../components/AlertModal';
 
 const UploadPage = () => {
-    const { clienteId: fullClientId } = useParams();
-    const clienteId = fullClientId.split('-').pop();
+    const { clienteId } = useParams();
     const navigate = useNavigate();
 
     useEffect(() => {

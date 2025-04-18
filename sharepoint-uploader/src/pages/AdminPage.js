@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -14,6 +13,8 @@ const AdminPage = () => {
             try {
                 const response = await axios.get('http://localhost:5000/listar-entidades');
                 const data = response.data?.DataSet?.Table || [];
+                console.log('Resposta da API de entidades:', response.data);
+                console.log('Dados processados:', data);
                 setEntidades(data);
             } catch (err) {
                 console.error('Erro ao buscar entidades:', err);
@@ -70,14 +71,20 @@ const AdminPage = () => {
     const adicionarSubempreiteiro = async () => {
         try {
             if (!novoNome.trim()) {
-                setAlert({ show: true, message: 'Digite o nome do subempreiteiro', type: 'warning' });
+                setAlert({ show: true, message: 'Selecione uma entidade', type: 'warning' });
+                return;
+            }
+            const entidadeSelecionada = entidades.find(e => e.Nome === novoNome);
+            if (!entidadeSelecionada) {
+                setAlert({ show: true, message: 'Entidade não encontrada', type: 'warning' });
                 return;
             }
             const credentials = generateCredentials();
             await axios.post('http://localhost:5000/subempreiteiros', {
                 nome: novoNome,
                 username: credentials.username,
-                password: credentials.password
+                password: credentials.password,
+                entidadeId: entidadeSelecionada.id
             });
             setNovoNome('');
             fetchSubempreiteiros();
@@ -91,10 +98,9 @@ const AdminPage = () => {
 
 
     const copiarLink = (sub) => {
-        const linkNome = sub.nome.toLowerCase().replace(/\s+/g, '-');
-        const link = `${window.location.origin}/upload/${linkNome}-${sub.id}`;
+        const link = `http://localhost:3000/upload/${sub.id}`;
         navigator.clipboard.writeText(link);
-        setAlert({ show: true, message: 'Link copiado!', type: 'success' });
+        setAlert({ show: true, message: `Link copiado: ${link}`, type: 'success' });
     };
 
     const handleLogout = () => {
@@ -158,7 +164,7 @@ const AdminPage = () => {
                                     <button
                                         className="btn btn-outline-info"
                                         onClick={() => {
-                                            const link = `${window.location.origin}/upload/${sub.id}`;
+                                            const link = `http://localhost:3000/upload/${sub.id}`;
                                             setAlert({
                                                 show: true,
                                                 message: `Link de acesso: ${link}\n\nCredenciais de acesso:\nUsuário: ${sub.username}\nSenha: ${sub.password}\n\nGuarde estas informações com segurança!`,
@@ -173,7 +179,7 @@ const AdminPage = () => {
                                         onClick={async () => {
                                             if (window.confirm(`Tem certeza que deseja remover ${sub.nome}?`)) {
                                                 try {
-                                                    await axios.delete(`http://0.0.0.0:5000/subempreiteiros/${sub.id}`);
+                                                    await axios.delete(`http://localhost:5000/subempreiteiros/${sub.id}`);
                                                     setSubempreiteiros(prev => prev.filter(s => s.id !== sub.id));
                                                     setAlert({ show: true, message: 'Subempreiteiro removido com sucesso', type: 'success' });
                                                 } catch (error) {

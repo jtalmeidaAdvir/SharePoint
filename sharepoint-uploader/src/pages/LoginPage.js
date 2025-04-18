@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AlertModal from '../components/AlertModal';
@@ -29,8 +28,8 @@ const LoginPage = () => {
                     localStorage.setItem('isAdmin', 'true');
                     navigate('/admin');
                 } else if (redirectPath && redirectPath.startsWith('/upload/')) {
-                    const clientId = redirectPath.split('/').pop();
-                    if (response.data.id === parseInt(clientId)) {
+                    const clientId = redirectPath.replace('/upload/', '');
+                    if (response.data.id === clientId) {
                         localStorage.setItem('uploadAuth_' + clientId, 'true');
                         navigate(redirectPath);
                     } else {
