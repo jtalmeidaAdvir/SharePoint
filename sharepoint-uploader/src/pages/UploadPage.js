@@ -1,9 +1,7 @@
 ﻿import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-
 import requiredDocsByCategory from "../constants/requiredDocsByCategory";
-
 import EmpresaForm from "../components/EmpresaForm";
 import TrabalhadorForm from "../components/TrabalhadorForm";
 import EquipamentoForm from "../components/EquipamentoForm";
@@ -40,6 +38,10 @@ const UploadPage = () => {
                     console.log(
                         "Entity Data:",
                         response.data.DataSet.Table[0].Nome,
+                    );
+                    console.log(
+                        "entidades:",
+                        response.data.DataSet,
                     );
                 } catch (error) {
                     console.error("Error fetching entity data:", error);

@@ -20,6 +20,13 @@ const TrabalhadorForm = ({
             (t) => t.nome === e.target.value,
         );
         if (trabalhador) {
+            console.log("Trabalhador selecionado:", {
+                nome: trabalhador.nome,
+                categoria: trabalhador.categoria,
+                contribuinte: trabalhador.contribuinte,
+                segurancaSocial: trabalhador.seguranca_social,
+                dataNascimento: trabalhador.data_nascimento
+            });
             setTrabalhadorSelecionado(trabalhador.nome);
             setNomeCompleto(trabalhador.nome);
             setFuncao(trabalhador.categoria);

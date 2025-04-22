@@ -84,7 +84,7 @@ const requiredDocsByCategory = {
         "Recibo do Seguro de Acidentes de Trabalho",
         "Seguro de Responsabilidade Civil",
         "Condições do Seguro de Acidentes de Trabalho",
-        "Alvará/Certificado de Construção ou Atividade",
+        "Alvará ou Certificado de Construção ou Atividade",
         "Certidão de não dívida à Segurança Social"
     ],
     Trabalhadores: [
@@ -96,7 +96,7 @@ const requiredDocsByCategory = {
     ],
     Equipamentos: [
         "Certificado CE",
-        "Certificado/Declaração",
+        "Certificado ou Declaração",
         "Registos de Manutenção",
         "Manual de utilizador",
         "Seguro"
@@ -246,13 +246,14 @@ app.listen(PORT, () => console.log(`✅ Backend rodando em http://0.0.0.0:${PORT
 async function getERPToken() {
     try {
         logSuccess("Iniciando autenticação no ERP");
-
-        const tokenResponse = await axios.post(`http://194.65.139.112:2018/WebApi/token`, new URLSearchParams({
-            username: 'Advir',
-            password: 'Code495@',
+        //194.65.139.112 - JPA
+        //localhost - Advir
+        const tokenResponse = await axios.post(`http://localhost:2018/WebApi/token`, new URLSearchParams({
+            username: 'jtalm',
+            password: '123',
             company: 'JPA',
             instance: 'DEFAULT',
-            line: 'Professional',
+            line: 'Evolution',
             grant_type: 'password'
         }), {
             headers: {
@@ -279,7 +280,7 @@ app.get('/listar-entidades', async (req, res) => {
             return res.status(401).json({ error: 'Erro na autenticação ERP' });
         }
 
-        const response = await axios.get('http://194.65.139.112:2018/WebApi/SharePoint/ListarEntidadesSGS', {
+        const response = await axios.get('http://localhost:2018/WebApi/SharePoint/ListarEntidadesSGS', {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
@@ -301,7 +302,7 @@ app.get('/entidade/:id', async (req, res) => {
             return res.status(401).json({ error: 'Erro na autenticação ERP' });
         }
 
-        const response = await axios.get(`http://194.65.139.112:2018/WebApi/SharePoint/GetEntidade/${req.params.id}`, {
+        const response = await axios.get(`http://localhost:2018/WebApi/SharePoint/GetEntidade/${req.params.id}`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
@@ -324,7 +325,7 @@ app.get('/entidade/:id/trabalhadores', async (req, res) => {
         }
 
         console.log(`Buscando trabalhadores para entidade ${req.params.id}`);
-        const response = await axios.get(`http://194.65.139.112:2018/WebApi/SharePoint/ListarTrabalhadores/${req.params.id}`, {
+        const response = await axios.get(`http://localhost:2018/WebApi/SharePoint/ListarTrabalhadores/${req.params.id}`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
@@ -336,7 +337,7 @@ app.get('/entidade/:id/trabalhadores', async (req, res) => {
             console.error('Resposta inválida do ERP:', response.data);
             return res.status(500).json({ error: 'Resposta inválida do ERP' });
         }
-
+        console.log(`Buscando trabalhadores para entidade ${req.params.id}`);
         console.log(`Encontrados ${response.data.DataSet.Table.length} trabalhadores`);
         res.json(response.data);
     } catch (error) {
@@ -356,7 +357,7 @@ app.get('/entidade/:id/equipamentos', async (req, res) => {
         }
 
         console.log(`Buscando equipamentos para entidade ${req.params.id}`);
-        const response = await axios.get(`http://194.65.139.112:2018/WebApi/SharePoint/ListarEquipamentos/${req.params.id}`, {
+        const response = await axios.get(`http://localhost:2018/WebApi/SharePoint/ListarEquipamentos/${req.params.id}`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',

@@ -8,7 +8,7 @@ const requiredDocsByCategory = {
         "Recibo do Seguro de Acidentes de Trabalho",
         "Seguro de Responsabilidade Civil",
         "Condições do Seguro de Acidentes de Trabalho",
-        "Alvará/Certificado de Construção ou Atividade"
+        "Alvará ou Certificado de Construção ou Atividade"
     ],
     Trabalhadores: [
         "Cartão de Cidadão ou residência",
@@ -19,7 +19,7 @@ const requiredDocsByCategory = {
     ],
     Equipamentos: [
         "Certificado CE",
-        "Certificado/Declaração",
+        "Certificado ou Declaração",
         "Registos de Manutenção",
         "Manual de utilizador",
         "Seguro"
