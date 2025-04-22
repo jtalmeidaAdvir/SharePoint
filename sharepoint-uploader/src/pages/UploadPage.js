@@ -29,7 +29,7 @@ const UploadPage = () => {
                 try {
                     const token = localStorage.getItem("token");
                     const response = await axios.get(
-                        `http://localhost:5000/entidade/${clienteId}`,
+                        `http://51.254.116.237:5000/entidade/${clienteId}`,
                         {
                             headers: {
                                 Authorization: `Bearer ${token}`,
@@ -92,7 +92,7 @@ const UploadPage = () => {
         if (category === "Trabalhadores" && entityData?.EntidadeId) {
             axios
                 .get(
-                    `http://localhost:5000/entidade/${clienteId}/trabalhadores`,
+                    `http://51.254.116.237:5000/entidade/${clienteId}/trabalhadores`,
                 )
                 .then((res) =>
                     setTrabalhadoresExistentes(res.data.DataSet.Table),
@@ -102,7 +102,7 @@ const UploadPage = () => {
                 );
         } else if (category === "Equipamentos" && entityData?.EntidadeId) {
             axios
-                .get(`http://localhost:5000/entidade/${clienteId}/equipamentos`)
+                .get(`http://51.254.116.237:5000/entidade/${clienteId}/equipamentos`)
                 .then((res) =>
                     setEquipamentosExistentes(res.data.DataSet.Table),
                 )
@@ -148,7 +148,7 @@ const UploadPage = () => {
 
     const fetchDocsStatus = async () => {
         try {
-            let endpoint = `http://localhost:5000/files/${entityData?.Nome}?category=${category}`;
+            let endpoint = `http://51.254.116.237:5000/files/${entityData?.Nome}?category=${category}`;
             if (category === "Trabalhadores") {
                 const nome = trabalhadorSelecionado || nomeCompleto;
                 if (!nome) return;
@@ -352,7 +352,7 @@ const UploadPage = () => {
                             : `Subempreiteiros/${entityData?.Nome}/${category}`;
 
             const res = await axios.post(
-                `http://localhost:5000/upload?folder=${encodeURIComponent(folderPath)}`,
+                `http://51.254.116.237:5000/upload?folder=${encodeURIComponent(folderPath)}`,
                 formData,
             );
 
@@ -422,7 +422,7 @@ const UploadPage = () => {
                             : `Subempreiteiros/${entityData?.Nome}/${category}`;
 
             const res = await axios.post(
-                `http://localhost:5000/upload?folder=${encodeURIComponent(folderPath)}`,
+                `http://51.254.116.237:5000/upload?folder=${encodeURIComponent(folderPath)}`,
                 formData,
             );
             setMessage("✅ " + res.data.message);

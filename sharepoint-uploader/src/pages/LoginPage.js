@@ -17,7 +17,7 @@ const LoginPage = () => {
         const redirectPath = params.get('redirect');
 
         try {
-            const response = await axios.post('http://localhost:5000/verificar-credenciais', { username, password });
+            const response = await axios.post('http://51.254.116.237:5000/verificar-credenciais', { username, password });
             if (response.data.valid) {
                 const expirationTime = Date.now() + (24 * 60 * 60 * 1000);
                 localStorage.setItem('isAuthenticated', 'true');
