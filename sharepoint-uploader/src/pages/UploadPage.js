@@ -149,9 +149,34 @@ const UploadPage = () => {
             }
             const res = await axios.get(endpoint);
             const docsMap = {};
+
+            // Preencher com arquivos existentes
             res.data.files.forEach((doc) => {
                 docsMap[doc.name] = doc.status;
             });
+
+            // Mapear campos de anexos adicionais do entityData
+            if (entityData) {
+                const anexos = {
+                    CDU_AnexoFinancas: 'Certidão de não dívida às Finanças',
+                    CDU_AnexoSegSocial: 'Certidão de não dívida à Segurança Social',
+                    CDU_AnexoCertidaoPermanente: 'Certidão Permanente',
+                    CDU_AnexoFolhaPag: 'Folha de Remuneração Mensal à Segurança Social',
+                    CDU_AnexoComprovativoPagamento: 'Comprovativo de Pagamento',
+                    CDU_AnexoReciboSeguroAT: 'Condições do Seguro de Acidentes de Trabalho',
+                    CDU_AnexoSeguroAT: 'Seguro de Acidentes de Trabalho',
+                    CDU_AnexoAlvara: 'Alvará ou Certificado de Construção ou Atividade'
+                };
+
+                for (const [key, label] of Object.entries(anexos)) {
+                    if (entityData[key] !== undefined) {
+                        const status = entityData[key] === 1 ? '✅ Enviado' : '❌ Não enviado';
+                        docsMap[label] = status;
+                    }
+                }
+            }
+
+            console.log("Documentos:", docsMap);
             setDocsStatus(docsMap);
         } catch (err) {
             console.error("Erro ao buscar documentos:", err);
