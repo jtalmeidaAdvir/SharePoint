@@ -16,6 +16,7 @@ const UploadPage = () => {
     const navigate = useNavigate();
 
     const [entityData, setEntityData] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const isAuthenticated = localStorage.getItem("uploadAuth_" + clienteId);
@@ -24,6 +25,7 @@ const UploadPage = () => {
         } else {
             // Fetch entity data
             const fetchEntityData = async () => {
+                setIsLoading(true);
                 try {
                     const token = localStorage.getItem("token");
                     const response = await axios.get(
@@ -39,12 +41,11 @@ const UploadPage = () => {
                         "Entity Data:",
                         response.data.DataSet.Table[0].Nome,
                     );
-                    console.log(
-                        "entidades:",
-                        response.data.DataSet,
-                    );
+                    console.log("entidades:", response.data.DataSet);
                 } catch (error) {
                     console.error("Error fetching entity data:", error);
+                } finally {
+                    setIsLoading(false);
                 }
             };
             fetchEntityData();
@@ -102,7 +103,9 @@ const UploadPage = () => {
         } else if (category === "Equipamentos" && entityData?.EntidadeId) {
             axios
                 .get(`http://localhost:5000/entidade/${clienteId}/equipamentos`)
-                .then((res) => setEquipamentosExistentes(res.data.DataSet.Table))
+                .then((res) =>
+                    setEquipamentosExistentes(res.data.DataSet.Table),
+                )
                 .catch((err) =>
                     console.error("Erro ao buscar equipamentos:", err),
                 );
@@ -110,6 +113,12 @@ const UploadPage = () => {
     }, [category, entityData]);
 
     useEffect(() => {
+        const handleResetDocsStatus = (event) => {
+            setDocsStatus(event.detail);
+        };
+
+        window.addEventListener('resetDocsStatus', handleResetDocsStatus);
+
         if (
             entityData?.Nome &&
             ((category !== "Trabalhadores" &&
@@ -123,6 +132,10 @@ const UploadPage = () => {
         ) {
             fetchDocsStatus();
         }
+
+        return () => {
+            window.removeEventListener('resetDocsStatus', handleResetDocsStatus);
+        };
     }, [
         entityData,
         category,
@@ -147,36 +160,105 @@ const UploadPage = () => {
             } else if (category === "Autorizações" && obraSelecionada) {
                 endpoint += `&obra=${encodeURIComponent(obraSelecionada)}`;
             }
+
             const res = await axios.get(endpoint);
             const docsMap = {};
 
-            // Preencher com arquivos existentes
-            res.data.files.forEach((doc) => {
-                docsMap[doc.name] = doc.status;
+            // Initialize all required docs as not sent
+            requiredDocs.forEach((doc) => {
+                docsMap[doc] = "❌ Não enviado";
             });
+
+            // Update with existing files if any
+            if (res.data.files && Array.isArray(res.data.files)) {
+                res.data.files.forEach((doc) => {
+                    docsMap[doc.name] = doc.status;
+                });
+            }
+
+            console.log(
+                trabalhadoresExistentes,
+                equipamentosExistentes,
+                docsMap,
+            ); // Debugging log)
 
             // Mapear campos de anexos adicionais do entityData
             if (entityData) {
                 const anexos = {
-                    CDU_AnexoFinancas: 'Certidão de não dívida às Finanças',
-                    CDU_AnexoSegSocial: 'Certidão de não dívida à Segurança Social',
-                    CDU_AnexoCertidaoPermanente: 'Certidão Permanente',
-                    CDU_AnexoFolhaPag: 'Folha de Remuneração Mensal à Segurança Social',
-                    CDU_AnexoComprovativoPagamento: 'Comprovativo de Pagamento',
-                    CDU_AnexoReciboSeguroAT: 'Condições do Seguro de Acidentes de Trabalho',
-                    CDU_AnexoSeguroAT: 'Seguro de Acidentes de Trabalho',
-                    CDU_AnexoAlvara: 'Alvará ou Certificado de Construção ou Atividade'
+                    CDU_AnexoFinancas: "Certidão de não dívida às Finanças",
+                    CDU_AnexoSegSocial:
+                        "Certidão de não dívida à Segurança Social",
+                    CDU_AnexoCertidaoPermanente: "Certidão Permanente",
+                    CDU_AnexoFolhaPag:
+                        "Folha de Remuneração Mensal à Segurança Social",
+                    CDU_AnexoComprovativoPagamento: "Comprovativo de Pagamento",
+                    CDU_AnexoReciboSeguroAT:
+                        "Condições do Seguro de Acidentes de Trabalho",
+                    CDU_AnexoSeguroAT: "Seguro de Acidentes de Trabalho",
+                    CDU_AnexoAlvara:
+                        "Alvará ou Certificado de Construção ou Atividade",
                 };
 
                 for (const [key, label] of Object.entries(anexos)) {
                     if (entityData[key] !== undefined) {
-                        const status = entityData[key] === 1 ? '✅ Enviado' : '❌ Não enviado';
+                        const status =
+                            entityData[key] === 1
+                                ? "✅ Enviado"
+                                : "❌ Não enviado";
                         docsMap[label] = status;
+                    }
+                }
+
+                // Verificar anexos específicos do trabalhador, se categoria for Trabalhadores
+                if (category === "Trabalhadores") {
+                    const trabalhador = trabalhadoresExistentes.find(
+                        (t) => t.nome === trabalhadorSelecionado,
+                    );
+
+                    if (trabalhador) {
+                        const anexosTrabalhador = {
+                            anexo1: "Cartão de Cidadão ou residência",
+                            anexo2: "Ficha Médica de aptidão",
+                            anexo3: "Credenciação do trabalhador",
+                            anexo4: "Trabalhos especializados",
+                            anexo5: "Ficha de distribuição de EPI",
+                        };
+
+                        for (const [key, label] of Object.entries(
+                            anexosTrabalhador,
+                        )) {
+                            if (trabalhador[key] === true) {
+                                docsMap[label] = "✅ Enviado";
+                            }
+                            // Se for false ou undefined, ignora (não adiciona no docsMap)
+                        }
+                    }
+                }
+
+                // Verificar anexos específicos do equipamento
+                if (category === "Equipamentos") {
+                    const equipamento = equipamentosExistentes.find(
+                        (e) => e.marca_modelo === equipamentoSelecionado
+                    );
+
+                    if (equipamento) {
+                        const anexosEquipamento = {
+                            anexo1: "Certificado CE",
+                            anexo2: "Certificado ou Declaração",
+                            anexo3: "Registos de Manutenção",
+                            anexo4: "Manual de utilizador",
+                            anexo5: "Seguro"
+                        };
+
+                        for (const [key, label] of Object.entries(anexosEquipamento)) {
+                            const sharePointStatus = docsMap[label]?.includes('SharePoint') ? '✅ SharePoint: Sim' : '❌ SharePoint: Não';
+                            const anexoStatus = equipamento[key] === true ? '✅ Sistema: Sim' : '❌ Sistema: Não';
+                            docsMap[label] = `${sharePointStatus} | ${anexoStatus}`;
+                        }
                     }
                 }
             }
 
-            console.log("Documentos:", docsMap);
             setDocsStatus(docsMap);
         } catch (err) {
             console.error("Erro ao buscar documentos:", err);
@@ -352,6 +434,21 @@ const UploadPage = () => {
             );
         }
     };
+
+    if (isLoading) {
+        return (
+            <div className="container mt-4 text-center">
+                <div
+                    className="spinner-border text-primary"
+                    role="status"
+                    style={{ width: "3rem", height: "3rem" }}
+                >
+                    <span className="visually-hidden">A carregar...</span>
+                </div>
+                <p className="mt-3">A carregar informações da entidade...</p>
+            </div>
+        );
+    }
 
     return (
         <div className="container mt-4">

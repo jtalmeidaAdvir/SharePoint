@@ -7,10 +7,12 @@ const LoginPage = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [showAlert, setShowAlert] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault();
+        setIsLoading(true);
         const params = new URLSearchParams(window.location.search);
         const redirectPath = params.get('redirect');
 
@@ -44,6 +46,8 @@ const LoginPage = () => {
         } catch (error) {
             console.error("Login failed:", error);
             setShowAlert(true);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -99,8 +103,13 @@ const LoginPage = () => {
                                 />
                             </div>
                         </div>
-                        <button type="submit" className="btn btn-primary w-100 py-2">
-                            Entrar
+                        <button type="submit" className="btn btn-primary w-100 py-2" disabled={isLoading}>
+                            {isLoading ? (
+                                <div className="spinner-border spinner-border-sm me-2" role="status">
+                                    <span className="visually-hidden">A carregar...</span>
+                                </div>
+                            ) : null}
+                            {isLoading ? 'A entrar...' : 'Entrar'}
                         </button>
                     </form>
                     <div className="text-center mt-4">

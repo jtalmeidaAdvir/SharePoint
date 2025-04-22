@@ -157,6 +157,13 @@ app.get("/files/:clienteId", async (req, res) => {
 
         res.json({ files });
     } catch (err) {
+        // If folder doesn't exist, return empty files array instead of error
+        if (err.response?.data?.error?.code === 'itemNotFound') {
+            console.log("📂 Pasta não encontrada, retornando lista vazia");
+            res.json({ files: [] });
+            return;
+        }
+        
         console.error("❌ Erro ao listar arquivos:", err.response?.data || err.message);
         res.status(500).json({ error: "Erro ao listar arquivos do SharePoint" });
     }

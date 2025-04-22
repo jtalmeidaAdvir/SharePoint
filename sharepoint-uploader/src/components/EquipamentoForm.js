@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 
 const EquipamentoForm = ({
     equipamentosExistentes,
@@ -12,69 +12,114 @@ const EquipamentoForm = ({
     numeroSerie,
     setNumeroSerie
 }) => {
+    const [mode, setMode] = useState('select'); // 'select' or 'create'
+
     const handleEquipamentoSelect = (e) => {
-        console.log('Equipamentos existentes:', equipamentosExistentes);
-        const equipamento = equipamentosExistentes.find(eq => eq.marca_modelo === e.target.value);
-        console.log('Equipamento selecionado:', equipamento);
+        const equipamento = equipamentosExistentes.find(eq => eq.marca_modelo === e.target.value || eq.marca === e.target.value);
 
         if (equipamento) {
-            setEquipamentoSelecionado(equipamento.marca_modelo);
-            setMarcaModelo(equipamento.marca_modelo);
-            setTipoMaquina(equipamento.tipo_maquina || '');
-            setNumeroSerie(equipamento.numero_serie || '');
-            console.log('Dados do equipamento:', {
-                marca_modelo: equipamento.marca_modelo,
-                tipo_maquina: equipamento.tipo_maquina,
-                numero_serie: equipamento.numero_serie
-            });
-        } else {
+            setEquipamentoSelecionado(equipamento.marca_modelo || equipamento.marca);
+            setMarcaModelo(equipamento.marca_modelo || equipamento.marca);
+            setTipoMaquina(equipamento.tipo_maquina || equipamento.tipo || '');
+            setNumeroSerie(equipamento.numero_serie || equipamento.serie || '');
+        }
+    };
+
+    const resetDocsStatus = () => {
+        const requiredDocs = [
+            "Certificado CE",
+            "Certificado ou Declaração",
+            "Registos de Manutenção",
+            "Manual de utilizador",
+            "Seguro"
+        ];
+        const emptyStatus = {};
+        requiredDocs.forEach(doc => {
+            emptyStatus[doc] = "❌ Não enviado";
+        });
+        return emptyStatus;
+    };
+
+    const handleModeChange = (newMode) => {
+        setMode(newMode);
+        if (newMode === 'create') {
             setEquipamentoSelecionado('');
             setMarcaModelo('');
             setTipoMaquina('');
             setNumeroSerie('');
+            window.dispatchEvent(new CustomEvent('resetDocsStatus', {
+                detail: resetDocsStatus()
+            }));
         }
     };
 
     return (
-        <div>
-            {equipamentosExistentes && equipamentosExistentes.length > 0 ? (
-                <select
-                    className="form-control"
-                    value={equipamentoSelecionado}
-                    onChange={handleEquipamentoSelect}
+        <div className="mb-4">
+            <div className="btn-group w-100 mb-3" role="group">
+                <button
+                    type="button"
+                    className={`btn ${mode === 'select' ? 'btn-primary' : 'btn-outline-primary'}`}
+                    onClick={() => handleModeChange('select')}
                 >
-                    <option value="">Selecione um equipamento existente</option>
-                    {equipamentosExistentes.map((equip, idx) => (
-                        <option key={idx} value={equip.marca_modelo}>
-                            {equip.marca_modelo} - {equip.tipo_maquina}
-                        </option>
-                    ))}
-                </select>
-            ) : null}
-
-            <div className="mt-3">
-                <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Marca / Modelo"
-                    value={marcaModelo}
-                    onChange={(e) => setMarcaModelo(e.target.value)}
-                />
-                <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Tipo de Máquina"
-                    value={tipoMaquina}
-                    onChange={(e) => setTipoMaquina(e.target.value)}
-                />
-                <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Número de Série"
-                    value={numeroSerie}
-                    onChange={(e) => setNumeroSerie(e.target.value)}
-                />
+                    Selecionar Equipamento Existente
+                </button>
+                <button
+                    type="button"
+                    className={`btn ${mode === 'create' ? 'btn-primary' : 'btn-outline-primary'}`}
+                    onClick={() => handleModeChange('create')}
+                >
+                    Criar Novo Equipamento
+                </button>
             </div>
+
+            {mode === 'select' && equipamentosExistentes && equipamentosExistentes.length > 0 ? (
+                <div className="mb-3">
+                    <label className="form-label">Selecione um Equipamento:</label>
+                    <select
+                        className="form-select"
+                        value={equipamentoSelecionado}
+                        onChange={handleEquipamentoSelect}
+                    >
+                        <option value="">Escolha um equipamento</option>
+                        {equipamentosExistentes.map((equip, idx) => (
+                            <option key={idx} value={equip.marca_modelo || equip.marca}>
+                                {equip.marca_modelo || equip.marca} - {equip.tipo_maquina || equip.tipo}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            ) : mode === 'create' ? (
+                <div className="card p-3">
+                    <h5 className="card-title mb-3">Novo Equipamento</h5>
+                    <div className="mb-3">
+                        <label className="form-label">Marca / Modelo:</label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            value={marcaModelo}
+                            onChange={(e) => setMarcaModelo(e.target.value)}
+                        />
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Tipo de Máquina:</label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            value={tipoMaquina}
+                            onChange={(e) => setTipoMaquina(e.target.value)}
+                        />
+                    </div>
+                    <div className="mb-3">
+                        <label className="form-label">Número de Série:</label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            value={numeroSerie}
+                            onChange={(e) => setNumeroSerie(e.target.value)}
+                        />
+                    </div>
+                </div>
+            ) : null}
         </div>
     );
 };
