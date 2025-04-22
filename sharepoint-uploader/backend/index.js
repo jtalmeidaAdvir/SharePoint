@@ -293,6 +293,93 @@ app.get('/listar-entidades', async (req, res) => {
         res.status(500).json({ error: 'Erro ao obter entidades do ERP' });
     }
 });
+
+app.get('/entidade/:id', async (req, res) => {
+    try {
+        const token = await getERPToken();
+        if (!token) {
+            return res.status(401).json({ error: 'Erro na autenticação ERP' });
+        }
+
+        const response = await axios.get(`http://194.65.139.112:2018/WebApi/SharePoint/GetEntidade/${req.params.id}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+
+        res.json(response.data);
+    } catch (error) {
+        console.error('Erro ao obter entidade:', error);
+        res.status(500).json({ error: 'Erro ao obter dados da entidade do ERP' });
+    }
+});
+
+app.get('/entidade/:id/trabalhadores', async (req, res) => {
+    try {
+        const token = await getERPToken();
+        if (!token) {
+            return res.status(401).json({ error: 'Erro na autenticação ERP' });
+        }
+
+        console.log(`Buscando trabalhadores para entidade ${req.params.id}`);
+        const response = await axios.get(`http://194.65.139.112:2018/WebApi/SharePoint/ListarTrabalhadores/${req.params.id}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+
+        if (!response.data || !response.data.DataSet || !response.data.DataSet.Table) {
+            console.error('Resposta inválida do ERP:', response.data);
+            return res.status(500).json({ error: 'Resposta inválida do ERP' });
+        }
+
+        console.log(`Encontrados ${response.data.DataSet.Table.length} trabalhadores`);
+        res.json(response.data);
+    } catch (error) {
+        console.error('Erro ao obter trabalhadores:', error.response?.data || error.message);
+        res.status(500).json({
+            error: 'Erro ao obter trabalhadores da entidade do ERP',
+            details: error.response?.data || error.message
+        });
+    }
+});
+
+app.get('/entidade/:id/equipamentos', async (req, res) => {
+    try {
+        const token = await getERPToken();
+        if (!token) {
+            return res.status(401).json({ error: 'Erro na autenticação ERP' });
+        }
+
+        console.log(`Buscando equipamentos para entidade ${req.params.id}`);
+        const response = await axios.get(`http://194.65.139.112:2018/WebApi/SharePoint/ListarEquipamentos/${req.params.id}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+
+        if (!response.data || !response.data.DataSet || !response.data.DataSet.Table) {
+            console.error('Resposta inválida do ERP:', response.data);
+            return res.status(500).json({ error: 'Resposta inválida do ERP' });
+        }
+
+        console.log(`Encontrados ${response.data.DataSet.Table.length} equipamentos`);
+        res.json(response.data);
+    } catch (error) {
+        console.error('Erro ao obter equipamentos:', error.response?.data || error.message);
+        res.status(500).json({
+            error: 'Erro ao obter equipamentos da entidade do ERP',
+            details: error.response?.data || error.message
+        });
+    }
+});
+
 app.post('/verificar-credenciais', async (req, res) => {
     const { username, password } = req.body;
     console.log('Tentativa de login:', { username, password });
