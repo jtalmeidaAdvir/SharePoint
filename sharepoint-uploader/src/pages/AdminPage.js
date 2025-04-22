@@ -98,7 +98,7 @@ const AdminPage = () => {
 
 
     const copiarLink = (sub) => {
-        const link = `http://localhost:3000/upload/${sub.id}`;
+        const link = `http://192.168.1.10:3000/upload/${sub.id}`;
         navigator.clipboard.writeText(link);
         setAlert({ show: true, message: `Link copiado: ${link}`, type: 'success' });
     };
@@ -164,7 +164,7 @@ const AdminPage = () => {
                                     <button
                                         className="btn btn-outline-info"
                                         onClick={() => {
-                                            const link = `http://localhost:3000/upload/${sub.id}`;
+                                            const link = `http://192.168.1.10:3000/upload/${sub.id}`;
                                             setAlert({
                                                 show: true,
                                                 message: `Link de acesso: ${link}\n\nCredenciais de acesso:\nUsuário: ${sub.username}\nSenha: ${sub.password}\n\nGuarde estas informações com segurança!`,
