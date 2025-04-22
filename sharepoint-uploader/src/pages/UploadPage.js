@@ -41,7 +41,6 @@ const UploadPage = () => {
                         "Entity Data:",
                         response.data.DataSet.Table[0].Nome,
                     );
-                    console.log("entidades:", response.data.DataSet);
                 } catch (error) {
                     console.error("Error fetching entity data:", error);
                 } finally {
@@ -149,32 +148,44 @@ const UploadPage = () => {
     const fetchDocsStatus = async () => {
         try {
             let endpoint = `http://51.254.116.237:5000/files/${entityData?.Nome}?category=${category}`;
+            console.log('Endpoint being called:', endpoint);
+            console.log('Current category:', category);
+            console.log('Entity data:', entityData);
+
             if (category === "Trabalhadores") {
                 const nome = trabalhadorSelecionado || nomeCompleto;
                 if (!nome) return;
                 endpoint += `&trabalhador=${encodeURIComponent(nome)}`;
+                console.log('Trabalhador endpoint:', endpoint);
             } else if (category === "Equipamentos") {
                 const nomeEquip = equipamentoSelecionado || marcaModelo;
                 if (!nomeEquip) return;
                 endpoint += `&equipamento=${encodeURIComponent(nomeEquip)}`;
+                console.log('Equipamento endpoint:', endpoint);
             } else if (category === "Autorizações" && obraSelecionada) {
                 endpoint += `&obra=${encodeURIComponent(obraSelecionada)}`;
+                console.log('Autorização endpoint:', endpoint);
             }
 
             const res = await axios.get(endpoint);
+            console.log('API Response:', res.data);
             const docsMap = {};
 
             // Initialize all required docs as not sent
+            console.log('Required docs:', requiredDocs);
             requiredDocs.forEach((doc) => {
                 docsMap[doc] = "❌ Não enviado";
             });
+            console.log('Initial docsMap:', docsMap);
 
             // Update with existing files if any
             if (res.data.files && Array.isArray(res.data.files)) {
+                console.log('Files from response:', res.data.files);
                 res.data.files.forEach((doc) => {
                     docsMap[doc.name] = doc.status;
                 });
             }
+            console.log('Final docsMap:', docsMap);
 
             console.log(
                 trabalhadoresExistentes,
@@ -200,12 +211,8 @@ const UploadPage = () => {
                 };
 
                 for (const [key, label] of Object.entries(anexos)) {
-                    if (entityData[key] !== undefined) {
-                        const status =
-                            entityData[key] === 1
-                                ? "✅ Enviado"
-                                : "❌ Não enviado";
-                        docsMap[label] = status;
+                    if (entityData[key]) {
+                        docsMap[label] = "✅ Enviado";
                     }
                 }
 
@@ -625,6 +632,7 @@ const UploadPage = () => {
                     <DocumentosList
                         requiredDocs={requiredDocs}
                         docsStatus={docsStatus}
+                        entityData={entityData}
                     />
                 </div>
             </div>

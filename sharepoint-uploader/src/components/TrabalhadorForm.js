@@ -100,51 +100,65 @@ const TrabalhadorForm = ({
 
                     {trabalhadorSelecionado && (
                         <div className="card p-3">
-                            <h5 className="card-title mb-3">Informação do Trabalhador</h5>
-                            <div className="mb-3">
-                                <label className="form-label">Nome Completo:</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    value={nomeCompleto}
-                                    disabled
-                                />
+                            <div className="d-flex justify-content-between align-items-center mb-3">
+                                <h5 className="card-title mb-0">Informação do Trabalhador</h5>
+                                <button
+                                    className="btn btn-outline-primary btn-sm"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#infoTrabalhador"
+                                    aria-expanded="true"
+                                    aria-controls="infoTrabalhador"
+                                >
+                                    <i className="bi bi-eye"></i> Ver/Ocultar
+                                </button>
                             </div>
-                            <div className="mb-3">
-                                <label className="form-label">Função:</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    value={funcao}
-                                    disabled
-                                />
-                            </div>
-                            <div className="mb-3">
-                                <label className="form-label">Contribuinte:</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    value={contribuinte}
-                                    disabled
-                                />
-                            </div>
-                            <div className="mb-3">
-                                <label className="form-label">Nº Segurança Social:</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    value={segSocial}
-                                    disabled
-                                />
-                            </div>
-                            <div className="mb-3">
-                                <label className="form-label">Data de Nascimento:</label>
-                                <input
-                                    type="date"
-                                    className="form-control"
-                                    value={dataNascimento}
-                                    disabled
-                                />
+                            <div className="collapse" id="infoTrabalhador">
+                                <div className="mb-3">
+                                    <label className="form-label">Nome Completo:</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        value={nomeCompleto}
+                                        disabled
+                                    />
+                                </div>
+                                <div className="mb-3">
+                                    <label className="form-label">Função:</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        value={funcao}
+                                        disabled
+                                    />
+                                </div>
+                                <div className="mb-3">
+                                    <label className="form-label">Contribuinte:</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        value={contribuinte}
+                                        disabled
+                                    />
+                                </div>
+                                <div className="mb-3">
+                                    <label className="form-label">Nº Segurança Social:</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        value={segSocial}
+                                        disabled
+                                    />
+                                </div>
+                                <div className="mb-3">
+                                    <label className="form-label">Data de Nascimento:</label>
+                                    <input
+                                        type="date"
+                                        className="form-control"
+                                        value={dataNascimento}
+                                        disabled
+                                    />
+                                </div>
                             </div>
                         </div>
                     )}

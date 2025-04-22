@@ -99,8 +99,24 @@ const AdminPage = () => {
 
     const copiarLink = (sub) => {
         const link = `http://192.168.1.10:3000/upload/${sub.id}`;
-        navigator.clipboard.writeText(link);
-        setAlert({ show: true, message: `Link copiado: ${link}`, type: 'success' });
+        try {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(link).then(() => {
+                    setAlert({ show: true, message: `Link copiado: ${link}`, type: 'success' });
+                });
+            } else {
+                // Fallback for when clipboard API is not available
+                const textArea = document.createElement("textarea");
+                textArea.value = link;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                setAlert({ show: true, message: `Link copiado: ${link}`, type: 'success' });
+            }
+        } catch (err) {
+            setAlert({ show: true, message: `Erro ao copiar link: ${link}`, type: 'error' });
+        }
     };
 
     const handleLogout = () => {
@@ -117,17 +133,17 @@ const AdminPage = () => {
                 type={alert.type}
                 onClose={() => setAlert({ show: false, message: '', type: 'success' })}
             />
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2>Gestão de Subempreiteiros</h2>
-                <button className="btn btn-outline-danger" onClick={handleLogout}>
+            <div className="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-4">
+                <h2 className="h3">Gestão de Subempreiteiros</h2>
+                <button className="btn btn-outline-danger w-100 w-sm-auto" onClick={handleLogout}>
                     Terminar Sessão
                 </button>
             </div>
 
-            <div className="card p-4 mb-4">
-                <div className="input-group mb-3">
+            <div className="card p-3 p-sm-4 mb-4">
+                <div className="d-flex flex-column flex-sm-row gap-2">
                     <select
-                        className="form-control"
+                        className="form-select flex-grow-1"
                         value={novoNome}
                         onChange={(e) => setNovoNome(e.target.value)}
                     >
@@ -136,10 +152,9 @@ const AdminPage = () => {
                             <option key={index} value={entidade.Nome}>
                                 {entidade.Nome}
                             </option>
-
                         ))}
                     </select>
-                    <button className="btn btn-primary" onClick={adicionarSubempreiteiro}>
+                    <button className="btn btn-primary w-100 w-sm-auto" onClick={adicionarSubempreiteiro}>
                         Adicionar
                     </button>
                 </div>
@@ -147,22 +162,24 @@ const AdminPage = () => {
 
             <div className="card">
                 <div className="card-header">
-                    <h3>Subempreiteiros Registados</h3>
+                    <h3 className="h4 mb-0">Subempreiteiros Registados</h3>
                 </div>
                 <div className="list-group list-group-flush">
                     {subempreiteiros.map((sub) => (
-                        <div key={sub.id} className="list-group-item">
-                            <div className="d-flex justify-content-between align-items-center mb-2">
-                                <h5 className="mb-0">{sub.nome}</h5>
-                                <div className="d-flex gap-2">
+                        <div key={sub.id} className="list-group-item p-3">
+                            <div className="d-flex flex-column gap-2">
+                                <div className="d-flex justify-content-between align-items-center">
+                                    <h5 className="mb-0 text-break">{sub.nome}</h5>
+                                </div>
+                                <div className="d-flex flex-column flex-sm-row gap-2">
                                     <button
-                                        className="btn btn-outline-primary"
+                                        className="btn btn-outline-primary w-100 w-sm-auto"
                                         onClick={() => copiarLink(sub)}
                                     >
                                         <i className="bi bi-link-45deg"></i> Copiar Link
                                     </button>
                                     <button
-                                        className="btn btn-outline-info"
+                                        className="btn btn-outline-info w-100 w-sm-auto"
                                         onClick={() => {
                                             const link = `http://192.168.1.10:3000/upload/${sub.id}`;
                                             setAlert({
@@ -175,7 +192,7 @@ const AdminPage = () => {
                                         <i className="bi bi-key"></i> Ver Credenciais
                                     </button>
                                     <button
-                                        className="btn btn-outline-danger"
+                                        className="btn btn-outline-danger w-100 w-sm-auto"
                                         onClick={async () => {
                                             if (window.confirm(`Tem certeza que deseja remover ${sub.nome}?`)) {
                                                 try {
@@ -192,9 +209,9 @@ const AdminPage = () => {
                                         <i className="bi bi-trash"></i> Remover
                                     </button>
                                 </div>
-                            </div>
-                            <div className="small text-muted">
-                                ID: {sub.id} • Criado em: {new Date(sub.dataCriacao).toLocaleDateString()}
+                                <div className="small text-muted">
+                                    ID: {sub.id} • Criado em: {new Date(sub.dataCriacao).toLocaleDateString()}
+                                </div>
                             </div>
                         </div>
                     ))}
