@@ -633,6 +633,8 @@ const UploadPage = () => {
                         requiredDocs={requiredDocs}
                         docsStatus={docsStatus}
                         entityData={entityData}
+                        selectedWorker={category === "Trabalhadores" ? trabalhadoresExistentes.find(t => t.nome === trabalhadorSelecionado) : null}
+                        selectedEquipment={category === "Equipamentos" ? equipamentosExistentes.find(e => e.marca_modelo === equipamentoSelecionado) : null}
                     />
                 </div>
             </div>

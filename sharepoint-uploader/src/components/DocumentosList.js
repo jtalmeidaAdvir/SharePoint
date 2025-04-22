@@ -1,6 +1,8 @@
 ﻿import React from 'react';
 
-const DocumentosList = ({ requiredDocs, docsStatus, entityData }) => {
+const DocumentosList = ({ requiredDocs, docsStatus, entityData, selectedWorker, selectedEquipment }) => {
+    console.log('Selected Worker Info:', selectedWorker);
+    console.log('Selected Equipment Info:', selectedEquipment);
 
     const extractValidityDate = (status) => {
         if (!status) return null;
@@ -10,22 +12,28 @@ const DocumentosList = ({ requiredDocs, docsStatus, entityData }) => {
             return match ? match[1] : null;
         }
 
-        
+
         // Handle regular format
         const match = status.match(/Válido até\s*:\s*(\d{2}\/\d{2}\/\d{4})/);
         return match ? match[1] : null;
     };
 
-    const getValidityDate = (docName, status, entityData) => {
-        console.log('---------------------');
+    const getValidityDate = (docName, status, entityData, selectedWorker) => {
+        // Handle worker documents with validity dates
+        if (selectedWorker) {
+            const docMap = {
+                "Cartão de Cidadão ou residência": selectedWorker.caminho1,
+                "Ficha Médica de aptidão": selectedWorker.caminho2,
+                "Credenciação do trabalhador": selectedWorker.caminho3,
+                "Trabalhos especializados": selectedWorker.caminho4,
+                "Ficha de distribuição de EPI's": selectedWorker.caminho5
+            };
 
-
-        // Check for worker document validity dates
-        if (docName.startsWith('caminho')) {
-            console.log('Processing Worker Document');
-            const validityMatch = status?.match(/&#40;Válido até&#58;\s*(\d{2}\/\d{2}\/\d{4})&#41;/);
-            console.log('Extracted Worker Validity:', validityMatch?.[1]);
-            return validityMatch ? validityMatch[1] : null;
+            const docStatus = docMap[docName];
+            if (docStatus) {
+                const validityMatch = docStatus.match(/&#40;Válido até&#58;\s*(\d{2}\/\d{2}\/\d{4})&#41;/);
+                if (validityMatch) return validityMatch[1];
+            }
         }
 
         // Check for company document validity dates
@@ -75,9 +83,9 @@ const DocumentosList = ({ requiredDocs, docsStatus, entityData }) => {
                                             <span className={`status-badge ${docsStatus[doc]?.includes('✅') ? 'text-success' : 'text-danger'}`}>
                                                 {docsStatus[doc]?.replace('✅', '').replace('❌', '').replace(/\(Válido até:[^)]*\)/, '')}
                                             </span>
-                                            {getValidityDate(doc, docsStatus[doc], entityData) && (
+                                            {getValidityDate(doc, docsStatus[doc], entityData, selectedWorker) && (
                                                 <span className="ms-2 text-muted">
-                                                    | Validade: {getValidityDate(doc, docsStatus[doc], entityData)}
+                                                    | Validade: {getValidityDate(doc, docsStatus[doc], entityData, selectedWorker)}
                                                 </span>
                                             )}
                                         </p>
