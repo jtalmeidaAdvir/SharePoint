@@ -11,7 +11,7 @@ const AdminPage = () => {
     useEffect(() => {
         const fetchEntidades = async () => {
             try {
-                const response = await axios.get('http://51.254.116.237:5000/listar-entidades');
+                const response = await axios.get('http://localhost:5000/listar-entidades');
                 const data = response.data?.DataSet?.Table || [];
                 console.log('Resposta da API de entidades:', response.data);
                 console.log('Dados processados:', data);
@@ -55,7 +55,7 @@ const AdminPage = () => {
 
     const fetchSubempreiteiros = async () => {
         try {
-            const response = await axios.get('http://51.254.116.237:5000/subempreiteiros');
+            const response = await axios.get('http://localhost:5000/subempreiteiros');
             setSubempreiteiros(response.data.subempreiteiros);
         } catch (error) {
             console.error('Erro ao buscar subempreiteiros:', error);
@@ -80,7 +80,7 @@ const AdminPage = () => {
                 return;
             }
             const credentials = generateCredentials();
-            await axios.post('http://51.254.116.237:5000/subempreiteiros', {
+            await axios.post('http://localhost:5000/subempreiteiros', {
                 nome: novoNome,
                 username: credentials.username,
                 password: credentials.password,
@@ -98,7 +98,7 @@ const AdminPage = () => {
 
 
     const copiarLink = (sub) => {
-        const link = `http://192.168.1.10:3000/upload/${sub.id}`;
+        const link = `http://192.168.1.80:3000/upload/${sub.id}`;
         try {
             if (navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText(link).then(() => {
@@ -181,7 +181,7 @@ const AdminPage = () => {
                                     <button
                                         className="btn btn-outline-info w-100 w-sm-auto"
                                         onClick={() => {
-                                            const link = `http://192.168.1.10:3000/upload/${sub.id}`;
+                                            const link = `http://192.168.1.80:3000/upload/${sub.id}`;
                                             setAlert({
                                                 show: true,
                                                 message: `Link de acesso: ${link}\n\nCredenciais de acesso:\nUsuário: ${sub.username}\nSenha: ${sub.password}\n\nGuarde estas informações com segurança!`,
@@ -196,7 +196,7 @@ const AdminPage = () => {
                                         onClick={async () => {
                                             if (window.confirm(`Tem certeza que deseja remover ${sub.nome}?`)) {
                                                 try {
-                                                    await axios.delete(`http://51.254.116.237:5000/subempreiteiros/${sub.id}`);
+                                                    await axios.delete(`http://localhost:5000/subempreiteiros/${sub.id}`);
                                                     setSubempreiteiros(prev => prev.filter(s => s.id !== sub.id));
                                                     setAlert({ show: true, message: 'Subempreiteiro removido com sucesso', type: 'success' });
                                                 } catch (error) {

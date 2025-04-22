@@ -3,7 +3,6 @@
     "",
     "\\sharepoint-uploader",
     "\\sharepoint-uploader\\backend",
-    "\\sharepoint-uploader\\public",
     "\\sharepoint-uploader\\src",
     "\\sharepoint-uploader\\src\\components",
     "\\sharepoint-uploader\\src\\constants",

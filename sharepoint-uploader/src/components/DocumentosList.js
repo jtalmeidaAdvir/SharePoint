@@ -1,25 +1,25 @@
-﻿import React from 'react';
+﻿import React, { useState } from 'react';
+import FileUploader from './FileUploader';
 
-const DocumentosList = ({ requiredDocs, docsStatus, entityData, selectedWorker, selectedEquipment }) => {
+const DocumentosList = ({ requiredDocs, docsStatus, entityData, selectedWorker, selectedEquipment, onUpload }) => {
     console.log('Selected Worker Info:', selectedWorker);
     console.log('Selected Equipment Info:', selectedEquipment);
+    const [showModal, setShowModal] = useState(false);
+    const [docType, setDocType] = useState('');
+    const [file, setFile] = useState(null);
 
     const extractValidityDate = (status) => {
         if (!status) return null;
-        // Handle HTML encoded format
         if (status.includes("&#40;")) {
             const match = status.match(/&#40;Válido até&#58;\s*(\d{2}\/\d{2}\/\d{4})&#41;/);
             return match ? match[1] : null;
         }
 
-
-        // Handle regular format
         const match = status.match(/Válido até\s*:\s*(\d{2}\/\d{2}\/\d{4})/);
         return match ? match[1] : null;
     };
 
     const getValidityDate = (docName, status, entityData, selectedWorker) => {
-        // Handle worker documents with validity dates
         if (selectedWorker) {
             const docMap = {
                 "Cartão de Cidadão ou residência": selectedWorker.caminho1,
@@ -36,11 +36,8 @@ const DocumentosList = ({ requiredDocs, docsStatus, entityData, selectedWorker, 
             }
         }
 
-        // Check for company document validity dates
         if (status?.includes("Válido até")) {
-            console.log('Checking company document format');
             const validity = extractValidityDate(status);
-            console.log('Company validity:', validity);
             return validity;
         }
 
@@ -58,8 +55,48 @@ const DocumentosList = ({ requiredDocs, docsStatus, entityData, selectedWorker, 
         return new Date(date).toLocaleDateString();
     };
 
+    const [tempValidade, setTempValidade] = useState('');
+
+    const handleConfirmUpload = () => {
+        if (!tempValidade) {
+            alert("Por favor, insira a data de validade do documento");
+            return;
+        }
+        onUpload(docType, file);
+        setShowModal(false);
+        setTempValidade('');
+    };
+
     return (
         <div className="docs-list mt-4">
+            {showModal && (
+                <div className="modal" style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}>
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Insira a Validade do Documento</h5>
+                                <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
+                            </div>
+                            <div className="modal-body">
+                                <input
+                                    type="date"
+                                    className="form-control"
+                                    value={tempValidade}
+                                    onChange={(e) => setTempValidade(e.target.value)}
+                                />
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>
+                                    Cancelar
+                                </button>
+                                <button type="button" className="btn btn-primary" onClick={handleConfirmUpload}>
+                                    Confirmar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
             <div className="row row-cols-1 row-cols-md-2 g-4">
                 {requiredDocs.map((doc, index) => (
                     <div key={index} className="col">
@@ -89,6 +126,56 @@ const DocumentosList = ({ requiredDocs, docsStatus, entityData, selectedWorker, 
                                                 </span>
                                             )}
                                         </p>
+                                        <div className="mt-2">
+                                            <input
+                                                type="file"
+                                                id={`file-${index}`}
+                                                className="d-none"
+                                                onChange={(e) => {
+                                                    const file = e.target.files[0];
+                                                    if (file) {
+                                                        console.log('Documento selecionado:', doc);
+                                                        console.log('Precisa de validade:',
+                                                            doc === "Certidão de não dívida às Finanças" ||
+                                                            doc === "Certidão de não dívida à Segurança Social" ||
+                                                            doc === "Certidão Permanente" ||
+                                                            doc === "Seguro de Acidentes de Trabalho" ||
+                                                            doc === "Seguro de Responsabilidade Civil" ||
+                                                            doc === "Ficha Médica de aptidão" ||
+                                                            doc === "Seguro" ||
+                                                            doc === "Cartão de Cidadão ou residência" ||
+                                                            doc === "Ficha Médica de aptidão" ||
+                                                            doc === "Credenciação do trabalhador"
+                                                        );
+                                                        if (doc === "Certidão de não dívida às Finanças" ||
+                                                            doc === "Certidão de não dívida à Segurança Social" ||
+                                                            doc === "Certidão Permanente" ||
+                                                            doc === "Seguro de Acidentes de Trabalho" ||
+                                                            doc === "Seguro de Responsabilidade Civil" ||
+                                                            doc === "Ficha Médica de aptidão" ||
+                                                            doc === "Seguro" ||
+                                                            doc === "Cartão de Cidadão ou residência" ||
+                                                            doc === "Ficha Médica de aptidão" ||
+                                                            doc === "Credenciação do trabalhador") {
+                                                            setShowModal(true);
+                                                            setDocType(doc);
+                                                            setFile(file);
+                                                        } else {
+                                                            onUpload(doc, file);
+                                                        }
+                                                    }
+                                                    e.target.value = "";
+                                                }}
+                                                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                                            />
+                                            <button
+                                                className="btn btn-primary btn-sm"
+                                                onClick={() => document.getElementById(`file-${index}`).click()}
+                                            >
+                                                <i className="bi bi-upload me-1"></i>
+                                                Upload
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
