@@ -71,7 +71,7 @@ app.post("/upload", upload.single("file"), async (req, res) => {
             "Ficha Médica de aptidão",
             "Credenciação do trabalhador",
             "Trabalhos especializados",
-            "Ficha de distribuição de EPI's",
+            "Ficha de distribuição de EPI",
         ];
 
         if (workerDocs.includes(docType) && folderPath.includes("/Empresas")) {
@@ -173,7 +173,7 @@ app.post("/upload", upload.single("file"), async (req, res) => {
                 "Ficha Médica de aptidão": "caminho2",
                 "Credenciação do trabalhador": "caminho3",
                 "Trabalhos especializados": "caminho4",
-                "Ficha de distribuição de EPI's": "caminho5",
+                "Ficha de distribuição de EPI": "caminho5",
             };
 
             const docTypeMappingAnexos = {
@@ -195,7 +195,7 @@ app.post("/upload", upload.single("file"), async (req, res) => {
                 "Ficha Médica de aptidão": "anexo2",
                 "Credenciação do trabalhador": "anexo3",
                 "Trabalhos especializados": "anexo4",
-                "Ficha de distribuição de EPI's": "anexo5",
+                "Ficha de distribuição de EPI": "anexo5",
             };
 
             const docKeyAnexos = docTypeMappingAnexos[docType];
@@ -205,16 +205,30 @@ app.post("/upload", upload.single("file"), async (req, res) => {
                 if (folderPath.includes("/Trabalhadores")) {
                     // Use worker update endpoint
                     console.log("Atualizando trabalhador no ERP...");
+                    const dataOriginal = new Date(validade); // validade = "2025-04-23"
+                    const validadeFormatada = dataOriginal.toLocaleDateString("pt-PT"); // => "23/04/2025"
+
+                    const formattedValidade =
+                        docType === "Cartão de Cidadão ou residência"
+                            ? `CartaoCidadao &#40;Válido até&#58; ${validadeFormatada}&#41;`
+                            : `${docType} &#40;Válido até&#58; ${validadeFormatada}&#41;`;
+
 
                     await axios.put(
-                        `http://localhost:2018/WebApi/SharePoint/UpdateTrabalhador/${docKey}/${validade}/${docKeyAnexos}/${contribuinte}/${idEntidade}`,
-                        {},
+                        `http://localhost:2018/WebApi/SharePoint/UpdateTrabalhador`,
+                        {
+                            Documento: docKey,
+                            Validade: formattedValidade, // com texto "Cartão Cidadão (Válido até: ...)"
+                            Anexo: docKeyAnexos,
+                            Contribuinte: contribuinte,
+                            IdEntidade: idEntidade,
+                        },
                         {
                             headers: {
                                 Authorization: `Bearer ${erpToken}`,
                                 "Content-Type": "application/json",
                             },
-                        },
+                        }
                     );
                     logSuccess("Trabalhador atualizado no ERP");
                 } else {
@@ -248,6 +262,50 @@ app.post("/upload", upload.single("file"), async (req, res) => {
     }
 });
 
+
+// Rota para inserir novo trabalhador
+app.put("/WebApi/SharePoint/InsertTrabalhador", async (req, res) => {
+
+    const token = await getERPToken();
+    if (!token) {
+        return res.status(401).json({ error: "Erro na autenticação ERP" });
+    }
+
+    const trabalhador = req.body;
+    console.log("Inserindo novo trabalhador:", JSON.stringify(trabalhador, null, 2));
+
+    try {
+        console.log("Fazendo requisição para o ERP em: http://localhost:2018/WebApi/SharePoint/InsertTrabalhador");
+        const response = await axios.put(
+            `http://localhost:2018/WebApi/SharePoint/InsertTrabalhador`,
+            trabalhador,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+
+        if (response.data) {
+            console.log("Trabalhador inserido com sucesso:", response.data);
+            res.json(response.data);
+        } else {
+            throw new Error("Resposta vazia do ERP");
+        }
+    } catch (error) {
+        console.error("Erro ao inserir trabalhador:", error.message);
+        if (error.response) {
+            console.error("Resposta do ERP:", error.response.data);
+        }
+        res.status(500).json({
+            error: "Erro ao inserir trabalhador no ERP",
+            details: error.response?.data || error.message,
+            data: trabalhador
+        });
+    }
+});
+
 // ------------------- LISTAGEM -------------------
 // 🗂️ Documentos obrigatórios por categoria
 const requiredDocsByCategory = {
@@ -267,7 +325,7 @@ const requiredDocsByCategory = {
         "Ficha Médica de aptidão",
         "Credenciação do trabalhador",
         "Trabalhos especializados",
-        "Ficha de distribuição de EPI's",
+        "Ficha de distribuição de EPI",
     ],
     Equipamentos: [
         "Certificado CE",
@@ -356,7 +414,7 @@ app.get("/trabalhadores/:clienteId", async (req, res) => {
         const folderPath = `Subempreiteiros/${encodeURIComponent(clienteId)}/Trabalhadores`;
 
         const listUrl = `https://graph.microsoft.com/v1.0/sites/${process.env.SITE_ID}/drive/root:/${folderPath}:/children`;
-  
+
         const response = await axios.get(listUrl, {
             headers: { Authorization: `Bearer ${token}` },
         });

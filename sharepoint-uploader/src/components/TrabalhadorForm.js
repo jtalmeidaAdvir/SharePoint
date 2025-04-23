@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import axios from 'axios'; // Import axios
 
 const TrabalhadorForm = ({
     nomeCompleto,
@@ -14,6 +15,7 @@ const TrabalhadorForm = ({
     trabalhadoresExistentes,
     trabalhadorSelecionado,
     setTrabalhadorSelecionado,
+    entityid, // Added entityData prop
 }) => {
     const [mode, setMode] = useState("select");
 
@@ -44,6 +46,56 @@ const TrabalhadorForm = ({
             emptyStatus[doc] = "❌ Não enviado";
         });
         return emptyStatus;
+    };
+
+    const handleSaveWorker = async () => {
+        try {
+    
+
+            // Ensure segSocial is a valid number
+
+
+            
+
+            const newWorker = {
+                Nome: nomeCompleto.trim(),
+                Funcao: funcao.trim(),
+                Contribuinte: contribuinte.trim(),
+                NumSegurancaSocial: segSocial,
+                DataNascimento: dataNascimento,
+                IdEntidade: entityid,
+                Caminho1: "",
+                Caminho2: "",
+                Caminho3: "",
+                Caminho4: "",
+                Caminho5: "",
+                Anexo1: false,
+                Anexo2: false,
+                Anexo3: false,
+                Anexo4: false,
+                Anexo5: false
+            };
+
+            console.log("Enviando dados do trabalhador:", newWorker);
+            const response = await axios.put(
+                "http://localhost:5000/WebApi/SharePoint/InsertTrabalhador",
+                newWorker,
+                {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+
+            if (response.data) {
+                alert("Trabalhador inserido com sucesso!");
+                handleModeChange('select');
+            }
+        } catch (error) {
+            console.error("Erro ao salvar trabalhador:", error);
+            const errorMsg = error.response?.data?.error || "Erro ao inserir trabalhador";
+            alert(errorMsg);
+        }
     };
 
     const handleModeChange = (newMode) => {
@@ -211,6 +263,7 @@ const TrabalhadorForm = ({
                             onChange={(e) => setDataNascimento(e.target.value)}
                         />
                     </div>
+                    <button onClick={handleSaveWorker} className="btn btn-success">Salvar Trabalhador</button> {/* Added save button */}
                 </div>
             ) : null}
         </div>

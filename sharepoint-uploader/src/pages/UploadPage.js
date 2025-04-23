@@ -235,7 +235,7 @@ const UploadPage = () => {
                             anexo2: "Ficha Médica de aptidão",
                             anexo3: "Credenciação do trabalhador",
                             anexo4: "Trabalhos especializados",
-                            anexo5: "Ficha de distribuição de EPI's",
+                            anexo5: "Ficha de distribuição de EPI",
                         };
 
                         for (const [key, label] of Object.entries(
@@ -602,6 +602,7 @@ const UploadPage = () => {
                             setTrabalhadorSelecionado={
                                 setTrabalhadorSelecionado
                             }
+                            entityid={clienteId}
                         />
                     )}
 

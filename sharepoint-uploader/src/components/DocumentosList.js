@@ -35,7 +35,7 @@ const DocumentosList = ({
                 "Ficha Médica de aptidão": selectedWorker.caminho2,
                 "Credenciação do trabalhador": selectedWorker.caminho3,
                 "Trabalhos especializados": selectedWorker.caminho4,
-                "Ficha de distribuição de EPI's": selectedWorker.caminho5,
+                "Ficha de distribuição de EPI": selectedWorker.caminho5,
             };
 
             const docStatus = docMap[docName];
@@ -232,7 +232,7 @@ const DocumentosList = ({
                                                                     /\(Válido até:[^)]*\)/,
                                                                     "",
                                                                 )
-                                                            : "Pendente"}
+                                                            : "Não enviado"}
                                                     </span>
                                                     {getValidityDate(
                                                         doc,

@@ -15,7 +15,7 @@ const requiredDocsByCategory = {
         "Ficha Médica de aptidão",
         "Credenciação do trabalhador",
         "Trabalhos especializados",
-        "Ficha de distribuição de EPI's"
+        "Ficha de distribuição de EPI"
     ],
     Equipamentos: [
         "Certificado CE",
