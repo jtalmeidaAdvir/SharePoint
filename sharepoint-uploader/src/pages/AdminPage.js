@@ -31,7 +31,7 @@ const AdminPage = () => {
     useEffect(() => {
         const fetchEntidades = async () => {
             try {
-                const response = await axios.get('http://51.254.116.237:5000/listar-entidades');
+                const response = await axios.get('http://localhost:5000/listar-entidades');
                 const data = response.data?.DataSet?.Table || [];
                 setEntidades(data);
             } catch (err) {
@@ -54,7 +54,7 @@ const AdminPage = () => {
     const fetchSubempreiteiros = async () => {
         setLoadingSubs(true);
         try {
-            const response = await axios.get('http://51.254.116.237:5000/subempreiteiros');
+            const response = await axios.get('http://localhost:5000/subempreiteiros');
             setSubempreiteiros(response.data.subempreiteiros);
         } catch (error) {
             console.error('Erro ao buscar subempreiteiros:', error);
@@ -82,7 +82,7 @@ const AdminPage = () => {
                 return;
             }
             const credentials = generateCredentials();
-            await axios.post('http://51.254.116.237:5000/subempreiteiros', {
+            await axios.post('http://localhost:5000/subempreiteiros', {
                 nome: novoNome,
                 username: credentials.username,
                 password: credentials.password,
@@ -98,7 +98,7 @@ const AdminPage = () => {
     };
 
     const copiarLink = (sub) => {
-        const link = `http://192.168.1.10:3000/upload/${sub.id}`;
+        const link = `http://192.168.1.22:3000/upload/${sub.id}`;
         try {
             navigator.clipboard.writeText(link);
             setAlert({ show: true, message: `Link copiado: ${link}`, type: 'success' });
@@ -110,7 +110,7 @@ const AdminPage = () => {
     const confirmarRemocao = async (sub) => {
         if (window.confirm(`Tem certeza que deseja remover ${sub.nome}?`)) {
             try {
-                await axios.delete(`http://51.254.116.237:5000/subempreiteiros/${sub.id}`);
+                await axios.delete(`http://localhost:5000/subempreiteiros/${sub.id}`);
                 setSubempreiteiros(prev => prev.filter(s => s.id !== sub.id));
                 setAlert({ show: true, message: 'Subempreiteiro removido com sucesso', type: 'success' });
             } catch (error) {
@@ -152,13 +152,13 @@ const AdminPage = () => {
                                 <span
                                     style={{ cursor: 'pointer', color: '#0d6efd', textDecoration: 'underline' }}
                                     onClick={() => {
-                                        const link = `http://192.168.1.10:3000/upload/${selectedSubempreiteiro.id}`;
+                                        const link = `http://192.168.1.22:3000/upload/${selectedSubempreiteiro.id}`;
                                         navigator.clipboard.writeText(link);
                                         setCopied(true);
                                         setTimeout(() => setCopied(false), 2000); // Esconde após 2 segundos
                                     }}
                                 >
-                                    http://192.168.1.10:3000/upload/{selectedSubempreiteiro.id}
+                                    http://192.168.1.22:3000/upload/{selectedSubempreiteiro.id}
                                 </span>
 
                             </p>

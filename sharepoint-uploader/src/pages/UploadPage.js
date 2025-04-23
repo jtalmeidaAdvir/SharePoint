@@ -210,12 +210,11 @@ const UploadPage = () => {
                     CDU_AnexoFolhaPag:
                         "Folha de Remuneração Mensal à Segurança Social",
                     CDU_AnexoComprovativoPagamento: "Comprovativo de Pagamento",
-                    CDU_AnexoReciboSeguroAT:
-                        "Condições do Seguro de Acidentes de Trabalho",
-                    CDU_AnexoSeguroAT: "Seguro de Acidentes de Trabalho",
                     CDU_AnexoAlvara:
                         "Alvará ou Certificado de Construção ou Atividade",
                     CDU_AnexoSeguroRC: "Seguro de Responsabilidade Civil",
+                    CDU_AnexoReciboSeguroAT: "Recibo do Seguro de Acidentes de Trabalho",
+                    CDU_AnexoSeguroAT: "Condições do Seguro de Acidentes de Trabalho",
                 };
 
                 for (const [key, label] of Object.entries(anexos)) {
@@ -236,7 +235,7 @@ const UploadPage = () => {
                             anexo2: "Ficha Médica de aptidão",
                             anexo3: "Credenciação do trabalhador",
                             anexo4: "Trabalhos especializados",
-                            anexo5: "Ficha de distribuição de EPI",
+                            anexo5: "Ficha de distribuição de EPI's",
                         };
 
                         for (const [key, label] of Object.entries(

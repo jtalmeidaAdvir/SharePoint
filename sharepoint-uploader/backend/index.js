@@ -60,12 +60,30 @@ app.post("/upload", upload.single("file"), async (req, res) => {
             throw new Error("Tipo de documento não especificado");
         }
 
-        const folderPath = req.query.folder || "";
+        let folderPath = req.query.folder || "";
         if (!folderPath) {
             throw new Error("Caminho da pasta não especificado");
         }
 
-        const { idEntidade, validade } = req.body;
+        // Check if this is a worker document being uploaded to wrong folder
+        const workerDocs = [
+            "Cartão de Cidadão ou residência",
+            "Ficha Médica de aptidão",
+            "Credenciação do trabalhador",
+            "Trabalhos especializados",
+            "Ficha de distribuição de EPI's",
+        ];
+
+        if (workerDocs.includes(docType) && folderPath.includes("/Empresas")) {
+            // Redirect to worker folder
+            folderPath = folderPath.replace("/Empresas", "/Trabalhadores");
+            console.log(
+                "Redirecionando documento de trabalhador para:",
+                folderPath,
+            );
+        }
+
+        const { idEntidade, validade, contribuinte } = req.body;
 
         console.log("📤 Upload iniciado:");
         console.log("- Cliente folderPath:", folderPath);
@@ -73,6 +91,7 @@ app.post("/upload", upload.single("file"), async (req, res) => {
         console.log("- Ficheiro original:", file.originalname);
         console.log("- ID Entidade:", idEntidade);
         console.log("- Validade:", validade);
+        console.log("- contribuinte:", contribuinte);
 
         const renamedFileName = `${docType}.txt`;
         const renamedFilePath = `uploads/${renamedFileName}`;
@@ -93,13 +112,19 @@ app.post("/upload", upload.single("file"), async (req, res) => {
                     headers: {
                         Authorization: `Bearer ${token}`,
                         "Content-Type": "application/octet-stream",
-                        'If-None-Match': '*' // Previne conflitos de ETag
+                        "If-None-Match": "*", // Previne conflitos de ETag
                     },
                 });
                 break;
             } catch (uploadError) {
-                if (uploadError.response?.data?.error?.code === 'resourceModified' && retryCount < maxRetries - 1) {
-                    console.log(`Tentativa ${retryCount + 1} falhou, tentando novamente...`);
+                if (
+                    uploadError.response?.data?.error?.code ===
+                    "resourceModified" &&
+                    retryCount < maxRetries - 1
+                ) {
+                    console.log(
+                        `Tentativa ${retryCount + 1} falhou, tentando novamente...`,
+                    );
                     retryCount++;
                     // Reabrir o stream para nova tentativa
                     fileStream.destroy();
@@ -113,68 +138,112 @@ app.post("/upload", upload.single("file"), async (req, res) => {
         fs.unlinkSync(renamedFilePath);
         logSuccess("Upload concluído e ficheiro local apagado");
 
-        // Atualizar entidade se for documento de empresa
-        if (folderPath.includes("/Empresas") && idEntidade && validade) {
-            console.log("Atualizando entidade no ERP...");
+        // Atualizar documento no ERP
+        if (idEntidade && validade) {
+            const isWorkerDoc = folderPath.includes("/Trabalhadores");
+            console.log(
+                isWorkerDoc
+                    ? "Atualizando trabalhador no ERP..."
+                    : "Atualizando entidade no ERP...",
+            );
             console.log("docType:", docType);
             console.log("idEntidade:", idEntidade);
             console.log("validade:", validade);
 
             const docTypeMappingValidacoes = {
+                // Documentos de Empresa
                 "Certidão de não dívida às Finanças": "CDU_ValidadeFinancas",
-                "Certidão de não dívida à Segurança Social": "CDU_ValidadeSegSocial",
-                "Folha de Remuneração Mensal à Segurança Social": "CDU_FolhaPagSegSocial",
-                "Comprovativo de Pagamento": "CDU_ValidadeComprovativoPagamento",
-                "Recibo do Seguro de Acidentes de Trabalho": "CDU_ValidadeReciboSeguroAT",
+                "Certidão de não dívida à Segurança Social":
+                    "CDU_ValidadeSegSocial",
+                "Folha de Remuneração Mensal à Segurança Social":
+                    "CDU_FolhaPagSegSocial",
+                "Comprovativo de Pagamento":
+                    "CDU_ValidadeComprovativoPagamento",
+                "Recibo do Seguro de Acidentes de Trabalho":
+                    "CDU_ValidadeReciboSeguroAT",
                 "Seguro de Responsabilidade Civil": "CDU_ValidadeSeguroRC",
+                "Condições do Seguro de Acidentes de Trabalho":
+                    "CDU_ValidadeSeguroAT",
+                "Alvará ou Certificado de Construção ou Atividade":
+                    "CDU_ValidadeAlvara",
+                "Certidão Permanente": "CDU_ValidadeCertidaoPermanente",
 
-                "Condições do Seguro de Acidentes de Trabalho": "CDU_ValidadeSeguroAT",
-
-                "Alvará ou Certificado de Construção ou Atividade": "CDU_ValidadeAlvara",
-                "Certidão Permanente": "CDU_ValidadeCertidaoPermanente"
-                
+                // Documentos de Trabalhador (apenas para pasta Trabalhadores)
+                "Cartão de Cidadão ou residência": "caminho1",
+                "Ficha Médica de aptidão": "caminho2",
+                "Credenciação do trabalhador": "caminho3",
+                "Trabalhos especializados": "caminho4",
+                "Ficha de distribuição de EPI's": "caminho5",
             };
 
             const docTypeMappingAnexos = {
                 "Certidão de não dívida às Finanças": "CDU_anexofinancas",
-                "Certidão de não dívida à Segurança Social": "CDU_anexoSegSocial",
-                "Folha de Remuneração Mensal à Segurança Social": "CDU_AnexoFolhaPag",
+                "Certidão de não dívida à Segurança Social":
+                    "CDU_anexoSegSocial",
+                "Folha de Remuneração Mensal à Segurança Social":
+                    "CDU_AnexoFolhaPag",
                 "Comprovativo de Pagamento": "CDU_anexoComprovativoPagamento",
-                "Recibo do Seguro de Acidentes de Trabalho": "CDU_anexoReciboSeguroAT",
+                "Recibo do Seguro de Acidentes de Trabalho":
+                    "CDU_anexoReciboSeguroAT",
                 "Seguro de Responsabilidade Civil": "CDU_anexoSeguroRC",
-
-                "Condições do Seguro de Acidentes de Trabalho": "CDU_anexoSeguroAT",
-
-                "Alvará ou Certificado de Construção ou Atividade": "CDU_anexoAlvara",
-                "Certidão Permanente": "CDU_anexoCertidaoPermanente"
-
+                "Condições do Seguro de Acidentes de Trabalho":
+                    "CDU_anexoSeguroAT",
+                "Alvará ou Certificado de Construção ou Atividade":
+                    "CDU_anexoAlvara",
+                "Certidão Permanente": "CDU_anexoCertidaoPermanente",
+                "Cartão de Cidadão ou residência": "anexo1",
+                "Ficha Médica de aptidão": "anexo2",
+                "Credenciação do trabalhador": "anexo3",
+                "Trabalhos especializados": "anexo4",
+                "Ficha de distribuição de EPI's": "anexo5",
             };
 
             const docKeyAnexos = docTypeMappingAnexos[docType];
             const docKey = docTypeMappingValidacoes[docType];
             console.log("Documento: ", docType, "=> Chave:", docKey);
             if (docKey) {
-                await axios.put(
-                    `http://localhost:2018/WebApi/SharePoint/UpdateEntidade/${docKey}/${validade}/${docKeyAnexos}/${idEntidade}`,
-                    {},
-                    {
-                        headers: {
-                            Authorization: `Bearer ${erpToken}`,
-                            "Content-Type": "application/json",
+                if (folderPath.includes("/Trabalhadores")) {
+                    // Use worker update endpoint
+                    console.log("Atualizando trabalhador no ERP...");
+
+                    await axios.put(
+                        `http://localhost:2018/WebApi/SharePoint/UpdateTrabalhador/${docKey}/${validade}/${docKeyAnexos}/${contribuinte}/${idEntidade}`,
+                        {},
+                        {
+                            headers: {
+                                Authorization: `Bearer ${erpToken}`,
+                                "Content-Type": "application/json",
+                            },
                         },
-                    },
-                );
-                logSuccess("Entidade atualizada no ERP");
+                    );
+                    logSuccess("Trabalhador atualizado no ERP");
+                } else {
+                    // Use company update endpoint
+                    await axios.put(
+                        `http://localhost:2018/WebApi/SharePoint/UpdateEntidade/${docKey}/${validade}/${docKeyAnexos}/${idEntidade}`,
+                        {},
+                        {
+                            headers: {
+                                Authorization: `Bearer ${erpToken}`,
+                                "Content-Type": "application/json",
+                            },
+                        },
+                    );
+                    logSuccess("Entidade atualizada no ERP");
+                }
             }
         }
 
         res.json({ message: "Ficheiro enviado com sucesso!" });
     } catch (err) {
         console.error("❌ Erro no upload:", err.response?.data || err.message);
-        const errorMessage = err.response?.data?.error || err.message || "Erro ao fazer upload para o SharePoint";
+        const errorMessage =
+            err.response?.data?.error ||
+            err.message ||
+            "Erro ao fazer upload para o SharePoint";
         res.status(500).json({
             error: errorMessage,
-            details: err.response?.data || err.message
+            details: err.response?.data || err.message,
         });
     }
 });
@@ -287,7 +356,7 @@ app.get("/trabalhadores/:clienteId", async (req, res) => {
         const folderPath = `Subempreiteiros/${encodeURIComponent(clienteId)}/Trabalhadores`;
 
         const listUrl = `https://graph.microsoft.com/v1.0/sites/${process.env.SITE_ID}/drive/root:/${folderPath}:/children`;
-
+  
         const response = await axios.get(listUrl, {
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -343,11 +412,9 @@ app.get("/subempreiteiros", (req, res) => {
 app.post("/subempreiteiros", (req, res) => {
     const { nome, username, password, entidadeId } = req.body;
     if (!nome || !username || !password || !entidadeId) {
-        return res
-            .status(400)
-            .json({
-                error: "Nome, credenciais e ID da entidade são obrigatórios",
-            });
+        return res.status(400).json({
+            error: "Nome, credenciais e ID da entidade são obrigatórios",
+        });
     }
 
     // Verifica se já existe um subempreiteiro com esse username
@@ -527,7 +594,7 @@ app.put(
             };
 
             const response = await axios.put(
-                `http://0.0.0.0:2018/WebApi/SharePoint/UpdateEntidade/${idEntidade}`,
+                `http://localhost:2018/WebApi/SharePoint/UpdateEntidade/${idEntidade}`,
                 updateData,
                 {
                     headers: {
@@ -542,6 +609,50 @@ app.put(
             console.error("Erro ao atualizar entidade:", error);
             res.status(500).json({
                 error: "Erro ao atualizar entidade no ERP",
+                details: error.response?.data || error.message,
+            });
+        }
+    },
+);
+
+// Nova rota para atualizar documentos dos trabalhadores
+app.put(
+    "/WebApi/SharePoint/UpdateTrabalhador/:idEntidade/:documento/:validade/:anexo/:contribuinte",
+    async (req, res) => {
+        try {
+            const token = await getERPToken();
+            if (!token) {
+                return res
+                    .status(401)
+                    .json({ error: "Erro na autenticação ERP" });
+            }
+
+            const { documento, validade, anexo, contribuinte, idEntidade } =
+                req.params;
+
+            // Monta o objeto de atualização com os campos dinâmicos
+            const updateData = {
+                [`CDU_Validade${documento}`]: validade,
+                [`CDU_Anexo${anexo}`]: anexo === "true" ? true : false,
+                Contribuinte: contribuinte,
+            };
+
+            const response = await axios.put(
+                `http://localhost:2018/WebApi/SharePoint/UpdateTrabalhador/${idEntidade}`,
+                updateData,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                },
+            );
+
+            res.json(response.data);
+        } catch (error) {
+            console.error("Erro ao atualizar trabalhador:", error);
+            res.status(500).json({
+                error: "Erro ao atualizar trabalhador no ERP",
                 details: error.response?.data || error.message,
             });
         }

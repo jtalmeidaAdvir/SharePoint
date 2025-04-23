@@ -1,5 +1,6 @@
 ﻿import React, { useState } from "react";
 import FileUploader from "./FileUploader";
+import AlertModal from "./AlertModal";
 import axios from "axios";
 
 const DocumentosList = ({
@@ -13,7 +14,6 @@ const DocumentosList = ({
     const [showModal, setShowModal] = useState(false);
     const [docType, setDocType] = useState("");
     const [file, setFile] = useState(null);
-    const [selectedDocType, setSelectedDocType] = useState(""); // Added to track selected document type
 
     const extractValidityDate = (status) => {
         if (!status) return null;
@@ -76,27 +76,21 @@ const DocumentosList = ({
     };
 
     const [tempValidade, setTempValidade] = useState("");
+    const [isUploading, setIsUploading] = useState(false);
+    const [alertModal, setAlertModal] = useState({ show: false, message: "", type: "success" });
 
-    const handleConfirmUpload = () => {
-        if (!tempValidade) {
-            alert("Por favor, insira a data de validade do documento");
-            return;
-        }
+    const handleConfirmUpload = async () => {
+        setIsUploading(true);
         const folderPath = `Subempreiteiros/${entityData?.Nome}/Empresas`;
         const formData = new FormData();
         console.log(entityData);
 
         formData.append("file", file);
         formData.append("docType", docType);
-        formData.append("idEntidade", entityData?.ID || '');
-        formData.append("validade", tempValidade || '');
+        formData.append("contribuinte", selectedWorker?.contribuinte);
+        formData.append("idEntidade", entityData?.ID);
+        formData.append("validade", docType === "Condições do Seguro de Acidentes de Trabalho" ? "" : tempValidade); // Update: Set validade to empty string if it's the specific document
         formData.append("anexo", "true");
-
-        console.log('Sending upload with:', {
-            docType,
-            idEntidade: entityData?.ID,
-            validade: tempValidade
-        });
 
         axios
             .post(
@@ -104,19 +98,20 @@ const DocumentosList = ({
                 formData,
             )
             .then((res) => {
-                console.log("Resposta do servidor:", res.data);
+                console.log("Upload successful:", res.data);
                 setShowModal(false);
                 setTempValidade("");
-
-                // Atualizar status localmente usando o callback onUpload
-                const validadeText = tempValidade ? ` (Válido até: ${tempValidade})` : '';
-                const validadeFormatada = tempValidade ? new Date(tempValidade).toLocaleDateString() : '';
-                const newStatus = { ...docsStatus, [docType]: `✅ Enviado (Válido até: ${validadeFormatada})` };
-                onUpload(docType, file, newStatus);
-
+                setIsUploading(false);
+                setAlertModal({
+                    show: true,
+                    message: "Documento enviado com sucesso!",
+                    type: "success"
+                });
+                // window.dispatchEvent(new CustomEvent('resetDocsStatus'));
             })
             .catch((err) => {
                 console.error("Upload error:", err);
+                setIsUploading(false);
                 alert(
                     "Erro ao fazer upload: " +
                     (err.response?.data?.error || err.message),
@@ -126,6 +121,12 @@ const DocumentosList = ({
 
     return (
         <div className="docs-list mt-4">
+            <AlertModal
+                show={alertModal.show}
+                message={alertModal.message}
+                type={alertModal.type}
+                onClose={() => setAlertModal({ show: false, message: "", type: "success" })}
+            />
             {showModal && (
                 <div
                     className="modal"
@@ -147,14 +148,16 @@ const DocumentosList = ({
                                 ></button>
                             </div>
                             <div className="modal-body">
-                                <input
-                                    type="date"
-                                    className="form-control"
-                                    value={tempValidade}
-                                    onChange={(e) =>
-                                        setTempValidade(e.target.value)
-                                    }
-                                />
+                                {docType !== "Condições do Seguro de Acidentes de Trabalho" && ( //Conditional rendering of date input
+                                    <input
+                                        type="date"
+                                        className="form-control"
+                                        value={tempValidade}
+                                        onChange={(e) =>
+                                            setTempValidade(e.target.value)
+                                        }
+                                    />
+                                )}
                             </div>
                             <div className="modal-footer">
                                 <button
@@ -168,8 +171,16 @@ const DocumentosList = ({
                                     type="button"
                                     className="btn btn-primary"
                                     onClick={handleConfirmUpload}
+                                    disabled={isUploading}
                                 >
-                                    Confirmar
+                                    {isUploading ? (
+                                        <>
+                                            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                            A enviar...
+                                        </>
+                                    ) : (
+                                        'Confirmar'
+                                    )}
                                 </button>
                             </div>
                         </div>
@@ -205,11 +216,23 @@ const DocumentosList = ({
                                                 </h6>
                                                 <p className="mb-0 small">
                                                     <span
-                                                        className={`status-badge ${docsStatus && docsStatus[doc] && docsStatus[doc].includes("✅") ? "text-success" : "text-danger"}`}
+                                                        className={`status-badge ${docsStatus?.[doc]?.includes("✅") ? "text-success" : "text-danger"}`}
                                                     >
-                                                        {docsStatus && docsStatus[doc] && docsStatus[doc].includes("✅")
-                                                            ? "Enviado"
-                                                            : "Não Enviado"}
+                                                        {docsStatus?.[doc]
+                                                            ? docsStatus[doc]
+                                                                .replace(
+                                                                    "✅",
+                                                                    "",
+                                                                )
+                                                                .replace(
+                                                                    "❌",
+                                                                    "",
+                                                                )
+                                                                .replace(
+                                                                    /\(Válido até:[^)]*\)/,
+                                                                    "",
+                                                                )
+                                                            : "Pendente"}
                                                     </span>
                                                     {getValidityDate(
                                                         doc,
@@ -238,7 +261,6 @@ const DocumentosList = ({
                                                                 e.target
                                                                     .files[0];
                                                             if (file) {
-                                                                setSelectedDocType(doc);
                                                                 if (entityData?.Nome) {
                                                                     setShowModal(
                                                                         true,
@@ -252,19 +274,21 @@ const DocumentosList = ({
                                                                 } else if (
                                                                     selectedWorker
                                                                 ) {
-                                                                    const validade = new Date(
-                                                                        selectedWorker.data_validade ||
-                                                                        Date.now(),
-                                                                    )
-                                                                        .toISOString()
-                                                                        .split("T")[0];
                                                                     onUpload(
                                                                         doc,
                                                                         file,
                                                                         {
                                                                             idEntidade:
                                                                                 selectedWorker.id,
-                                                                            validade,
+                                                                            validade:
+                                                                                new Date(
+                                                                                    selectedWorker.data_validade ||
+                                                                                    Date.now(),
+                                                                                )
+                                                                                    .toISOString()
+                                                                                    .split(
+                                                                                        "T",
+                                                                                    )[0],
                                                                         },
                                                                     );
                                                                 } else {
