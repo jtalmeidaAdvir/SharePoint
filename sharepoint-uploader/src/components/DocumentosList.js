@@ -13,6 +13,7 @@ const DocumentosList = ({
     const [showModal, setShowModal] = useState(false);
     const [docType, setDocType] = useState("");
     const [file, setFile] = useState(null);
+    const [selectedDocType, setSelectedDocType] = useState(""); // Added to track selected document type
 
     const extractValidityDate = (status) => {
         if (!status) return null;
@@ -87,9 +88,15 @@ const DocumentosList = ({
 
         formData.append("file", file);
         formData.append("docType", docType);
-        formData.append("idEntidade", entityData?.ID);
-        formData.append("validade", tempValidade);
+        formData.append("idEntidade", entityData?.ID || '');
+        formData.append("validade", tempValidade || '');
         formData.append("anexo", "true");
+
+        console.log('Sending upload with:', {
+            docType,
+            idEntidade: entityData?.ID,
+            validade: tempValidade
+        });
 
         axios
             .post(
@@ -97,10 +104,16 @@ const DocumentosList = ({
                 formData,
             )
             .then((res) => {
-                console.log("Upload successful:", res.data);
+                console.log("Resposta do servidor:", res.data);
                 setShowModal(false);
                 setTempValidade("");
-                // window.dispatchEvent(new CustomEvent('resetDocsStatus'));
+
+                // Atualizar status localmente usando o callback onUpload
+                const validadeText = tempValidade ? ` (Válido até: ${tempValidade})` : '';
+                const validadeFormatada = tempValidade ? new Date(tempValidade).toLocaleDateString() : '';
+                const newStatus = { ...docsStatus, [docType]: `✅ Enviado (Válido até: ${validadeFormatada})` };
+                onUpload(docType, file, newStatus);
+
             })
             .catch((err) => {
                 console.error("Upload error:", err);
@@ -192,23 +205,11 @@ const DocumentosList = ({
                                                 </h6>
                                                 <p className="mb-0 small">
                                                     <span
-                                                        className={`status-badge ${docsStatus?.[doc]?.includes("✅") ? "text-success" : "text-danger"}`}
+                                                        className={`status-badge ${docsStatus && docsStatus[doc] && docsStatus[doc].includes("✅") ? "text-success" : "text-danger"}`}
                                                     >
-                                                        {docsStatus?.[doc]
-                                                            ? docsStatus[doc]
-                                                                .replace(
-                                                                    "✅",
-                                                                    "",
-                                                                )
-                                                                .replace(
-                                                                    "❌",
-                                                                    "",
-                                                                )
-                                                                .replace(
-                                                                    /\(Válido até:[^)]*\)/,
-                                                                    "",
-                                                                )
-                                                            : "Pendente"}
+                                                        {docsStatus && docsStatus[doc] && docsStatus[doc].includes("✅")
+                                                            ? "Enviado"
+                                                            : "Não Enviado"}
                                                     </span>
                                                     {getValidityDate(
                                                         doc,
@@ -226,8 +227,6 @@ const DocumentosList = ({
                                                                 )}
                                                             </span>
                                                         )}
-
-
                                                 </p>
                                                 <div className="mt-2">
                                                     <input
@@ -239,6 +238,7 @@ const DocumentosList = ({
                                                                 e.target
                                                                     .files[0];
                                                             if (file) {
+                                                                setSelectedDocType(doc);
                                                                 if (entityData?.Nome) {
                                                                     setShowModal(
                                                                         true,
@@ -252,21 +252,19 @@ const DocumentosList = ({
                                                                 } else if (
                                                                     selectedWorker
                                                                 ) {
+                                                                    const validade = new Date(
+                                                                        selectedWorker.data_validade ||
+                                                                        Date.now(),
+                                                                    )
+                                                                        .toISOString()
+                                                                        .split("T")[0];
                                                                     onUpload(
                                                                         doc,
                                                                         file,
                                                                         {
                                                                             idEntidade:
                                                                                 selectedWorker.id,
-                                                                            validade:
-                                                                                new Date(
-                                                                                    selectedWorker.data_validade ||
-                                                                                    Date.now(),
-                                                                                )
-                                                                                    .toISOString()
-                                                                                    .split(
-                                                                                        "T",
-                                                                                    )[0],
+                                                                            validade,
                                                                         },
                                                                     );
                                                                 } else {

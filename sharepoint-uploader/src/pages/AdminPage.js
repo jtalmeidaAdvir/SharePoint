@@ -7,27 +7,12 @@ const AdminPage = () => {
     const [subempreiteiros, setSubempreiteiros] = useState([]);
     const [entidades, setEntidades] = useState([]);
     const [novoNome, setNovoNome] = useState('');
-
-    useEffect(() => {
-        const fetchEntidades = async () => {
-            try {
-                const response = await axios.get('http://localhost:5000/listar-entidades');
-                const data = response.data?.DataSet?.Table || [];
-                console.log('Resposta da API de entidades:', response.data);
-                console.log('Dados processados:', data);
-                setEntidades(data);
-            } catch (err) {
-                console.error('Erro ao buscar entidades:', err);
-                setAlert(err.message || 'Erro desconhecido');
-            }
-        };
-
-        fetchEntidades();
-    }, []);
-
-
     const [selectedSubempreiteiro, setSelectedSubempreiteiro] = useState(null);
     const [alert, setAlert] = useState({ show: false, message: '', type: 'success' });
+    const [loadingEntidades, setLoadingEntidades] = useState(true);
+    const [loadingSubs, setLoadingSubs] = useState(true);
+    const [copied, setCopied] = useState(false);
+
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -44,21 +29,38 @@ const AdminPage = () => {
     }, [navigate]);
 
     useEffect(() => {
+        const fetchEntidades = async () => {
+            try {
+                const response = await axios.get('http://51.254.116.237:5000/listar-entidades');
+                const data = response.data?.DataSet?.Table || [];
+                setEntidades(data);
+            } catch (err) {
+                console.error('Erro ao buscar entidades:', err);
+                setAlert({ show: true, message: err.message || 'Erro desconhecido', type: 'error' });
+            } finally {
+                setLoadingEntidades(false);
+            }
+        };
+
+        fetchEntidades();
+    }, []);
+
+    useEffect(() => {
         if (localStorage.getItem('isAuthenticated')) {
             fetchSubempreiteiros();
         }
     }, []);
 
-    if (!localStorage.getItem('isAuthenticated')) {
-        return null;
-    }
-
     const fetchSubempreiteiros = async () => {
+        setLoadingSubs(true);
         try {
-            const response = await axios.get('http://localhost:5000/subempreiteiros');
+            const response = await axios.get('http://51.254.116.237:5000/subempreiteiros');
             setSubempreiteiros(response.data.subempreiteiros);
         } catch (error) {
             console.error('Erro ao buscar subempreiteiros:', error);
+            setAlert({ show: true, message: 'Erro ao carregar subempreiteiros', type: 'error' });
+        } finally {
+            setLoadingSubs(false);
         }
     };
 
@@ -80,7 +82,7 @@ const AdminPage = () => {
                 return;
             }
             const credentials = generateCredentials();
-            await axios.post('http://localhost:5000/subempreiteiros', {
+            await axios.post('http://51.254.116.237:5000/subempreiteiros', {
                 nome: novoNome,
                 username: credentials.username,
                 password: credentials.password,
@@ -95,27 +97,26 @@ const AdminPage = () => {
         }
     };
 
-
-
     const copiarLink = (sub) => {
-        const link = `http://192.168.1.22:3000/upload/${sub.id}`;
+        const link = `http://192.168.1.10:3000/upload/${sub.id}`;
         try {
-            if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(link).then(() => {
-                    setAlert({ show: true, message: `Link copiado: ${link}`, type: 'success' });
-                });
-            } else {
-                // Fallback for when clipboard API is not available
-                const textArea = document.createElement("textarea");
-                textArea.value = link;
-                document.body.appendChild(textArea);
-                textArea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textArea);
-                setAlert({ show: true, message: `Link copiado: ${link}`, type: 'success' });
-            }
+            navigator.clipboard.writeText(link);
+            setAlert({ show: true, message: `Link copiado: ${link}`, type: 'success' });
         } catch (err) {
             setAlert({ show: true, message: `Erro ao copiar link: ${link}`, type: 'error' });
+        }
+    };
+
+    const confirmarRemocao = async (sub) => {
+        if (window.confirm(`Tem certeza que deseja remover ${sub.nome}?`)) {
+            try {
+                await axios.delete(`http://51.254.116.237:5000/subempreiteiros/${sub.id}`);
+                setSubempreiteiros(prev => prev.filter(s => s.id !== sub.id));
+                setAlert({ show: true, message: 'Subempreiteiro removido com sucesso', type: 'success' });
+            } catch (error) {
+                setAlert({ show: true, message: 'Erro ao remover subempreiteiro', type: 'error' });
+                console.error('Erro ao remover subempreiteiro:', error);
+            }
         }
     };
 
@@ -125,99 +126,123 @@ const AdminPage = () => {
         navigate('/login');
     };
 
+    if (!localStorage.getItem('isAuthenticated')) return null;
+
     return (
         <div className="container mt-4">
-            <AlertModal
-                show={alert.show}
-                message={alert.message}
-                type={alert.type}
-                onClose={() => setAlert({ show: false, message: '', type: 'success' })}
-            />
-            <div className="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-4">
-                <h2 className="h3">Gestão de Subempreiteiros</h2>
-                <button className="btn btn-outline-danger w-100 w-sm-auto" onClick={handleLogout}>
-                    Terminar Sessão
+            <header className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                <div className="d-flex align-items-center gap-3">
+                    <img src="/jpa.png" alt="Logo" style={{ height: '40px' }} />
+                    <h1 className="h4 m-0">Painel de Administração</h1>
+                </div>
+                <button className="btn btn-outline-danger d-flex align-items-center" onClick={handleLogout} title="Terminar Sessão">
+                    <i className="bi bi-box-arrow-right fs-5 me"></i>
                 </button>
-            </div>
+            </header>
 
-            <div className="card p-3 p-sm-4 mb-4">
-                <div className="d-flex flex-column flex-sm-row gap-2">
-                    <select
-                        className="form-select flex-grow-1"
-                        value={novoNome}
-                        onChange={(e) => setNovoNome(e.target.value)}
-                    >
-                        <option value="">Selecione uma entidade</option>
-                        {entidades.map((entidade, index) => (
-                            <option key={index} value={entidade.Nome}>
-                                {entidade.Nome}
-                            </option>
-                        ))}
-                    </select>
-                    <button className="btn btn-primary w-100 w-sm-auto" onClick={adicionarSubempreiteiro}>
-                        Adicionar
-                    </button>
+
+            {selectedSubempreiteiro && (
+                <AlertModal
+                    show={true}
+                    type="info"
+                    message={
+                        <div>
+                            <p>
+                                <strong>Link de Acesso:</strong><br />
+                                <span
+                                    style={{ cursor: 'pointer', color: '#0d6efd', textDecoration: 'underline' }}
+                                    onClick={() => {
+                                        const link = `http://192.168.1.10:3000/upload/${selectedSubempreiteiro.id}`;
+                                        navigator.clipboard.writeText(link);
+                                        setCopied(true);
+                                        setTimeout(() => setCopied(false), 2000); // Esconde após 2 segundos
+                                    }}
+                                >
+                                    http://192.168.1.10:3000/upload/{selectedSubempreiteiro.id}
+                                </span>
+
+                            </p>
+                            <p>
+                                <strong>User:</strong> {selectedSubempreiteiro.username}<br />
+                                <strong>Password:</strong> {selectedSubempreiteiro.password}
+                            </p>
+                        </div>
+                    }
+                    onClose={() => setSelectedSubempreiteiro(null)}
+                />
+
+            )}
+
+            <div className="card p-4 mb-4 shadow-sm">
+                <div className="row g-3 align-items-center">
+                    <div className="col-md">
+                        <select
+                            className="form-select"
+                            value={novoNome}
+                            onChange={(e) => setNovoNome(e.target.value)}
+                        >
+                            <option value="">Selecione uma entidade para adicionar</option>
+                            {entidades.map((entidade, index) => (
+                                <option key={index} value={entidade.Nome}>{entidade.Nome}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="col-md-auto">
+                        <button className="btn btn-primary w-100" onClick={adicionarSubempreiteiro}>
+                            <i className="bi bi-person-plus me"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <div className="card">
+            <div className="card shadow-sm">
                 <div className="card-header">
-                    <h3 className="h4 mb-0">Subempreiteiros Registados</h3>
+                    <h3 className="h5 mb-0">Subempreiteiros Registados</h3>
                 </div>
                 <div className="list-group list-group-flush">
-                    {subempreiteiros.map((sub) => (
-                        <div key={sub.id} className="list-group-item p-3">
-                            <div className="d-flex flex-column gap-2">
-                                <div className="d-flex justify-content-between align-items-center">
+                    {loadingSubs ? (
+                        <div className="p-4 text-center">
+                            <div className="spinner-border text-primary" role="status" />
+                            <div className="mt-2">A carregar subempreiteiros...</div>
+                        </div>
+                    ) : (
+                        subempreiteiros.map((sub) => (
+                            <div key={sub.id} className="list-group-item p-3">
+                                <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
                                     <h5 className="mb-0 text-break">{sub.nome}</h5>
-                                </div>
-                                <div className="d-flex flex-column flex-sm-row gap-2">
-                                    <button
-                                        className="btn btn-outline-primary w-100 w-sm-auto"
-                                        onClick={() => copiarLink(sub)}
-                                    >
-                                        <i className="bi bi-link-45deg"></i> Copiar Link
-                                    </button>
-                                    <button
-                                        className="btn btn-outline-info w-100 w-sm-auto"
-                                        onClick={() => {
-                                            const link = `http://192.168.1.22:3000/upload/${sub.id}`;
-                                            setAlert({
-                                                show: true,
-                                                message: `Link de acesso: ${link}\n\nCredenciais de acesso:\nUsuário: ${sub.username}\nSenha: ${sub.password}\n\nGuarde estas informações com segurança!`,
-                                                type: 'info'
-                                            });
-                                        }}
-                                    >
-                                        <i className="bi bi-key"></i> Ver Credenciais
-                                    </button>
-                                    <button
-                                        className="btn btn-outline-danger w-100 w-sm-auto"
-                                        onClick={async () => {
-                                            if (window.confirm(`Tem certeza que deseja remover ${sub.nome}?`)) {
-                                                try {
-                                                    await axios.delete(`http://localhost:5000/subempreiteiros/${sub.id}`);
-                                                    setSubempreiteiros(prev => prev.filter(s => s.id !== sub.id));
-                                                    setAlert({ show: true, message: 'Subempreiteiro removido com sucesso', type: 'success' });
-                                                } catch (error) {
-                                                    setAlert({ show: true, message: 'Erro ao remover subempreiteiro', type: 'error' });
-                                                    console.error('Erro ao remover subempreiteiro:', error);
-                                                }
-                                            }
-                                        }}
-                                    >
-                                        <i className="bi bi-trash"></i> Remover
-                                    </button>
-                                </div>
-                                <div className="small text-muted">
-                                    ID: {sub.id} • Criado em: {new Date(sub.dataCriacao).toLocaleDateString()}
+                                    <div className="d-flex flex-wrap gap-2">
+                                        <button className="btn btn-outline-primary" onClick={() => setSelectedSubempreiteiro(sub)}>
+                                            <i className="bi bi-key"></i> Ver Credenciais
+                                        </button>
+                                        <button className="btn btn-outline-danger" onClick={() => confirmarRemocao(sub)}>
+                                            <i className="bi bi-trash"></i> Remover
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        ))
+                    )}
                 </div>
             </div>
+            {copied && (
+                <div style={{
+                    position: 'fixed',
+                    bottom: '20px',
+                    right: '20px',
+                    backgroundColor: 'blue',
+                    color: 'white',
+                    padding: '10px 20px',
+                    borderRadius: '8px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                    zIndex: 9999,
+                    transition: 'opacity 0.3s ease-in-out'
+                }}>
+                    Link copiado 📋
+                </div>
+            )}
+
         </div>
+
     );
 };
 

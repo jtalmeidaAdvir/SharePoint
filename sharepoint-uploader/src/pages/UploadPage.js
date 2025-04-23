@@ -637,7 +637,7 @@ const UploadPage = () => {
                     <p>{message}</p>
 
                     <DocumentosList
-                        onUpload={(selectedDocType, selectedFile) => {
+                        onUpload={(selectedDocType, selectedFile, newStatus) => {
                             console.log('Iniciando upload:', {
                                 selectedDocType,
                                 selectedFileName: selectedFile.name,
@@ -678,7 +678,11 @@ const UploadPage = () => {
                                 .then(res => {
                                     console.log('Resposta do servidor:', res.data);
                                     setMessage("✅ " + res.data.message);
-                                    fetchDocsStatus();
+                                    if (newStatus) {
+                                        setDocsStatus(newStatus);
+                                    } else {
+                                        fetchDocsStatus();
+                                    }
                                 })
                                 .catch(err => {
                                     console.error(err);
