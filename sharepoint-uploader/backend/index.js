@@ -9,7 +9,11 @@ const fs = require("fs");
 // Função para mensagens de sucesso no console
 const logSuccess = (message) => {
     const timestamp = new Date().toLocaleTimeString();
-    console.log('\x1b[42m\x1b[30m SUCCESS \x1b[0m \x1b[32m[%s]\x1b[0m %s', timestamp, message);
+    console.log(
+        "\x1b[42m\x1b[30m SUCCESS \x1b[0m \x1b[32m[%s]\x1b[0m %s",
+        timestamp,
+        message,
+    );
 };
 
 dotenv.config();
@@ -37,10 +41,30 @@ async function getAccessToken() {
 app.post("/upload", upload.single("file"), async (req, res) => {
     try {
         const token = await getAccessToken();
+        if (!token) {
+            throw new Error("Falha ao obter token do SharePoint");
+        }
+
         const erpToken = await getERPToken();
+        if (!erpToken) {
+            throw new Error("Falha ao obter token do ERP");
+        }
+
         const file = req.file;
+        if (!file) {
+            throw new Error("Nenhum arquivo foi enviado");
+        }
+
         const docType = req.body.docType;
+        if (!docType) {
+            throw new Error("Tipo de documento não especificado");
+        }
+
         const folderPath = req.query.folder || "";
+        if (!folderPath) {
+            throw new Error("Caminho da pasta não especificado");
+        }
+
         const { idEntidade, validade } = req.body;
 
         console.log("📤 Upload iniciado:");
@@ -50,7 +74,7 @@ app.post("/upload", upload.single("file"), async (req, res) => {
         console.log("- ID Entidade:", idEntidade);
         console.log("- Validade:", validade);
 
-        const renamedFileName = `${docType}.txt`; // Altere a extensão conforme necessário
+        const renamedFileName = `${docType}.txt`;
         const renamedFilePath = `uploads/${renamedFileName}`;
 
         fs.renameSync(file.path, renamedFilePath);
@@ -60,38 +84,85 @@ app.post("/upload", upload.single("file"), async (req, res) => {
 
         console.log("- Upload para o SharePoint em:", uploadUrl);
 
-        await axios.put(uploadUrl, fileStream, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/octet-stream",
-            },
-        });
+        const maxRetries = 3;
+        let retryCount = 0;
+
+        while (retryCount < maxRetries) {
+            try {
+                await axios.put(uploadUrl, fileStream, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/octet-stream",
+                        'If-None-Match': '*' // Previne conflitos de ETag
+                    },
+                });
+                break;
+            } catch (uploadError) {
+                if (uploadError.response?.data?.error?.code === 'resourceModified' && retryCount < maxRetries - 1) {
+                    console.log(`Tentativa ${retryCount + 1} falhou, tentando novamente...`);
+                    retryCount++;
+                    // Reabrir o stream para nova tentativa
+                    fileStream.destroy();
+                    fileStream = fs.createReadStream(renamedFilePath);
+                } else {
+                    throw uploadError;
+                }
+            }
+        }
 
         fs.unlinkSync(renamedFilePath);
         logSuccess("Upload concluído e ficheiro local apagado");
 
         // Atualizar entidade se for documento de empresa
         if (folderPath.includes("/Empresas") && idEntidade && validade) {
-            const docTypeMapping = {
-                "Certidão de não dívida às Finanças": "Financas",
-                "Certidão de não dívida à Segurança Social": "SegSocial",
-                "Certidão Permanente": "CertidaoPermanente",
-                "Alvará ou Certificado de Construção ou Atividade": "Alvara",
-                "Seguro de Responsabilidade Civil": "SeguroRC",
-                "Seguro de Acidentes de Trabalho": "SeguroAT"
+            console.log("Atualizando entidade no ERP...");
+            console.log("docType:", docType);
+            console.log("idEntidade:", idEntidade);
+            console.log("validade:", validade);
+
+            const docTypeMappingValidacoes = {
+                "Certidão de não dívida às Finanças": "CDU_ValidadeFinancas",
+                "Certidão de não dívida à Segurança Social": "CDU_ValidadeSegSocial",
+                "Folha de Remuneração Mensal à Segurança Social": "CDU_FolhaPagSegSocial",
+                "Comprovativo de Pagamento": "CDU_ValidadeComprovativoPagamento",
+                "Recibo do Seguro de Acidentes de Trabalho": "CDU_ValidadeReciboSeguroAT",
+                "Seguro de Responsabilidade Civil": "CDU_ValidadeSeguroRC",
+
+                "Condições do Seguro de Acidentes de Trabalho": "CDU_ValidadeSeguroAT",
+
+                "Alvará ou Certificado de Construção ou Atividade": "CDU_ValidadeAlvara",
+                "Certidão Permanente": "CDU_ValidadeCertidaoPermanente"
+                
             };
 
-            const docKey = docTypeMapping[docType];
+            const docTypeMappingAnexos = {
+                "Certidão de não dívida às Finanças": "CDU_anexofinancas",
+                "Certidão de não dívida à Segurança Social": "CDU_anexoSegSocial",
+                "Folha de Remuneração Mensal à Segurança Social": "CDU_AnexoFolhaPag",
+                "Comprovativo de Pagamento": "CDU_anexoComprovativoPagamento",
+                "Recibo do Seguro de Acidentes de Trabalho": "CDU_anexoReciboSeguroAT",
+                "Seguro de Responsabilidade Civil": "CDU_anexoSeguroRC",
+
+                "Condições do Seguro de Acidentes de Trabalho": "CDU_anexoSeguroAT",
+
+                "Alvará ou Certificado de Construção ou Atividade": "CDU_anexoAlvara",
+                "Certidão Permanente": "CDU_anexoCertidaoPermanente"
+
+            };
+
+            const docKeyAnexos = docTypeMappingAnexos[docType];
+            const docKey = docTypeMappingValidacoes[docType];
+            console.log("Documento: ", docType, "=> Chave:", docKey);
             if (docKey) {
                 await axios.put(
-                    `http://localhost:2018/WebApi/SharePoint/UpdateEntidade/${docKey}/${validade}/${docKey}/${idEntidade}`,
+                    `http://localhost:2018/WebApi/SharePoint/UpdateEntidade/${docKey}/${validade}/${docKeyAnexos}/${idEntidade}`,
                     {},
                     {
                         headers: {
-                            'Authorization': `Bearer ${erpToken}`,
-                            'Content-Type': 'application/json'
-                        }
-                    }
+                            Authorization: `Bearer ${erpToken}`,
+                            "Content-Type": "application/json",
+                        },
+                    },
                 );
                 logSuccess("Entidade atualizada no ERP");
             }
@@ -100,7 +171,11 @@ app.post("/upload", upload.single("file"), async (req, res) => {
         res.json({ message: "Ficheiro enviado com sucesso!" });
     } catch (err) {
         console.error("❌ Erro no upload:", err.response?.data || err.message);
-        res.status(500).json({ error: "Erro ao fazer upload para o SharePoint" });
+        const errorMessage = err.response?.data?.error || err.message || "Erro ao fazer upload para o SharePoint";
+        res.status(500).json({
+            error: errorMessage,
+            details: err.response?.data || err.message
+        });
     }
 });
 
@@ -116,28 +191,28 @@ const requiredDocsByCategory = {
         "Seguro de Responsabilidade Civil",
         "Condições do Seguro de Acidentes de Trabalho",
         "Alvará ou Certificado de Construção ou Atividade",
-        "Certidão de não dívida à Segurança Social"
+        "Certidão de não dívida à Segurança Social",
     ],
     Trabalhadores: [
         "Cartão de Cidadão ou residência",
         "Ficha Médica de aptidão",
         "Credenciação do trabalhador",
         "Trabalhos especializados",
-        "Ficha de distribuição de EPI's"
+        "Ficha de distribuição de EPI's",
     ],
     Equipamentos: [
         "Certificado CE",
         "Certificado ou Declaração",
         "Registos de Manutenção",
         "Manual de utilizador",
-        "Seguro"
+        "Seguro",
     ],
-    "Autorizações": [
+    Autorizações: [
         "Contrato/Nota de encomenda",
         "Horário de trabalho da empreitada",
         "Declaração de adesão ao PSS",
-        "Declaração do responsável do estaleiro"
-    ]
+        "Declaração do responsável do estaleiro",
+    ],
 };
 
 app.get("/files/:clienteId", async (req, res) => {
@@ -170,33 +245,38 @@ app.get("/files/:clienteId", async (req, res) => {
 
         const filesFromSharePoint = response.data.value;
         console.log("📁 Arquivos encontrados:");
-        filesFromSharePoint.forEach(file => console.log(`- ${file.name}`));
+        filesFromSharePoint.forEach((file) => console.log(`- ${file.name}`));
 
         // Usa os documentos obrigatórios apenas se for uma categoria conhecida
         const requiredDocs = requiredDocsByCategory[category] || [];
 
-        const files = requiredDocs.map(docName => {
-            const match = filesFromSharePoint.find(file =>
-                file.name.toLowerCase().startsWith(docName.toLowerCase())
+        const files = requiredDocs.map((docName) => {
+            const match = filesFromSharePoint.find((file) =>
+                file.name.toLowerCase().startsWith(docName.toLowerCase()),
             );
             return {
                 name: docName,
                 webUrl: match ? match.webUrl : null,
-                status: match ? "✅ Enviado" : "❌ Não Enviado"
+                status: match ? "✅ Enviado" : "❌ Não Enviado",
             };
         });
 
         res.json({ files });
     } catch (err) {
         // If folder doesn't exist, return empty files array instead of error
-        if (err.response?.data?.error?.code === 'itemNotFound') {
+        if (err.response?.data?.error?.code === "itemNotFound") {
             console.log("📂 Pasta não encontrada, retornando lista vazia");
             res.json({ files: [] });
             return;
         }
 
-        console.error("❌ Erro ao listar arquivos:", err.response?.data || err.message);
-        res.status(500).json({ error: "Erro ao listar arquivos do SharePoint" });
+        console.error(
+            "❌ Erro ao listar arquivos:",
+            err.response?.data || err.message,
+        );
+        res.status(500).json({
+            error: "Erro ao listar arquivos do SharePoint",
+        });
     }
 });
 
@@ -213,12 +293,15 @@ app.get("/trabalhadores/:clienteId", async (req, res) => {
         });
 
         const subfolders = response.data.value
-            .filter(item => item.folder) // só pastas (trabalhadores)
-            .map(item => item.name); // nome do trabalhador (pasta)
+            .filter((item) => item.folder) // só pastas (trabalhadores)
+            .map((item) => item.name); // nome do trabalhador (pasta)
 
         res.json({ trabalhadores: subfolders });
     } catch (err) {
-        console.error("❌ Erro ao listar trabalhadores:", err.response?.data || err.message);
+        console.error(
+            "❌ Erro ao listar trabalhadores:",
+            err.response?.data || err.message,
+        );
         res.status(500).json({ error: "Erro ao listar trabalhadores" });
     }
 });
@@ -236,12 +319,15 @@ app.get("/equipamentos/:clienteId", async (req, res) => {
         });
 
         const subfolders = response.data.value
-            .filter(item => item.folder)
-            .map(item => item.name);
+            .filter((item) => item.folder)
+            .map((item) => item.name);
 
         res.json({ equipamentos: subfolders });
     } catch (err) {
-        console.error("❌ Erro ao listar equipamentos:", err.response?.data || err.message);
+        console.error(
+            "❌ Erro ao listar equipamentos:",
+            err.response?.data || err.message,
+        );
         res.status(500).json({ error: "Erro ao listar equipamentos" });
     }
 });
@@ -250,21 +336,23 @@ app.get("/equipamentos/:clienteId", async (req, res) => {
 let subempreiteiros = [];
 let nextId = 1;
 
-
-
-app.get('/subempreiteiros', (req, res) => {
+app.get("/subempreiteiros", (req, res) => {
     res.json({ subempreiteiros });
 });
 
-app.post('/subempreiteiros', (req, res) => {
+app.post("/subempreiteiros", (req, res) => {
     const { nome, username, password, entidadeId } = req.body;
     if (!nome || !username || !password || !entidadeId) {
-        return res.status(400).json({ error: 'Nome, credenciais e ID da entidade são obrigatórios' });
+        return res
+            .status(400)
+            .json({
+                error: "Nome, credenciais e ID da entidade são obrigatórios",
+            });
     }
 
     // Verifica se já existe um subempreiteiro com esse username
-    if (subempreiteiros.find(s => s.username === username)) {
-        return res.status(400).json({ error: 'Username já existe' });
+    if (subempreiteiros.find((s) => s.username === username)) {
+        return res.status(400).json({ error: "Username já existe" });
     }
 
     const novoSubempreiteiro = {
@@ -272,228 +360,276 @@ app.post('/subempreiteiros', (req, res) => {
         nome,
         username,
         password,
-        dataCriacao: new Date()
+        dataCriacao: new Date(),
     };
 
     subempreiteiros.push(novoSubempreiteiro);
-    console.log('Novo subempreiteiro cadastrado:', novoSubempreiteiro);
+    console.log("Novo subempreiteiro cadastrado:", novoSubempreiteiro);
     res.status(201).json(novoSubempreiteiro);
 });
 
-app.listen(PORT, () => console.log(`✅ Backend rodando em http://0.0.0.0:${PORT}`));
+app.listen(PORT, () =>
+    console.log(`✅ Backend rodando em http://0.0.0.0:${PORT}`),
+);
 async function getERPToken() {
     try {
         logSuccess("Iniciando autenticação no ERP");
         //localhost - JPA
         //localhost - Advir
-        const tokenResponse = await axios.post(`http://localhost:2018/WebApi/token`, new URLSearchParams({
-            username: 'jtalm',
-            password: '123',
-            company: 'JPA',
-            instance: 'DEFAULT',
-            line: 'Evolution',
-            grant_type: 'password'
-        }), {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
-        });
+        const tokenResponse = await axios.post(
+            `http://localhost:2018/WebApi/token`,
+            new URLSearchParams({
+                username: "jtalm",
+                password: "123",
+                company: "JPA",
+                instance: "DEFAULT",
+                line: "Evolution",
+                grant_type: "password",
+            }),
+            {
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+            },
+        );
 
         if (tokenResponse.data.access_token) {
             logSuccess("Token ERP obtido com sucesso");
             return tokenResponse.data.access_token;
         } else {
-            console.error('\x1b[41m\x1b[37m ERRO \x1b[0m Token ERP não encontrado na resposta');
+            console.error(
+                "\x1b[41m\x1b[37m ERRO \x1b[0m Token ERP não encontrado na resposta",
+            );
             return null;
         }
     } catch (error) {
-        console.error('\x1b[41m\x1b[37m ERRO \x1b[0m Falha na autenticação ERP:', error.response?.data || error.message);
+        console.error(
+            "\x1b[41m\x1b[37m ERRO \x1b[0m Falha na autenticação ERP:",
+            error.response?.data || error.message,
+        );
         return null;
     }
 }
-app.get('/listar-entidades', async (req, res) => {
+app.get("/listar-entidades", async (req, res) => {
     try {
         const token = await getERPToken();
         if (!token) {
-            return res.status(401).json({ error: 'Erro na autenticação ERP' });
+            return res.status(401).json({ error: "Erro na autenticação ERP" });
         }
 
-        const response = await axios.get('http://localhost:2018/WebApi/SharePoint/ListarEntidadesSGS', {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            }
-        });
+        const response = await axios.get(
+            "http://localhost:2018/WebApi/SharePoint/ListarEntidadesSGS",
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+            },
+        );
 
         res.json(response.data);
     } catch (error) {
-        console.error('Erro ao listar entidades:', error);
-        res.status(500).json({ error: 'Erro ao obter entidades do ERP' });
+        console.error("Erro ao listar entidades:", error);
+        res.status(500).json({ error: "Erro ao obter entidades do ERP" });
     }
 });
 
-app.get('/entidade/:id', async (req, res) => {
+app.get("/entidade/:id", async (req, res) => {
     try {
         const token = await getERPToken();
         if (!token) {
-            return res.status(401).json({ error: 'Erro na autenticação ERP' });
+            return res.status(401).json({ error: "Erro na autenticação ERP" });
         }
 
-        const response = await axios.get(`http://localhost:2018/WebApi/SharePoint/GetEntidade/${req.params.id}`, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            }
-        });
+        const response = await axios.get(
+            `http://localhost:2018/WebApi/SharePoint/GetEntidade/${req.params.id}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+            },
+        );
 
         res.json(response.data);
     } catch (error) {
-        console.error('Erro ao obter entidade:', error);
-        res.status(500).json({ error: 'Erro ao obter dados da entidade do ERP' });
-    }
-});
-
-app.get('/entidade/:id/trabalhadores', async (req, res) => {
-    try {
-        const token = await getERPToken();
-        if (!token) {
-            return res.status(401).json({ error: 'Erro na autenticação ERP' });
-        }
-
-        console.log(`Buscando trabalhadores para entidade ${req.params.id}`);
-        const response = await axios.get(`http://localhost:2018/WebApi/SharePoint/ListarTrabalhadores/${req.params.id}`, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            }
-        });
-
-        if (!response.data || !response.data.DataSet || !response.data.DataSet.Table) {
-            console.error('Resposta inválida do ERP:', response.data);
-            return res.status(500).json({ error: 'Resposta inválida do ERP' });
-        }
-        console.log(`Buscando trabalhadores para entidade ${req.params.id}`);
-        console.log(`Encontrados ${response.data.DataSet.Table.length} trabalhadores`);
-        res.json(response.data);
-    } catch (error) {
-        console.error('Erro ao obter trabalhadores:', error.response?.data || error.message);
+        console.error("Erro ao obter entidade:", error);
         res.status(500).json({
-            error: 'Erro ao obter trabalhadores da entidade do ERP',
-            details: error.response?.data || error.message
+            error: "Erro ao obter dados da entidade do ERP",
+        });
+    }
+});
+
+app.get("/entidade/:id/trabalhadores", async (req, res) => {
+    try {
+        const token = await getERPToken();
+        if (!token) {
+            return res.status(401).json({ error: "Erro na autenticação ERP" });
+        }
+
+        console.log(`Buscando trabalhadores para entidade ${req.params.id}`);
+        const response = await axios.get(
+            `http://localhost:2018/WebApi/SharePoint/ListarTrabalhadores/${req.params.id}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+            },
+        );
+
+        if (
+            !response.data ||
+            !response.data.DataSet ||
+            !response.data.DataSet.Table
+        ) {
+            console.error("Resposta inválida do ERP:", response.data);
+            return res.status(500).json({ error: "Resposta inválida do ERP" });
+        }
+        console.log(`Buscando trabalhadores para entidade ${req.params.id}`);
+        console.log(
+            `Encontrados ${response.data.DataSet.Table.length} trabalhadores`,
+        );
+        res.json(response.data);
+    } catch (error) {
+        console.error(
+            "Erro ao obter trabalhadores:",
+            error.response?.data || error.message,
+        );
+        res.status(500).json({
+            error: "Erro ao obter trabalhadores da entidade do ERP",
+            details: error.response?.data || error.message,
         });
     }
 });
 
 // Rota para atualizar documentos da entidade
-app.put('/WebApi/SharePoint/UpdateEntidade/:documento/:validade/:anexo/:idEntidade', async (req, res) => {
-    try {
-        const token = await getERPToken();
-        if (!token) {
-            return res.status(401).json({ error: 'Erro na autenticação ERP' });
-        }
-
-        const { documento, validade, anexo, idEntidade } = req.params;
-
-        // Monta o objeto de atualização com os campos dinâmicos
-        const updateData = {
-            [`CDU_Validade${documento}`]: validade,
-            [`CDU_Anexo${anexo}`]: anexo === 'true' ? true : false // added type checking
-        };
-
-        const response = await axios.put(
-            `http://0.0.0.0:2018/WebApi/SharePoint/UpdateEntidade/${idEntidade}`,
-            updateData,
-            {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
+app.put(
+    "/WebApi/SharePoint/UpdateEntidade/:documento/:validade/:anexo/:idEntidade",
+    async (req, res) => {
+        try {
+            const token = await getERPToken();
+            if (!token) {
+                return res
+                    .status(401)
+                    .json({ error: "Erro na autenticação ERP" });
             }
-        );
 
-        res.json(response.data);
-    } catch (error) {
-        console.error('Erro ao atualizar entidade:', error);
-        res.status(500).json({
-            error: 'Erro ao atualizar entidade no ERP',
-            details: error.response?.data || error.message
-        });
-    }
-});
+            const { documento, validade, anexo, idEntidade } = req.params;
 
-app.get('/entidade/:id/equipamentos', async (req, res) => {
+            // Monta o objeto de atualização com os campos dinâmicos
+            const updateData = {
+                [`CDU_Validade${documento}`]: validade,
+                [`CDU_Anexo${anexo}`]: anexo === "true" ? true : false, // added type checking
+            };
+
+            const response = await axios.put(
+                `http://0.0.0.0:2018/WebApi/SharePoint/UpdateEntidade/${idEntidade}`,
+                updateData,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                },
+            );
+
+            res.json(response.data);
+        } catch (error) {
+            console.error("Erro ao atualizar entidade:", error);
+            res.status(500).json({
+                error: "Erro ao atualizar entidade no ERP",
+                details: error.response?.data || error.message,
+            });
+        }
+    },
+);
+
+app.get("/entidade/:id/equipamentos", async (req, res) => {
     try {
         const token = await getERPToken();
         if (!token) {
-            return res.status(401).json({ error: 'Erro na autenticação ERP' });
+            return res.status(401).json({ error: "Erro na autenticação ERP" });
         }
 
         console.log(`Buscando equipamentos para entidade ${req.params.id}`);
-        const response = await axios.get(`http://localhost:2018/WebApi/SharePoint/ListarEquipamentos/${req.params.id}`, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            }
-        });
+        const response = await axios.get(
+            `http://localhost:2018/WebApi/SharePoint/ListarEquipamentos/${req.params.id}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+            },
+        );
 
-        if (!response.data || !response.data.DataSet || !response.data.DataSet.Table) {
-            console.error('Resposta inválida do ERP:', response.data);
-            return res.status(500).json({ error: 'Resposta inválida do ERP' });
+        if (
+            !response.data ||
+            !response.data.DataSet ||
+            !response.data.DataSet.Table
+        ) {
+            console.error("Resposta inválida do ERP:", response.data);
+            return res.status(500).json({ error: "Resposta inválida do ERP" });
         }
 
-        console.log(`Encontrados ${response.data.DataSet.Table.length} equipamentos`);
+        console.log(
+            `Encontrados ${response.data.DataSet.Table.length} equipamentos`,
+        );
         res.json(response.data);
     } catch (error) {
-        console.error('Erro ao obter equipamentos:', error.response?.data || error.message);
+        console.error(
+            "Erro ao obter equipamentos:",
+            error.response?.data || error.message,
+        );
         res.status(500).json({
-            error: 'Erro ao obter equipamentos da entidade do ERP',
-            details: error.response?.data || error.message
+            error: "Erro ao obter equipamentos da entidade do ERP",
+            details: error.response?.data || error.message,
         });
     }
 });
 
-app.post('/verificar-credenciais', async (req, res) => {
+app.post("/verificar-credenciais", async (req, res) => {
     const { username, password } = req.body;
-    console.log('Tentativa de login:', { username, password });
-    console.log('Subempreiteiros cadastrados:', subempreiteiros);
+    console.log("Tentativa de login:", { username, password });
+    console.log("Subempreiteiros cadastrados:", subempreiteiros);
 
-    const subempreiteiro = subempreiteiros.find(s =>
-        s.username === username && s.password === password
+    const subempreiteiro = subempreiteiros.find(
+        (s) => s.username === username && s.password === password,
     );
 
     if (subempreiteiro) {
         const erpToken = await getERPToken();
-        console.log('Login bem sucedido para:', subempreiteiro.nome);
+        console.log("Login bem sucedido para:", subempreiteiro.nome);
         res.json({
             valid: true,
             id: subempreiteiro.id,
             nome: subempreiteiro.nome,
-            erpToken
+            erpToken,
         });
     } else {
-        if (username === 'admin' && password === 'admin123') {
+        if (username === "admin" && password === "admin123") {
             const erpToken = await getERPToken();
-            console.log('Login admin bem sucedido');
+            console.log("Login admin bem sucedido");
             res.json({ valid: true, isAdmin: true, erpToken });
         } else {
-            console.log('Login falhou');
+            console.log("Login falhou");
             res.json({ valid: false });
         }
     }
 });
 
-app.delete('/subempreiteiros/:id', (req, res) => {
+app.delete("/subempreiteiros/:id", (req, res) => {
     const id = parseInt(req.params.id);
-    const index = subempreiteiros.findIndex(s => s.id === id);
+    const index = subempreiteiros.findIndex((s) => s.id === id);
 
     if (index === -1) {
-        return res.status(404).json({ error: 'Subempreiteiro não encontrado' });
+        return res.status(404).json({ error: "Subempreiteiro não encontrado" });
     }
 
     subempreiteiros.splice(index, 1);
-    res.json({ message: 'Subempreiteiro removido com sucesso' });
+    res.json({ message: "Subempreiteiro removido com sucesso" });
 });
