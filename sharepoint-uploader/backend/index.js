@@ -37,14 +37,18 @@ async function getAccessToken() {
 app.post("/upload", upload.single("file"), async (req, res) => {
     try {
         const token = await getAccessToken();
+        const erpToken = await getERPToken();
         const file = req.file;
         const docType = req.body.docType;
         const folderPath = req.query.folder || "";
+        const { idEntidade, validade } = req.body;
 
         console.log("📤 Upload iniciado:");
         console.log("- Cliente folderPath:", folderPath);
         console.log("- Tipo de documento:", docType);
         console.log("- Ficheiro original:", file.originalname);
+        console.log("- ID Entidade:", idEntidade);
+        console.log("- Validade:", validade);
 
         const renamedFileName = `${docType}.txt`; // Altere a extensão conforme necessário
         const renamedFilePath = `uploads/${renamedFileName}`;
@@ -65,6 +69,33 @@ app.post("/upload", upload.single("file"), async (req, res) => {
 
         fs.unlinkSync(renamedFilePath);
         logSuccess("Upload concluído e ficheiro local apagado");
+
+        // Atualizar entidade se for documento de empresa
+        if (folderPath.includes("/Empresas") && idEntidade && validade) {
+            const docTypeMapping = {
+                "Certidão de não dívida às Finanças": "Financas",
+                "Certidão de não dívida à Segurança Social": "SegSocial",
+                "Certidão Permanente": "CertidaoPermanente",
+                "Alvará ou Certificado de Construção ou Atividade": "Alvara",
+                "Seguro de Responsabilidade Civil": "SeguroRC",
+                "Seguro de Acidentes de Trabalho": "SeguroAT"
+            };
+
+            const docKey = docTypeMapping[docType];
+            if (docKey) {
+                await axios.put(
+                    `http://localhost:2018/WebApi/SharePoint/UpdateEntidade/${docKey}/${validade}/${docKey}/${idEntidade}`,
+                    {},
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${erpToken}`,
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                );
+                logSuccess("Entidade atualizada no ERP");
+            }
+        }
 
         res.json({ message: "Ficheiro enviado com sucesso!" });
     } catch (err) {
@@ -163,7 +194,7 @@ app.get("/files/:clienteId", async (req, res) => {
             res.json({ files: [] });
             return;
         }
-        
+
         console.error("❌ Erro ao listar arquivos:", err.response?.data || err.message);
         res.status(500).json({ error: "Erro ao listar arquivos do SharePoint" });
     }
@@ -351,6 +382,43 @@ app.get('/entidade/:id/trabalhadores', async (req, res) => {
         console.error('Erro ao obter trabalhadores:', error.response?.data || error.message);
         res.status(500).json({
             error: 'Erro ao obter trabalhadores da entidade do ERP',
+            details: error.response?.data || error.message
+        });
+    }
+});
+
+// Rota para atualizar documentos da entidade
+app.put('/WebApi/SharePoint/UpdateEntidade/:documento/:validade/:anexo/:idEntidade', async (req, res) => {
+    try {
+        const token = await getERPToken();
+        if (!token) {
+            return res.status(401).json({ error: 'Erro na autenticação ERP' });
+        }
+
+        const { documento, validade, anexo, idEntidade } = req.params;
+
+        // Monta o objeto de atualização com os campos dinâmicos
+        const updateData = {
+            [`CDU_Validade${documento}`]: validade,
+            [`CDU_Anexo${anexo}`]: anexo === 'true' ? true : false // added type checking
+        };
+
+        const response = await axios.put(
+            `http://0.0.0.0:2018/WebApi/SharePoint/UpdateEntidade/${idEntidade}`,
+            updateData,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+
+        res.json(response.data);
+    } catch (error) {
+        console.error('Erro ao atualizar entidade:', error);
+        res.status(500).json({
+            error: 'Erro ao atualizar entidade no ERP',
             details: error.response?.data || error.message
         });
     }

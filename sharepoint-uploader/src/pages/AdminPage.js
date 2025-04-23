@@ -98,7 +98,7 @@ const AdminPage = () => {
 
 
     const copiarLink = (sub) => {
-        const link = `http://192.168.1.80:3000/upload/${sub.id}`;
+        const link = `http://192.168.1.22:3000/upload/${sub.id}`;
         try {
             if (navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText(link).then(() => {
@@ -181,7 +181,7 @@ const AdminPage = () => {
                                     <button
                                         className="btn btn-outline-info w-100 w-sm-auto"
                                         onClick={() => {
-                                            const link = `http://192.168.1.80:3000/upload/${sub.id}`;
+                                            const link = `http://192.168.1.22:3000/upload/${sub.id}`;
                                             setAlert({
                                                 show: true,
                                                 message: `Link de acesso: ${link}\n\nCredenciais de acesso:\nUsuário: ${sub.username}\nSenha: ${sub.password}\n\nGuarde estas informações com segurança!`,

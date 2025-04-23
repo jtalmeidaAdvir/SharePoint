@@ -1,5 +1,6 @@
 ﻿import React, { useState } from 'react';
 import FileUploader from './FileUploader';
+import axios from 'axios';
 
 const DocumentosList = ({ requiredDocs, docsStatus, entityData, selectedWorker, selectedEquipment, onUpload }) => {
     console.log('Selected Worker Info:', selectedWorker);
@@ -62,9 +63,30 @@ const DocumentosList = ({ requiredDocs, docsStatus, entityData, selectedWorker, 
             alert("Por favor, insira a data de validade do documento");
             return;
         }
-        onUpload(docType, file);
-        setShowModal(false);
-        setTempValidade('');
+        const folderPath = `Subempreiteiros/${entityData?.Nome}/Empresas`;
+        const formData = new FormData();
+        console.log(entityData);
+
+        formData.append("file", file);
+        formData.append("docType", docType);
+        formData.append("idEntidade", entityData?.ID);
+        formData.append("validade", tempValidade);
+        formData.append("anexo", "true");
+
+        axios.post(
+            `http://localhost:5000/upload?folder=${encodeURIComponent(folderPath)}`,
+            formData
+        )
+            .then(res => {
+                console.log("Upload successful:", res.data);
+                setShowModal(false);
+                setTempValidade('');
+                window.dispatchEvent(new CustomEvent('resetDocsStatus'));
+            })
+            .catch(err => {
+                console.error("Upload error:", err);
+                alert("Erro ao fazer upload: " + (err.response?.data?.error || err.message));
+            });
     };
 
     return (
@@ -134,34 +156,32 @@ const DocumentosList = ({ requiredDocs, docsStatus, entityData, selectedWorker, 
                                                 onChange={(e) => {
                                                     const file = e.target.files[0];
                                                     if (file) {
-                                                        console.log('Documento selecionado:', doc);
-                                                        console.log('Precisa de validade:',
-                                                            doc === "Certidão de não dívida às Finanças" ||
-                                                            doc === "Certidão de não dívida à Segurança Social" ||
-                                                            doc === "Certidão Permanente" ||
-                                                            doc === "Seguro de Acidentes de Trabalho" ||
-                                                            doc === "Seguro de Responsabilidade Civil" ||
-                                                            doc === "Ficha Médica de aptidão" ||
-                                                            doc === "Seguro" ||
-                                                            doc === "Cartão de Cidadão ou residência" ||
-                                                            doc === "Ficha Médica de aptidão" ||
-                                                            doc === "Credenciação do trabalhador"
-                                                        );
                                                         if (doc === "Certidão de não dívida às Finanças" ||
                                                             doc === "Certidão de não dívida à Segurança Social" ||
                                                             doc === "Certidão Permanente" ||
                                                             doc === "Seguro de Acidentes de Trabalho" ||
-                                                            doc === "Seguro de Responsabilidade Civil" ||
-                                                            doc === "Ficha Médica de aptidão" ||
-                                                            doc === "Seguro" ||
-                                                            doc === "Cartão de Cidadão ou residência" ||
-                                                            doc === "Ficha Médica de aptidão" ||
-                                                            doc === "Credenciação do trabalhador") {
+                                                            doc === "Seguro de Responsabilidade Civil") {
                                                             setShowModal(true);
                                                             setDocType(doc);
                                                             setFile(file);
+                                                        } else if (selectedWorker) {
+                                                            onUpload(doc, file, {
+                                                                idEntidade: selectedWorker.id,
+                                                                validade: new Date(selectedWorker.data_validade || Date.now()).toISOString().split('T')[0]
+                                                            });
                                                         } else {
-                                                            onUpload(doc, file);
+                                                            if (doc === "Certidão de não dívida às Finanças" ||
+                                                                doc === "Certidão de não dívida à Segurança Social" ||
+                                                                doc === "Certidão Permanente" ||
+                                                                doc === "Seguro de Acidentes de Trabalho" ||
+                                                                doc === "Seguro de Responsabilidade Civil") {
+                                                                setShowModal(true);
+                                                                setDocType(doc);
+                                                                setFile(file);
+                                                            } else {
+                                                                console.log('Documento selecionado:', doc);
+                                                                onUpload(doc, file);
+                                                            }
                                                         }
                                                     }
                                                     e.target.value = "";

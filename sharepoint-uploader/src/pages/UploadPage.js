@@ -651,6 +651,12 @@ const UploadPage = () => {
                             const formData = new FormData();
                             formData.append("file", selectedFile);
                             formData.append("docType", selectedDocType);
+                            formData.append("idEntidade", entityData?.Id);
+
+                            const selectedWorker = trabalhadoresExistentes.find(t => t.nome === trabalhadorSelecionado);
+                            if (category === "Trabalhadores" && selectedWorker) {
+                                formData.append("validade", selectedWorker.data_validade || new Date().toISOString().split('T')[0]);
+                            }
 
                             console.log('FormData criado com sucesso');
 
