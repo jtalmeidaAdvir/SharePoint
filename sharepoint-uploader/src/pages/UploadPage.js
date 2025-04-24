@@ -39,10 +39,7 @@ const UploadPage = () => {
                         },
                     );
                     setEntityData(response.data.DataSet.Table[0]);
-                    console.log(
-                        "Entity Data:",
-                        response.data.DataSet.Table[0].Nome,
-                    );
+            
                 } catch (error) {
                     console.error("Error fetching entity data:", error);
                 } finally {
@@ -156,50 +153,36 @@ const UploadPage = () => {
     const fetchDocsStatus = async () => {
         try {
             let endpoint = `http://localhost:5000/files/${entityData?.Nome}?category=${category}`;
-            console.log("Endpoint being called:", endpoint);
-            console.log("Current category:", category);
-            console.log("Entity data:", entityData);
+
 
             if (category === "Trabalhadores") {
                 const nome = trabalhadorSelecionado || nomeCompleto;
                 if (!nome) return;
                 endpoint += `&trabalhador=${encodeURIComponent(nome)}`;
-                console.log("Trabalhador endpoint:", endpoint);
             } else if (category === "Equipamentos") {
                 const nomeEquip = equipamentoSelecionado || marcaModelo;
                 if (!nomeEquip) return;
                 endpoint += `&equipamento=${encodeURIComponent(nomeEquip)}`;
-                console.log("Equipamento endpoint:", endpoint);
             } else if (category === "Autorizações" && obraSelecionada) {
                 endpoint += `&obra=${encodeURIComponent(obraSelecionada)}`;
-                console.log("Autorização endpoint:", endpoint);
             }
 
             const res = await axios.get(endpoint);
-            console.log("API Response:", res.data);
             const docsMap = {};
 
             // Initialize all required docs as not sent
-            console.log("Required docs:", requiredDocs);
             requiredDocs.forEach((doc) => {
                 docsMap[doc] = "❌ Não enviado";
             });
-            console.log("Initial docsMap:", docsMap);
 
             // Update with existing files if any
             if (res.data.files && Array.isArray(res.data.files)) {
-                console.log("Files from response:", res.data.files);
                 res.data.files.forEach((doc) => {
                     docsMap[doc.name] = doc.status;
                 });
             }
-            console.log("Final docsMap:", docsMap);
 
-            console.log(
-                trabalhadoresExistentes,
-                equipamentosExistentes,
-                docsMap,
-            ); // Debugging log)
+
 
             // Mapear campos de anexos adicionais do entityData
             if (entityData) {
@@ -639,8 +622,8 @@ const UploadPage = () => {
                         <p>{message}</p>
 
                         {((category !== "Trabalhadores" && category !== "Equipamentos") ||
-                            (category === "Trabalhadores" && !(nomeCompleto === "" && funcao === "" && contribuinte === "" && segSocial === "" && dataNascimento === "")) ||
-                            (category === "Equipamentos" && !(marcaModelo === "" && tipoMaquina === "" && numeroSerie === ""))) && (
+                            (category === "Trabalhadores" && mode === "select" && trabalhadorSelecionado) ||
+                            (category === "Equipamentos" && equipamentoSelecionado)) && (
                                 <DocumentosList
                                     onUpload={(selectedDocType, selectedFile, newStatus) => {
                                         console.log('Iniciando upload:', {
@@ -661,7 +644,14 @@ const UploadPage = () => {
                                         const selectedWorker = trabalhadoresExistentes.find(t => t.nome === trabalhadorSelecionado);
                                         if (category === "Trabalhadores" && selectedWorker) {
                                             formData.append("validade", selectedWorker.data_validade || new Date().toISOString().split('T')[0]);
-                                        }
+                                    }
+                                   
+                                    if (category === "Equipamentos" && equipamentoSelecionado) {
+                                        formData.append("equipamentoSelecionado", equipamentoSelecionado);
+                                    }
+
+
+                                    console.log('FormData criado:', formData);
 
                                         console.log('FormData criado com sucesso');
 

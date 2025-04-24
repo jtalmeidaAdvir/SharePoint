@@ -65,13 +65,21 @@ app.post("/upload", upload.single("file"), async (req, res) => {
             throw new Error("Caminho da pasta não especificado");
         }
 
-        // Check if this is a worker document being uploaded to wrong folder
+        // Check if this is a worker or equipment document being uploaded to wrong folder
         const workerDocs = [
             "Cartão de Cidadão ou residência",
             "Ficha Médica de aptidão",
             "Credenciação do trabalhador",
             "Trabalhos especializados",
             "Ficha de distribuição de EPI",
+        ];
+
+        const equipmentDocs = [
+            "Certificado CE",
+            "Certificado ou Declaração",
+            "Registos de Manutenção",
+            "Manual de utilizador",
+            "Seguro",
         ];
 
         if (workerDocs.includes(docType) && folderPath.includes("/Empresas")) {
@@ -81,9 +89,20 @@ app.post("/upload", upload.single("file"), async (req, res) => {
                 "Redirecionando documento de trabalhador para:",
                 folderPath,
             );
+        } else if (
+            equipmentDocs.includes(docType) &&
+            folderPath.includes("/Empresas")
+        ) {
+            // Redirect to equipment folder
+            folderPath = folderPath.replace("/Empresas", "/Equipamentos");
+            console.log(
+                "Redirecionando documento de equipamento para:",
+                folderPath,
+            );
         }
 
-        const { idEntidade, validade, contribuinte } = req.body;
+        const { idEntidade, validade, contribuinte, equipamentoSelecionado } =
+            req.body;
 
         console.log("📤 Upload iniciado:");
         console.log("- Cliente folderPath:", folderPath);
@@ -92,6 +111,9 @@ app.post("/upload", upload.single("file"), async (req, res) => {
         console.log("- ID Entidade:", idEntidade);
         console.log("- Validade:", validade);
         console.log("- contribuinte:", contribuinte);
+
+
+        console.log("- marca:", equipamentoSelecionado);
 
         const renamedFileName = `${docType}.txt`;
         const renamedFilePath = `uploads/${renamedFileName}`;
@@ -141,10 +163,14 @@ app.post("/upload", upload.single("file"), async (req, res) => {
         // Atualizar documento no ERP
         if (idEntidade && validade) {
             const isWorkerDoc = folderPath.includes("/Trabalhadores");
+            const isEquipmentDoc = folderPath.includes("/Equipamentos");
+
             console.log(
                 isWorkerDoc
                     ? "Atualizando trabalhador no ERP..."
-                    : "Atualizando entidade no ERP...",
+                    : isEquipmentDoc
+                        ? "Atualizando equipamento no ERP..."
+                        : "Atualizando entidade no ERP...",
             );
             console.log("docType:", docType);
             console.log("idEntidade:", idEntidade);
@@ -174,9 +200,17 @@ app.post("/upload", upload.single("file"), async (req, res) => {
                 "Credenciação do trabalhador": "caminho3",
                 "Trabalhos especializados": "caminho4",
                 "Ficha de distribuição de EPI": "caminho5",
+
+                // Documentos de Equipamento (apenas para pasta Equipamentos)
+                "Certificado CE": "caminho1",
+                "Certificado ou Declaração": "caminho2",
+                "Registos de Manutenção": "caminho3",
+                "Manual de utilizador": "caminho4",
+                Seguro: "caminho5",
             };
 
             const docTypeMappingAnexos = {
+                // Documentos de Empresa
                 "Certidão de não dívida às Finanças": "CDU_anexofinancas",
                 "Certidão de não dívida à Segurança Social":
                     "CDU_anexoSegSocial",
@@ -191,28 +225,66 @@ app.post("/upload", upload.single("file"), async (req, res) => {
                 "Alvará ou Certificado de Construção ou Atividade":
                     "CDU_anexoAlvara",
                 "Certidão Permanente": "CDU_anexoCertidaoPermanente",
+
+                // Documentos de Trabalhador
                 "Cartão de Cidadão ou residência": "anexo1",
                 "Ficha Médica de aptidão": "anexo2",
                 "Credenciação do trabalhador": "anexo3",
                 "Trabalhos especializados": "anexo4",
                 "Ficha de distribuição de EPI": "anexo5",
+
+                // Documentos de Equipamento
+                "Certificado CE": "anexo1",
+                "Certificado ou Declaração": "anexo2",
+                "Registos de Manutenção": "anexo3",
+                "Manual de utilizador": "anexo4",
+                Seguro: "anexo5",
             };
 
             const docKeyAnexos = docTypeMappingAnexos[docType];
             const docKey = docTypeMappingValidacoes[docType];
             console.log("Documento: ", docType, "=> Chave:", docKey);
+            console.log("Equipment data:", {
+                equipamentoSelecionado,
+                folderPath,
+                docType
+            });
             if (docKey) {
-                if (folderPath.includes("/Trabalhadores")) {
+                if (folderPath.includes("/Equipamentos")) {
+                    // Use equipment update endpoint
+                    console.log("Atualizando equipamento no ERP...");
+                    const dataOriginal = new Date(validade);
+                    const validadeFormatada =
+                        dataOriginal.toLocaleDateString("pt-PT");
+
+                    await axios.put(
+                        `http://localhost:2018/WebApi/SharePoint/UpdateEquipamento`,
+                        {
+                            Documento: docKey,
+                            Validade: `${docType} &#40;Válido até&#58; ${validadeFormatada}&#41;`,
+                            Anexo: docKeyAnexos,
+                            Marca: equipamentoSelecionado,
+                            IdEntidade: idEntidade,
+                        },
+                        {
+                            headers: {
+                                Authorization: `Bearer ${erpToken}`,
+                                "Content-Type": "application/json",
+                            },
+                        },
+                    );
+                    logSuccess("Equipamento atualizado no ERP");
+                } else if (folderPath.includes("/Trabalhadores")) {
                     // Use worker update endpoint
                     console.log("Atualizando trabalhador no ERP...");
                     const dataOriginal = new Date(validade); // validade = "2025-04-23"
-                    const validadeFormatada = dataOriginal.toLocaleDateString("pt-PT"); // => "23/04/2025"
+                    const validadeFormatada =
+                        dataOriginal.toLocaleDateString("pt-PT"); // => "23/04/2025"
 
                     const formattedValidade =
                         docType === "Cartão de Cidadão ou residência"
                             ? `CartaoCidadao &#40;Válido até&#58; ${validadeFormatada}&#41;`
                             : `${docType} &#40;Válido até&#58; ${validadeFormatada}&#41;`;
-
 
                     await axios.put(
                         `http://localhost:2018/WebApi/SharePoint/UpdateTrabalhador`,
@@ -228,7 +300,7 @@ app.post("/upload", upload.single("file"), async (req, res) => {
                                 Authorization: `Bearer ${erpToken}`,
                                 "Content-Type": "application/json",
                             },
-                        }
+                        },
                     );
                     logSuccess("Trabalhador atualizado no ERP");
                 } else {
@@ -262,20 +334,23 @@ app.post("/upload", upload.single("file"), async (req, res) => {
     }
 });
 
-
 // Rota para inserir novo trabalhador
 app.put("/WebApi/SharePoint/InsertTrabalhador", async (req, res) => {
-
     const token = await getERPToken();
     if (!token) {
         return res.status(401).json({ error: "Erro na autenticação ERP" });
     }
 
     const trabalhador = req.body;
-    console.log("Inserindo novo trabalhador:", JSON.stringify(trabalhador, null, 2));
+    console.log(
+        "Inserindo novo trabalhador:",
+        JSON.stringify(trabalhador, null, 2),
+    );
 
     try {
-        console.log("Fazendo requisição para o ERP em: http://localhost:2018/WebApi/SharePoint/InsertTrabalhador");
+        console.log(
+            "Fazendo requisição para o ERP em: http://localhost:2018/WebApi/SharePoint/InsertTrabalhador",
+        );
         const response = await axios.put(
             `http://localhost:2018/WebApi/SharePoint/InsertTrabalhador`,
             trabalhador,
@@ -284,7 +359,7 @@ app.put("/WebApi/SharePoint/InsertTrabalhador", async (req, res) => {
                     Authorization: `Bearer ${token}`,
                     "Content-Type": "application/json",
                 },
-            }
+            },
         );
 
         if (response.data) {
@@ -301,7 +376,7 @@ app.put("/WebApi/SharePoint/InsertTrabalhador", async (req, res) => {
         res.status(500).json({
             error: "Erro ao inserir trabalhador no ERP",
             details: error.response?.data || error.message,
-            data: trabalhador
+            data: trabalhador,
         });
     }
 });
@@ -716,6 +791,52 @@ app.put(
         }
     },
 );
+
+// Update equipment endpoint
+app.put("/WebApi/SharePoint/UpdateEquipamento", async (req, res) => {
+    try {
+        const token = await getERPToken();
+        if (!token) {
+            return res.status(401).json({ error: "Erro na autenticação ERP" });
+        }
+
+        const { Documento, Validade, Anexo, Marca, IdEntidade } = req.body;
+
+        console.log("Atualizando equipamento:", {
+            Documento,
+            Validade,
+            Anexo,
+            Marca,
+            IdEntidade,
+        });
+
+        const response = await axios.put(
+            `http://localhost:2018/WebApi/SharePoint/UpdateEquipamento`,
+            {
+                Documento,
+                Validade,
+                Anexo,
+                Marca,
+                IdEntidade,
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+            },
+        );
+
+        logSuccess("Equipamento atualizado no ERP");
+        res.json(response.data);
+    } catch (error) {
+        console.error("Erro ao atualizar equipamento:", error);
+        res.status(500).json({
+            error: "Erro ao atualizar equipamento no ERP",
+            details: error.response?.data || error.message,
+        });
+    }
+});
 
 app.get("/entidade/:id/equipamentos", async (req, res) => {
     try {

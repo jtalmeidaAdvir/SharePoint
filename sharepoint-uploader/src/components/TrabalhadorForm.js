@@ -18,6 +18,7 @@ const TrabalhadorForm = ({
     entityid, // Added entityData prop
 }) => {
     const [mode, setMode] = useState("select");
+    const [isSaving, setIsSaving] = useState(false);
 
     const handleTrabalhadorSelect = (e) => {
         const trabalhador = trabalhadoresExistentes.find(
@@ -49,6 +50,7 @@ const TrabalhadorForm = ({
     };
 
     const handleSaveWorker = async () => {
+        setIsSaving(true);
         try {
 
 
@@ -95,6 +97,8 @@ const TrabalhadorForm = ({
             console.error("Erro ao salvar trabalhador:", error);
             const errorMsg = error.response?.data?.error || "Erro ao inserir trabalhador";
             alert(errorMsg);
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -263,7 +267,16 @@ const TrabalhadorForm = ({
                             onChange={(e) => setDataNascimento(e.target.value)}
                         />
                     </div>
-                    <button onClick={handleSaveWorker} className="btn btn-success">Salvar Trabalhador</button>
+                    <button onClick={handleSaveWorker} className="btn btn-success" disabled={isSaving}>
+                        {isSaving ? (
+                            <>
+                                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                Salvando...
+                            </>
+                        ) : (
+                            'Salvar Trabalhador'
+                        )}
+                    </button>
                 </div>
             ) : (
                 <div className="alert alert-info">

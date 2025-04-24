@@ -8,7 +8,7 @@ const DocumentosList = ({
     docsStatus = {},
     entityData,
     selectedWorker,
-    selectedEquipment,
+    equipamentoSelecionado,
     onUpload,
 }) => {
     const [showModal, setShowModal] = useState(false);
@@ -66,8 +66,10 @@ const DocumentosList = ({
             "Seguro de Responsabilidade Civil":
                 entityData?.CDU_ValidadeSeguroRC,
             "Certidão Permanente": entityData?.CDU_ValidadeCertidaoPermanente,
-            "Folha de Remuneração Mensal à Segurança Social": entityData?.CDU_FolhaPagSegSocial,
-            "Recibo do Seguro de Acidentes de Trabalho": entityData?.CDU_ValidadeReciboSeguroAT,
+            "Folha de Remuneração Mensal à Segurança Social":
+                entityData?.CDU_FolhaPagSegSocial,
+            "Recibo do Seguro de Acidentes de Trabalho":
+                entityData?.CDU_ValidadeReciboSeguroAT,
         };
 
         const date = validityMap[docName];
@@ -77,20 +79,38 @@ const DocumentosList = ({
 
     const [tempValidade, setTempValidade] = useState("");
     const [isUploading, setIsUploading] = useState(false);
-    const [alertModal, setAlertModal] = useState({ show: false, message: "", type: "success" });
+    const [alertModal, setAlertModal] = useState({
+        show: false,
+        message: "",
+        type: "success",
+    });
 
     const handleConfirmUpload = async () => {
         setIsUploading(true);
-        const folderPath = `Subempreiteiros/${entityData?.Nome}/Empresas`;
+        let folderPath = `Subempreiteiros/${entityData?.Nome}/Empresas`;
         const formData = new FormData();
-        console.log(entityData);
+
 
         formData.append("file", file);
         formData.append("docType", docType);
         formData.append("contribuinte", selectedWorker?.contribuinte);
+        formData.append(
+            "equipamentoSelecionado",
+            equipamentoSelecionado?.marca_modelo || equipamentoSelecionado?.marca, //Corrected this line
+        );
         formData.append("idEntidade", entityData?.ID);
-        formData.append("validade", docType === "Condições do Seguro de Acidentes de Trabalho" ? "" : tempValidade); // Update: Set validade to empty string if it's the specific document
+        formData.append(
+            "validade",
+            docType === "Condições do Seguro de Acidentes de Trabalho"
+                ? ""
+                : tempValidade,
+        );
         formData.append("anexo", "true");
+
+        if (selectedWorker?.id) {
+            // Adiciona o nome do trabalhador ao caminho
+            folderPath = `Subempreiteiros/${entityData?.Nome}/Trabalhadores/${selectedWorker.nome}`;
+        }
 
         axios
             .post(
@@ -105,7 +125,7 @@ const DocumentosList = ({
                 setAlertModal({
                     show: true,
                     message: "Documento enviado com sucesso!",
-                    type: "success"
+                    type: "success",
                 });
                 // window.dispatchEvent(new CustomEvent('resetDocsStatus'));
             })
@@ -125,7 +145,9 @@ const DocumentosList = ({
                 show={alertModal.show}
                 message={alertModal.message}
                 type={alertModal.type}
-                onClose={() => setAlertModal({ show: false, message: "", type: "success" })}
+                onClose={() =>
+                    setAlertModal({ show: false, message: "", type: "success" })
+                }
             />
             {showModal && (
                 <div
@@ -148,16 +170,17 @@ const DocumentosList = ({
                                 ></button>
                             </div>
                             <div className="modal-body">
-                                {docType !== "Condições do Seguro de Acidentes de Trabalho" && ( //Conditional rendering of date input
-                                    <input
-                                        type="date"
-                                        className="form-control"
-                                        value={tempValidade}
-                                        onChange={(e) =>
-                                            setTempValidade(e.target.value)
-                                        }
-                                    />
-                                )}
+                                {docType !==
+                                    "Condições do Seguro de Acidentes de Trabalho" && (
+                                        <input
+                                            type="date"
+                                            className="form-control"
+                                            value={tempValidade}
+                                            onChange={(e) =>
+                                                setTempValidade(e.target.value)
+                                            }
+                                        />
+                                    )}
                             </div>
                             <div className="modal-footer">
                                 <button
@@ -175,11 +198,15 @@ const DocumentosList = ({
                                 >
                                     {isUploading ? (
                                         <>
-                                            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                            <span
+                                                className="spinner-border spinner-border-sm me-2"
+                                                role="status"
+                                                aria-hidden="true"
+                                            ></span>
                                             A enviar...
                                         </>
                                     ) : (
-                                        'Confirmar'
+                                        "Confirmar"
                                     )}
                                 </button>
                             </div>
@@ -244,7 +271,9 @@ const DocumentosList = ({
                                                                 | Validade:{" "}
                                                                 {getValidityDate(
                                                                     doc,
-                                                                    docsStatus?.[doc],
+                                                                    docsStatus?.[
+                                                                    doc
+                                                                    ],
                                                                     entityData,
                                                                     selectedWorker,
                                                                 )}
@@ -261,7 +290,9 @@ const DocumentosList = ({
                                                                 e.target
                                                                     .files[0];
                                                             if (file) {
-                                                                if (entityData?.Nome) {
+                                                                if (
+                                                                    entityData?.Nome
+                                                                ) {
                                                                     setShowModal(
                                                                         true,
                                                                     );
@@ -292,7 +323,9 @@ const DocumentosList = ({
                                                                         },
                                                                     );
                                                                 } else {
-                                                                    if (entityData?.Nome) {
+                                                                    if (
+                                                                        entityData?.Nome
+                                                                    ) {
                                                                         setShowModal(
                                                                             true,
                                                                         );
