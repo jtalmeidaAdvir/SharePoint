@@ -58,6 +58,7 @@ const UploadPage = () => {
     const [file, setFile] = useState(null);
     const [message, setMessage] = useState("");
     const [docsStatus, setDocsStatus] = useState({});
+    const [mode, setMode] = useState("select"); // Add mode state
 
     // Empresa
     const [nomeEmpresa, setNomeEmpresa] = useState("");
@@ -634,81 +635,87 @@ const UploadPage = () => {
                         />
                     )}
 
-                    <p>{message}</p>
+                    <div>
+                        <p>{message}</p>
 
-                    <DocumentosList
-                        onUpload={(selectedDocType, selectedFile, newStatus) => {
-                            console.log('Iniciando upload:', {
-                                selectedDocType,
-                                selectedFileName: selectedFile.name,
-                                category,
-                                entityData: entityData?.Nome
-                            });
+                        {((category !== "Trabalhadores" && category !== "Equipamentos") ||
+                            (category === "Trabalhadores" && !(nomeCompleto === "" && funcao === "" && contribuinte === "" && segSocial === "" && dataNascimento === "")) ||
+                            (category === "Equipamentos" && !(marcaModelo === "" && tipoMaquina === "" && numeroSerie === ""))) && (
+                                <DocumentosList
+                                    onUpload={(selectedDocType, selectedFile, newStatus) => {
+                                        console.log('Iniciando upload:', {
+                                            selectedDocType,
+                                            selectedFileName: selectedFile.name,
+                                            category,
+                                            entityData: entityData?.Nome
+                                        });
 
-                            setDocType(selectedDocType);
-                            setFile(selectedFile);
+                                        setDocType(selectedDocType);
+                                        setFile(selectedFile);
 
-                            const formData = new FormData();
-                            formData.append("file", selectedFile);
-                            formData.append("docType", selectedDocType);
-                            formData.append("idEntidade", entityData?.Id);
+                                        const formData = new FormData();
+                                        formData.append("file", selectedFile);
+                                        formData.append("docType", selectedDocType);
+                                        formData.append("idEntidade", entityData?.Id);
 
-                            const selectedWorker = trabalhadoresExistentes.find(t => t.nome === trabalhadorSelecionado);
-                            if (category === "Trabalhadores" && selectedWorker) {
-                                formData.append("validade", selectedWorker.data_validade || new Date().toISOString().split('T')[0]);
-                            }
+                                        const selectedWorker = trabalhadoresExistentes.find(t => t.nome === trabalhadorSelecionado);
+                                        if (category === "Trabalhadores" && selectedWorker) {
+                                            formData.append("validade", selectedWorker.data_validade || new Date().toISOString().split('T')[0]);
+                                        }
 
-                            console.log('FormData criado com sucesso');
+                                        console.log('FormData criado com sucesso');
 
-                            const folderPath =
-                                category === "Trabalhadores"
-                                    ? `Subempreiteiros/${entityData?.Nome}/Trabalhadores/${trabalhadorSelecionado || nomeCompleto}`
-                                    : category === "Equipamentos"
-                                        ? `Subempreiteiros/${entityData?.Nome}/Equipamentos/${equipamentoSelecionado || marcaModelo}`
-                                        : category === "Autorizações"
-                                            ? `Subempreiteiros/${entityData?.Nome}/Autorizações/${obraSelecionada}`
-                                            : `Subempreiteiros/${entityData?.Nome}/${category}`;
+                                        const folderPath =
+                                            category === "Trabalhadores"
+                                                ? `Subempreiteiros/${entityData?.Nome}/Trabalhadores/${trabalhadorSelecionado || nomeCompleto}`
+                                                : category === "Equipamentos"
+                                                    ? `Subempreiteiros/${entityData?.Nome}/Equipamentos/${equipamentoSelecionado || marcaModelo}`
+                                                    : category === "Autorizações"
+                                                        ? `Subempreiteiros/${entityData?.Nome}/Autorizações/${obraSelecionada}`
+                                                        : `Subempreiteiros/${entityData?.Nome}/${category}`;
 
-                            console.log('Enviando para:', folderPath);
+                                        console.log('Enviando para:', folderPath);
 
-                            axios.post(
-                                `http://localhost:5000/upload?folder=${encodeURIComponent(folderPath)}`,
-                                formData
-                            )
-                                .then(res => {
-                                    console.log('Resposta do servidor:', res.data);
-                                    setMessage("✅ " + res.data.message);
-                                    if (newStatus) {
-                                        setDocsStatus(newStatus);
-                                    } else {
-                                        fetchDocsStatus();
+                                        axios.post(
+                                            `http://localhost:5000/upload?folder=${encodeURIComponent(folderPath)}`,
+                                            formData
+                                        )
+                                            .then(res => {
+                                                console.log('Resposta do servidor:', res.data);
+                                                setMessage("✅ " + res.data.message);
+                                                if (newStatus) {
+                                                    setDocsStatus(newStatus);
+                                                } else {
+                                                    fetchDocsStatus();
+                                                }
+                                            })
+                                            .catch(err => {
+                                                console.error(err);
+                                                setMessage("❌ Erro: " + (err.response?.data?.error || err.message));
+                                            });
+                                    }}
+                                    requiredDocs={requiredDocs}
+                                    docsStatus={docsStatus}
+                                    entityData={entityData}
+                                    selectedWorker={
+                                        category === "Trabalhadores"
+                                            ? trabalhadoresExistentes.find(
+                                                (t) => t.nome === trabalhadorSelecionado,
+                                            )
+                                            : null
                                     }
-                                })
-                                .catch(err => {
-                                    console.error(err);
-                                    setMessage("❌ Erro: " + (err.response?.data?.error || err.message));
-                                });
-                        }}
-                        requiredDocs={requiredDocs}
-                        docsStatus={docsStatus}
-                        entityData={entityData}
-                        selectedWorker={
-                            category === "Trabalhadores"
-                                ? trabalhadoresExistentes.find(
-                                    (t) => t.nome === trabalhadorSelecionado,
-                                )
-                                : null
-                        }
-                        selectedEquipment={
-                            category === "Equipamentos"
-                                ? equipamentosExistentes.find(
-                                    (e) =>
-                                        e.marca_modelo ===
-                                        equipamentoSelecionado,
-                                )
-                                : null
-                        }
-                    />
+                                    selectedEquipment={
+                                        category === "Equipamentos"
+                                            ? equipamentosExistentes.find(
+                                                (e) =>
+                                                    e.marca_modelo ===
+                                                    equipamentoSelecionado,
+                                            )
+                                            : null
+                                    }
+                                />
+                            )}
+                    </div>
                 </div>
             </div>
         </div>

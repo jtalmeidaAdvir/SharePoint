@@ -50,12 +50,12 @@ const TrabalhadorForm = ({
 
     const handleSaveWorker = async () => {
         try {
-    
+
 
             // Ensure segSocial is a valid number
 
 
-            
+
 
             const newWorker = {
                 Nome: nomeCompleto.trim(),
@@ -263,9 +263,13 @@ const TrabalhadorForm = ({
                             onChange={(e) => setDataNascimento(e.target.value)}
                         />
                     </div>
-                    <button onClick={handleSaveWorker} className="btn btn-success">Salvar Trabalhador</button> {/* Added save button */}
+                    <button onClick={handleSaveWorker} className="btn btn-success">Salvar Trabalhador</button>
                 </div>
-            ) : null}
+            ) : (
+                <div className="alert alert-info">
+                    Por favor, selecione um trabalhador existente ou crie um novo.
+                </div>
+            )}
         </div>
     );
 };
