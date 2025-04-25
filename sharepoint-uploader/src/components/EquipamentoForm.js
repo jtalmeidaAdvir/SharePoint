@@ -12,7 +12,7 @@ const EquipamentoForm = ({
     numeroSerie,
     setNumeroSerie
 }) => {
-    const [mode, setMode] = useState('select'); // 'select' or 'create'
+    const [mode, setMode] = useState('select');
 
     const handleEquipamentoSelect = (e) => {
         const equipamento = equipamentosExistentes.find(eq => eq.marca_modelo === e.target.value || eq.marca === e.target.value);
@@ -73,20 +73,69 @@ const EquipamentoForm = ({
             </div>
 
             {mode === 'select' && equipamentosExistentes && equipamentosExistentes.length > 0 ? (
-                <div className="mb-3">
-                    <label className="form-label">Selecione um Equipamento:</label>
-                    <select
-                        className="form-select"
-                        value={equipamentoSelecionado}
-                        onChange={handleEquipamentoSelect}
-                    >
-                        <option value="">Escolha um equipamento</option>
-                        {equipamentosExistentes.map((equip, idx) => (
-                            <option key={idx} value={equip.marca_modelo || equip.marca}>
-                                {equip.marca_modelo || equip.marca} - {equip.tipo_maquina || equip.tipo}
-                            </option>
-                        ))}
-                    </select>
+                <div>
+                    <div className="mb-3">
+                        <label className="form-label">Selecione um Equipamento:</label>
+                        <select
+                            className="form-select"
+                            value={equipamentoSelecionado}
+                            onChange={handleEquipamentoSelect}
+                        >
+                            <option value="">Escolha um equipamento</option>
+                            {equipamentosExistentes.map((equip, idx) => (
+                                <option key={idx} value={equip.marca_modelo || equip.marca}>
+                                    {equip.marca_modelo || equip.marca} - {equip.tipo_maquina || equip.tipo}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {equipamentoSelecionado && (
+                        <div className="card p-3">
+                            <div className="d-flex justify-content-between align-items-center mb-3">
+                                <h5 className="card-title mb-0">Informação do Equipamento</h5>
+                                <button
+                                    className="btn btn-outline-primary btn-sm"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#infoEquipamento"
+                                    aria-expanded="true"
+                                    aria-controls="infoEquipamento"
+                                >
+                                    <i className="bi bi-eye"></i> Ver/Ocultar
+                                </button>
+                            </div>
+                            <div className="collapse" id="infoEquipamento">
+                                <div className="mb-3">
+                                    <label className="form-label">Marca / Modelo:</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        value={marcaModelo}
+                                        disabled
+                                    />
+                                </div>
+                                <div className="mb-3">
+                                    <label className="form-label">Tipo de Máquina:</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        value={tipoMaquina}
+                                        disabled
+                                    />
+                                </div>
+                                <div className="mb-3">
+                                    <label className="form-label">Número de Série:</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        value={numeroSerie}
+                                        disabled
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             ) : mode === 'create' ? (
                 <div className="card p-3">

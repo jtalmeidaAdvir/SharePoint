@@ -101,7 +101,7 @@ app.post("/upload", upload.single("file"), async (req, res) => {
             );
         }
 
-        const { idEntidade, validade, contribuinte, equipamentoSelecionado } =
+        const { idEntidade, validade, contribuinte, marca } =
             req.body;
 
         console.log("📤 Upload iniciado:");
@@ -111,9 +111,8 @@ app.post("/upload", upload.single("file"), async (req, res) => {
         console.log("- ID Entidade:", idEntidade);
         console.log("- Validade:", validade);
         console.log("- contribuinte:", contribuinte);
-
-
-        console.log("- marca:", equipamentoSelecionado);
+        console.log("- Marca/Modelo:", marca);
+        // Log equipment data if present
 
         const renamedFileName = `${docType}.txt`;
         const renamedFilePath = `uploads/${renamedFileName}`;
@@ -244,11 +243,7 @@ app.post("/upload", upload.single("file"), async (req, res) => {
             const docKeyAnexos = docTypeMappingAnexos[docType];
             const docKey = docTypeMappingValidacoes[docType];
             console.log("Documento: ", docType, "=> Chave:", docKey);
-            console.log("Equipment data:", {
-                equipamentoSelecionado,
-                folderPath,
-                docType
-            });
+
             if (docKey) {
                 if (folderPath.includes("/Equipamentos")) {
                     // Use equipment update endpoint
@@ -263,7 +258,7 @@ app.post("/upload", upload.single("file"), async (req, res) => {
                             Documento: docKey,
                             Validade: `${docType} &#40;Válido até&#58; ${validadeFormatada}&#41;`,
                             Anexo: docKeyAnexos,
-                            Marca: equipamentoSelecionado,
+                            Marca: marca,
                             IdEntidade: idEntidade,
                         },
                         {
@@ -436,17 +431,14 @@ app.get("/files/:clienteId", async (req, res) => {
 
         const listFilesUrl = `https://graph.microsoft.com/v1.0/sites/${process.env.SITE_ID}/drive/root:/${folderPath}:/children`;
 
-        console.log("📂 Listando arquivos para cliente:", clienteId);
-        console.log("- Categoria:", category);
+
         if (trabalhador) console.log("- Trabalhador:", trabalhador);
-        console.log("- Caminho da pasta:", folderPath);
 
         const response = await axios.get(listFilesUrl, {
             headers: { Authorization: `Bearer ${token}` },
         });
 
         const filesFromSharePoint = response.data.value;
-        console.log("📁 Arquivos encontrados:");
         filesFromSharePoint.forEach((file) => console.log(`- ${file.name}`));
 
         // Usa os documentos obrigatórios apenas se for uma categoria conhecida

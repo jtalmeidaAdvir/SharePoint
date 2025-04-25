@@ -39,7 +39,7 @@ const UploadPage = () => {
                         },
                     );
                     setEntityData(response.data.DataSet.Table[0]);
-            
+
                 } catch (error) {
                     console.error("Error fetching entity data:", error);
                 } finally {
@@ -626,12 +626,7 @@ const UploadPage = () => {
                             (category === "Equipamentos" && equipamentoSelecionado)) && (
                                 <DocumentosList
                                     onUpload={(selectedDocType, selectedFile, newStatus) => {
-                                        console.log('Iniciando upload:', {
-                                            selectedDocType,
-                                            selectedFileName: selectedFile.name,
-                                            category,
-                                            entityData: entityData?.Nome
-                                        });
+                              
 
                                         setDocType(selectedDocType);
                                         setFile(selectedFile);
@@ -640,19 +635,26 @@ const UploadPage = () => {
                                         formData.append("file", selectedFile);
                                         formData.append("docType", selectedDocType);
                                         formData.append("idEntidade", entityData?.Id);
-
+                                        formData.append("marca", "teste30");
                                         const selectedWorker = trabalhadoresExistentes.find(t => t.nome === trabalhadorSelecionado);
                                         if (category === "Trabalhadores" && selectedWorker) {
                                             formData.append("validade", selectedWorker.data_validade || new Date().toISOString().split('T')[0]);
-                                    }
-                                   
-                                    if (category === "Equipamentos" && equipamentoSelecionado) {
-                                        formData.append("equipamentoSelecionado", equipamentoSelecionado);
-                                    }
+                                        }
 
 
-                                    console.log('FormData criado:', formData);
+                                        const selectedEquipment = equipamentosExistentes.find(e => e.marca_modelo === equipamentoSelecionado);
+                                        if (category === "Equipamentos" && selectedEquipment) {
+                                       
+                                            
+                                        }
+                                    console.log('Iniciando upload:', {
+                                        selectedDocType,
+                                        selectedFileName: selectedFile.name,
+                                        category,
+                                        entityData: entityData?.Nome,
+                                        selectedEquipment,
 
+                                    });
                                         console.log('FormData criado com sucesso');
 
                                         const folderPath =
@@ -703,6 +705,7 @@ const UploadPage = () => {
                                             )
                                             : null
                                     }
+                                marca={marcaModelo}
                                 />
                             )}
                     </div>

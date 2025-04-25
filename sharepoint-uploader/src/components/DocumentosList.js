@@ -8,7 +8,7 @@ const DocumentosList = ({
     docsStatus = {},
     entityData,
     selectedWorker,
-    equipamentoSelecionado,
+    marca,
     onUpload,
 }) => {
     const [showModal, setShowModal] = useState(false);
@@ -94,10 +94,8 @@ const DocumentosList = ({
         formData.append("file", file);
         formData.append("docType", docType);
         formData.append("contribuinte", selectedWorker?.contribuinte);
-        formData.append(
-            "equipamentoSelecionado",
-            equipamentoSelecionado?.marca_modelo || equipamentoSelecionado?.marca, //Corrected this line
-        );
+        formData.append("marca", marca);
+        console.log("marca", marca);
         formData.append("idEntidade", entityData?.ID);
         formData.append(
             "validade",
