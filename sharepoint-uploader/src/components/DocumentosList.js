@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+﻿import React, { useState, useEffect } from "react";
 import FileUploader from "./FileUploader";
 import AlertModal from "./AlertModal";
 import axios from "axios";
@@ -14,6 +14,21 @@ const DocumentosList = ({
     const [showModal, setShowModal] = useState(false);
     const [docType, setDocType] = useState("");
     const [file, setFile] = useState(null);
+    const tiposSemInput = [
+        "Condições do Seguro de Acidentes de Trabalho",
+        "Manual de utilizador",
+        "Certificado ou Declaração",
+        "Certificado CE",
+        "Registos de Manutenção"
+    ];
+    const tiposSemValidade = [
+        "Condições do Seguro de Acidentes de Trabalho",
+        "Manual de utilizador",
+        "Certificado ou Declaração",
+        "Certificado CE",
+        "Registos de Manutenção"
+    ];
+    const deveExibirInput = !tiposSemInput.includes(docType);
 
     const extractValidityDate = (status) => {
         if (!status) return null;
@@ -99,9 +114,7 @@ const DocumentosList = ({
         formData.append("idEntidade", entityData?.ID);
         formData.append(
             "validade",
-            docType === "Condições do Seguro de Acidentes de Trabalho"
-                ? ""
-                : tempValidade,
+            tiposSemValidade.includes(docType) ? "" : tempValidade
         );
         formData.append("anexo", "true");
 
@@ -137,6 +150,15 @@ const DocumentosList = ({
             });
     };
 
+
+    useEffect(() => {
+        if (showModal && !deveExibirInput) {
+            handleConfirmUpload();
+        }
+    }, [showModal, deveExibirInput]);
+
+
+
     return (
         <div className="docs-list mt-4">
             <AlertModal
@@ -159,57 +181,61 @@ const DocumentosList = ({
                         <div className="modal-content">
                             <div className="modal-header">
                                 <h5 className="modal-title">
-                                    Insira a Validade do Documento
+                                    {deveExibirInput ? "Insira a Validade do Documento" : "A enviar documento..."}
                                 </h5>
+
                                 <button
                                     type="button"
                                     className="btn-close"
                                     onClick={() => setShowModal(false)}
                                 ></button>
                             </div>
+
                             <div className="modal-body">
-                                {docType !==
-                                    "Condições do Seguro de Acidentes de Trabalho" && (
-                                        <input
-                                            type="date"
-                                            className="form-control"
-                                            value={tempValidade}
-                                            onChange={(e) =>
-                                                setTempValidade(e.target.value)
-                                            }
-                                        />
-                                    )}
+                                {deveExibirInput ? (
+                                    <input
+                                        type="date"
+                                        className="form-control"
+                                        value={tempValidade}
+                                        onChange={(e) => setTempValidade(e.target.value)}
+                                    />
+                                ) : (
+                                    <div className="d-flex align-items-center justify-content-center gap-2 py-2">
+                                        <div className="spinner-border text-primary" role="status" />
+                                        <span className="text-primary fw-semibold">A enviar documento...</span>
+                                    </div>
+                                )}
                             </div>
-                            <div className="modal-footer">
-                                <button
-                                    type="button"
-                                    className="btn btn-secondary"
-                                    onClick={() => setShowModal(false)}
-                                >
-                                    Cancelar
-                                </button>
-                                <button
-                                    type="button"
-                                    className="btn btn-primary"
-                                    onClick={handleConfirmUpload}
-                                    disabled={isUploading}
-                                >
-                                    {isUploading ? (
-                                        <>
-                                            <span
-                                                className="spinner-border spinner-border-sm me-2"
-                                                role="status"
-                                                aria-hidden="true"
-                                            ></span>
-                                            A enviar...
-                                        </>
-                                    ) : (
-                                        "Confirmar"
-                                    )}
-                                </button>
-                            </div>
+
+                            {deveExibirInput && (
+                                <div className="modal-footer">
+                 
+                                    <button
+                                        type="button"
+                                        className="btn btn-primary"
+                                        onClick={handleConfirmUpload}
+                                        disabled={isUploading}
+                                    >
+                                        {isUploading ? (
+                                            <>
+                                                <span
+                                                    className="spinner-border spinner-border-sm me-2"
+                                                    role="status"
+                                                    aria-hidden="true"
+                                                ></span>
+                                                A enviar...
+                                            </>
+                                        ) : (
+                                            "Confirmar"
+                                        )}
+                                    </button>
+                                </div>
+                            )}
+
+
                         </div>
                     </div>
+
                 </div>
             )}
             <div className="row row-cols-1 row-cols-md-2 g-4">

@@ -120,6 +120,12 @@ app.post("/upload", upload.single("file"), async (req, res) => {
         fs.renameSync(file.path, renamedFilePath);
         const fileStream = fs.createReadStream(renamedFilePath);
 
+        // Add equipment subfolder to the path if equipment document
+        if (equipmentDocs.includes(docType) && marca) {
+            folderPath = `${folderPath}/${marca}`;
+        }
+
+
         const uploadUrl = `https://graph.microsoft.com/v1.0/sites/${process.env.SITE_ID}/drive/root:/${folderPath}/${renamedFileName}:/content`;
 
         console.log("- Upload para o SharePoint em:", uploadUrl);

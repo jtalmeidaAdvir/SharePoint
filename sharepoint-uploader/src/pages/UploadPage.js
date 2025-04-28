@@ -20,6 +20,11 @@ const UploadPage = () => {
     const [entityData, setEntityData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
+
+
+
+
+
     useEffect(() => {
         const isAuthenticated = localStorage.getItem("uploadAuth_" + clienteId);
         if (!isAuthenticated) {
