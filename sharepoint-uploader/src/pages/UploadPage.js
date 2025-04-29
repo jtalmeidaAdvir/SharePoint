@@ -7,7 +7,6 @@ import requiredDocsByCategory from "../constants/requiredDocsByCategory";
 import EmpresaForm from "../components/EmpresaForm";
 import TrabalhadorForm from "../components/TrabalhadorForm";
 import EquipamentoForm from "../components/EquipamentoForm";
-import AutorizacaoForm from "../components/AutorizacaoForm";
 import DocumentosList from "../components/DocumentosList";
 import AlertModal from "../components/AlertModal";
 
@@ -37,7 +36,6 @@ const UploadPage = () => {
                         },
                     );
                     setEntityData(response.data.DataSet.Table[0]);
-
                 } catch (error) {
                     console.error("Error fetching entity data:", error);
                 } finally {
@@ -76,12 +74,6 @@ const UploadPage = () => {
     const [tipoMaquina, setTipoMaquina] = useState("");
     const [numeroSerie, setNumeroSerie] = useState("");
 
-    // Autorizações
-    const obrasDisponiveis = ["Obra A", "Obra B", "Obra C"];
-    const [obraSelecionada, setObraSelecionada] = useState("");
-    const [dataEntrada, setDataEntrada] = useState("");
-    const [dataSaida, setDataSaida] = useState("");
-
     const requiredDocs = requiredDocsByCategory[category] || [];
 
     useEffect(() => {
@@ -98,9 +90,7 @@ const UploadPage = () => {
                 );
         } else if (category === "Equipamentos" && entityData?.EntidadeId) {
             axios
-                .get(
-                    `http://localhost:5000/entidade/${clienteId}/equipamentos`,
-                )
+                .get(`http://localhost:5000/entidade/${clienteId}/equipamentos`)
                 .then((res) =>
                     setEquipamentosExistentes(res.data.DataSet.Table),
                 )
@@ -125,8 +115,7 @@ const UploadPage = () => {
                 nomeCompleto ||
                 trabalhadorSelecionado ||
                 marcaModelo ||
-                equipamentoSelecionado ||
-                obraSelecionada)
+                equipamentoSelecionado)
         ) {
             fetchDocsStatus();
         }
@@ -144,13 +133,12 @@ const UploadPage = () => {
         trabalhadorSelecionado,
         marcaModelo,
         equipamentoSelecionado,
-        obraSelecionada,
     ]);
 
     const fetchDocsStatus = async () => {
         try {
+            console.log("🔁 fetchDocsStatus chamado!");
             let endpoint = `http://localhost:5000/files/${entityData?.Nome}?category=${category}`;
-
 
             if (category === "Trabalhadores") {
                 const nome = trabalhadorSelecionado || nomeCompleto;
@@ -160,8 +148,6 @@ const UploadPage = () => {
                 const nomeEquip = equipamentoSelecionado || marcaModelo;
                 if (!nomeEquip) return;
                 endpoint += `&equipamento=${encodeURIComponent(nomeEquip)}`;
-            } else if (category === "Autorizações" && obraSelecionada) {
-                endpoint += `&obra=${encodeURIComponent(obraSelecionada)}`;
             }
 
             const res = await axios.get(endpoint);
@@ -179,8 +165,6 @@ const UploadPage = () => {
                 });
             }
 
-
-
             // Mapear campos de anexos adicionais do entityData
             if (entityData) {
                 const anexos = {
@@ -194,8 +178,10 @@ const UploadPage = () => {
                     CDU_AnexoAlvara:
                         "Alvará ou Certificado de Construção ou Atividade",
                     CDU_AnexoSeguroRC: "Seguro de Responsabilidade Civil",
-                    CDU_AnexoReciboSeguroAT: "Recibo do Seguro de Acidentes de Trabalho",
-                    CDU_AnexoSeguroAT: "Condições do Seguro de Acidentes de Trabalho",
+                    CDU_AnexoReciboSeguroAT:
+                        "Recibo do Seguro de Acidentes de Trabalho",
+                    CDU_AnexoSeguroAT:
+                        "Condições do Seguro de Acidentes de Trabalho",
                 };
 
                 for (const [key, label] of Object.entries(anexos)) {
@@ -343,10 +329,6 @@ const UploadPage = () => {
             formData.append("marcaModelo", marcaModelo);
             formData.append("tipoMaquina", tipoMaquina);
             formData.append("numeroSerie", numeroSerie);
-        } else if (category === "Autorizações") {
-            formData.append("obra", obraSelecionada);
-            formData.append("dataEntrada", dataEntrada);
-            if (dataSaida) formData.append("dataSaida", dataSaida);
         }
 
         try {
@@ -356,9 +338,7 @@ const UploadPage = () => {
                     ? `Subempreiteiros/${entityData?.Nome}/Trabalhadores/${nomeFinal}`
                     : category === "Equipamentos"
                         ? `Subempreiteiros/${entityData?.Nome}/Equipamentos/${equipamentoSelecionado || marcaModelo}`
-                        : category === "Autorizações"
-                            ? `Subempreiteiros/${entityData?.Nome}/Autorizações/${obraSelecionada}`
-                            : `Subempreiteiros/${entityData?.Nome}/${category}`;
+                        : `Subempreiteiros/${entityData?.Nome}/${category}`;
 
             const res = await axios.post(
                 `http://localhost:5000/upload?folder=${encodeURIComponent(folderPath)}`,
@@ -413,10 +393,6 @@ const UploadPage = () => {
             formData.append("marcaModelo", marcaModelo);
             formData.append("tipoMaquina", tipoMaquina);
             formData.append("numeroSerie", numeroSerie);
-        } else if (category === "Autorizações") {
-            formData.append("obra", obraSelecionada);
-            formData.append("dataEntrada", dataEntrada);
-            if (dataSaida) formData.append("dataSaida", dataSaida);
         }
 
         try {
@@ -426,9 +402,7 @@ const UploadPage = () => {
                     ? `Subempreiteiros/${entityData?.Nome}/Trabalhadores/${nomeFinal}`
                     : category === "Equipamentos"
                         ? `Subempreiteiros/${entityData?.Nome}/Equipamentos/${equipamentoSelecionado || marcaModelo}`
-                        : category === "Autorizações"
-                            ? `Subempreiteiros/${entityData?.Nome}/Autorizações/${obraSelecionada}`
-                            : `Subempreiteiros/${entityData?.Nome}/${category}`;
+                        : `Subempreiteiros/${entityData?.Nome}/${category}`;
 
             const res = await axios.post(
                 `http://localhost:5000/upload?folder=${encodeURIComponent(folderPath)}`,
@@ -519,32 +493,68 @@ const UploadPage = () => {
                     </div>
                 </div>
             )}
-            <div className="bg-primary text-white p-4 rounded mb-4 d-flex justify-content-between align-items-center">
-                <h2>
-                    Envio de Documentos -{" "}
-                    {entityData?.Nome || `Subempreiteiro ${entityData?.Nome}`}
-                </h2>
-                <button
-                    className="btn btn-outline-light"
-                    onClick={() => {
-                        localStorage.removeItem(
-                            "uploadAuth_" + entityData?.Nome,
-                        );
-                        localStorage.removeItem("isAuthenticated");
-                        localStorage.removeItem("authExpiration");
-                        navigate("/login");
-                    }}
-                >
-                    <i className="bi bi-box-arrow-right"></i> Terminar Sessão
-                </button>
+            <div className="header-container bg-gradient p-4 rounded-lg shadow-lg mb-4 animate__animated animate__fadeInDown">
+                <div className="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 className="text-dark mb-0">
+                            <i className="bi bi-cloud-upload me-2"></i>
+                            Envio de Documentos
+                        </h2>
+                        <p className="text-dark mb-0">
+                            {entityData?.Nome || `Subempreiteiro ${entityData?.Nome}`}
+                        </p>
+                    </div>
+
+                    <div className="d-flex gap-2">
+                        <button
+                            className="btn btn-warning btn-lg"
+                            onClick={() => navigate("/documentos-caducados")}
+                        >
+                            <i className="bi bi-exclamation-triangle me-2"></i>
+                            Documentos Caducados
+                        </button>
+                        <button
+                            className="btn btn-light btn-lg"
+                            onClick={() => {
+                                localStorage.removeItem(
+                                    "uploadAuth_" + entityData?.Nome,
+                                );
+                                localStorage.removeItem("isAuthenticated");
+                                localStorage.removeItem("authExpiration");
+                                navigate("/login");
+                            }}
+                        >
+                            <i className="bi bi-box-arrow-right me-2"></i>
+                            Terminar Sessão
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <div className="card p-4 mb-4">
                 <div className="form-group">
-                    <Nav variant="tabs" className="mb-4" activeKey={category} onSelect={(k) => setCategory(k)}>
+                    <Nav
+                        variant="pills"
+                        className="mb-4 bg-light p-2 rounded-pill shadow-sm"
+                        activeKey={category}
+                        onSelect={(k) => setCategory(k)}
+                    >
                         {Object.keys(requiredDocsByCategory).map((cat, idx) => (
-                            <Nav.Item key={idx}>
-                                <Nav.Link eventKey={cat} className={category === cat ? 'active' : ''}>
+                            <Nav.Item key={idx} className="mx-1">
+                                <Nav.Link
+                                    eventKey={cat}
+                                    className={`rounded-pill ${category === cat ? "active shadow-sm" : ""}`}
+                                >
+                                    <i
+                                        className={`bi bi-${cat === "Empresas"
+                                                ? "building"
+                                                : cat === "Trabalhadores"
+                                                    ? "person"
+                                                    : cat === "Equipamentos"
+                                                        ? "tools"
+                                                        : "file-earmark"
+                                            } me-2`}
+                                    ></i>
                                     {cat}
                                 </Nav.Link>
                             </Nav.Item>
@@ -604,84 +614,111 @@ const UploadPage = () => {
                         />
                     )}
 
-                    {category === "Autorizações" && (
-                        <AutorizacaoForm
-                            obrasDisponiveis={obrasDisponiveis}
-                            obraSelecionada={obraSelecionada}
-                            setObraSelecionada={setObraSelecionada}
-                            dataEntrada={dataEntrada}
-                            setDataEntrada={setDataEntrada}
-                            dataSaida={dataSaida}
-                            setDataSaida={setDataSaida}
-                        />
-                    )}
-
                     <div>
                         <p>{message}</p>
 
-                        {((category !== "Trabalhadores" && category !== "Equipamentos") ||
-                            (category === "Trabalhadores"  && trabalhadorSelecionado) ||
-                            (category === "Equipamentos" && equipamentoSelecionado)) && (
-                                <DocumentosList
-                                    onUpload={(selectedDocType, selectedFile, newStatus) => {
-                              
-
+                        {((category !== "Trabalhadores" &&
+                            category !== "Equipamentos") ||
+                            (category === "Trabalhadores" &&
+                                trabalhadorSelecionado) ||
+                            (category === "Equipamentos" &&
+                                equipamentoSelecionado)) && (
+                            <DocumentosList
+                                onRefresh={fetchDocsStatus}
+                                    onUpload={(
+                                        selectedDocType,
+                                        selectedFile,
+                                        newStatus,
+                                    ) => {
                                         setDocType(selectedDocType);
                                         setFile(selectedFile);
 
                                         const formData = new FormData();
                                         formData.append("file", selectedFile);
                                         formData.append("docType", selectedDocType);
-                                        formData.append("idEntidade", entityData?.Id);
+                                        formData.append(
+                                            "idEntidade",
+                                            entityData?.Id,
+                                        );
                                         formData.append("marca", "teste30");
-                                        const selectedWorker = trabalhadoresExistentes.find(t => t.nome === trabalhadorSelecionado);
-                                        if (category === "Trabalhadores" && selectedWorker) {
-                                            formData.append("validade", selectedWorker.data_validade || new Date().toISOString().split('T')[0]);
+                                        const selectedWorker =
+                                            trabalhadoresExistentes.find(
+                                                (t) =>
+                                                    t.nome ===
+                                                    trabalhadorSelecionado,
+                                            );
+                                        if (
+                                            category === "Trabalhadores" &&
+                                            selectedWorker
+                                        ) {
+                                            formData.append(
+                                                "validade",
+                                                selectedWorker.data_validade ||
+                                                new Date()
+                                                    .toISOString()
+                                                    .split("T")[0],
+                                            );
                                         }
 
-
-                                        const selectedEquipment = equipamentosExistentes.find(e => e.marca_modelo === equipamentoSelecionado);
-                                        if (category === "Equipamentos" && selectedEquipment) {
-                                       
-                                            
+                                        const selectedEquipment =
+                                            equipamentosExistentes.find(
+                                                (e) =>
+                                                    e.marca_modelo ===
+                                                    equipamentoSelecionado,
+                                            );
+                                        if (
+                                            category === "Equipamentos" &&
+                                            selectedEquipment
+                                        ) {
                                         }
-                                    console.log('Iniciando upload:', {
-                                        selectedDocType,
-                                        selectedFileName: selectedFile.name,
-                                        category,
-                                        entityData: entityData?.Nome,
-                                        selectedEquipment,
-
-                                    });
-                                        console.log('FormData criado com sucesso');
+                                        console.log("Iniciando upload:", {
+                                            selectedDocType,
+                                            selectedFileName: selectedFile.name,
+                                            category,
+                                            entityData: entityData?.Nome,
+                                            selectedEquipment,
+                                        });
+                                        console.log("FormData criado com sucesso");
 
                                         const folderPath =
                                             category === "Trabalhadores"
                                                 ? `Subempreiteiros/${entityData?.Nome}/Trabalhadores/${trabalhadorSelecionado || nomeCompleto}`
                                                 : category === "Equipamentos"
                                                     ? `Subempreiteiros/${entityData?.Nome}/Equipamentos/${equipamentoSelecionado || marcaModelo}`
-                                                    : category === "Autorizações"
-                                                        ? `Subempreiteiros/${entityData?.Nome}/Autorizações/${obraSelecionada}`
-                                                        : `Subempreiteiros/${entityData?.Nome}/${category}`;
+                                                    : `Subempreiteiros/${entityData?.Nome}/${category}`;
 
-                                        console.log('Enviando para:', folderPath);
+                                        console.log("Enviando para:", folderPath);
 
-                                        axios.post(
-                                            `http://localhost:5000/upload?folder=${encodeURIComponent(folderPath)}`,
-                                            formData
-                                        )
-                                            .then(res => {
-                                                console.log('Resposta do servidor:', res.data);
-                                                setMessage("✅ " + res.data.message);
-                                                if (newStatus && Object.keys(newStatus).length > 0) {
+                                        axios
+                                            .post(
+                                                `http://localhost:5000/upload?folder=${encodeURIComponent(folderPath)}`,
+                                                formData,
+                                            )
+                                            .then((res) => {
+                                                console.log(
+                                                    "Resposta do servidor:",
+                                                    res.data,
+                                                );
+                                                setMessage(
+                                                    "✅ " + res.data.message,
+                                                );
+                                                if (
+                                                    newStatus &&
+                                                    Object.keys(newStatus).length >
+                                                    0
+                                                ) {
                                                     setDocsStatus(newStatus);
                                                 } else {
                                                     fetchDocsStatus();
                                                 }
                                             })
-                                            .catch(err => {
+                                            .catch((err) => {
                                                 console.error(err);
-                                                setMessage("❌ Erro: " + (err.response?.data?.error || err.message));
+                                                setMessage(
+                                                    "❌ Erro: " +
+                                                    (err.response?.data
+                                                        ?.error || err.message),
+                                                );
                                             });
                                     }}
                                     requiredDocs={requiredDocs}
@@ -690,7 +727,9 @@ const UploadPage = () => {
                                     selectedWorker={
                                         category === "Trabalhadores"
                                             ? trabalhadoresExistentes.find(
-                                                (t) => t.nome === trabalhadorSelecionado,
+                                                (t) =>
+                                                    t.nome ===
+                                                    trabalhadorSelecionado,
                                             )
                                             : null
                                     }
@@ -704,6 +743,8 @@ const UploadPage = () => {
                                             : null
                                     }
                                 marca={marcaModelo}
+                                validade={validade}
+                                setValidade={setValidade}
                                 />
                             )}
                     </div>

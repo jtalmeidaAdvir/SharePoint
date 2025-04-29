@@ -11,7 +11,11 @@ const DocumentosList = ({
     selectedEquipment,
     marca,
     onUpload,
+    onRefresh,
+    validade,
+    setValidade,
 }) => {
+
     const [showModal, setShowModal] = useState(false);
     const [docType, setDocType] = useState("");
     const [file, setFile] = useState(null);
@@ -20,14 +24,14 @@ const DocumentosList = ({
         "Manual de utilizador",
         "Certificado ou Declaração",
         "Certificado CE",
-        "Registos de Manutenção"
+        "Registos de Manutenção",
     ];
     const tiposSemValidade = [
         "Condições do Seguro de Acidentes de Trabalho",
         "Manual de utilizador",
         "Certificado ou Declaração",
         "Certificado CE",
-        "Registos de Manutenção"
+        "Registos de Manutenção",
     ];
     const deveExibirInput = !tiposSemInput.includes(docType);
 
@@ -44,7 +48,26 @@ const DocumentosList = ({
         return match ? match[1] : null;
     };
 
-    const getValidityDate = (docName, status, entityData, selectedWorker, selectedEquipment) => {
+    const getValidityDate = (
+        docName,
+        status,
+        entityData,
+        selectedWorker,
+        selectedEquipment,
+    ) => {
+
+        if (selectedWorker?.id && validadeTemporariaTrabalhador[docName]) {
+            return new Date(validadeTemporariaTrabalhador[docName]).toLocaleDateString();
+        }
+
+        if (selectedEquipment?.id && validadeTemporariaEquipamento[docName]) {
+            return new Date(validadeTemporariaEquipamento[docName]).toLocaleDateString();
+        }
+
+        if (!selectedWorker && !selectedEquipment && validadeTemporaria[docName]) {
+            return new Date(validadeTemporaria[docName]).toLocaleDateString();
+        }
+
         if (selectedWorker) {
             const docMap = {
                 "Cartão de Cidadão ou residência": selectedWorker.caminho1,
@@ -64,7 +87,7 @@ const DocumentosList = ({
         }
         if (selectedEquipment) {
             const docMap = {
-                "Seguro": selectedEquipment.caminho5,
+                Seguro: selectedEquipment.caminho5,
             },
                 docStatus = docMap[docName];
             if (docStatus) {
@@ -74,7 +97,6 @@ const DocumentosList = ({
                 if (validityMatch) return validityMatch[1];
             }
         }
-
 
         if (status?.includes("Válido até")) {
             const validity = extractValidityDate(status);
@@ -101,12 +123,28 @@ const DocumentosList = ({
                 entityData?.CDU_ValidadeReciboSeguroAT,
         };
 
+        if (validadeTemporaria[docName]) {
+            return new Date(validadeTemporaria[docName]).toLocaleDateString();
+        }
+
+        console.log("getValidityDate:", {
+            docName,
+            tempWorker: validadeTemporariaTrabalhador[docName],
+            tempEquip: validadeTemporariaEquipamento[docName],
+            tempEmpresa: validadeTemporaria[docName],
+        });
+
         const date = validityMap[docName];
         if (!date) return null;
         return new Date(date).toLocaleDateString();
+
     };
 
     const [tempValidade, setTempValidade] = useState("");
+    const [validadeTemporaria, setValidadeTemporaria] = useState({});
+    const [validadeTemporariaTrabalhador, setValidadeTemporariaTrabalhador] = useState({});
+    const [validadeTemporariaEquipamento, setValidadeTemporariaEquipamento] = useState({});
+
     const [isUploading, setIsUploading] = useState(false);
     const [alertModal, setAlertModal] = useState({
         show: false,
@@ -116,9 +154,8 @@ const DocumentosList = ({
 
     const handleConfirmUpload = async () => {
         setIsUploading(true);
-        let folderPath = `Subempreiteiros/${entityData?.Nome}/Empresas`;
+        let folderPath = `Subempreiteiros/${entityData?.Nome}/Empresa`;
         const formData = new FormData();
-
 
         formData.append("file", file);
         formData.append("docType", docType);
@@ -128,7 +165,7 @@ const DocumentosList = ({
         formData.append("idEntidade", entityData?.ID);
         formData.append(
             "validade",
-            tiposSemValidade.includes(docType) ? "" : tempValidade
+            tiposSemValidade.includes(docType) ? "" : tempValidade,
         );
         formData.append("anexo", "true");
 
@@ -143,7 +180,15 @@ const DocumentosList = ({
                 formData,
             )
             .then((res) => {
+                onRefresh();
+
+                // **Só para a empresa** (sem trabalhador nem equipamento), actualiza o estado de validade
+                setValidade(tempValidade);
+                
                 console.log("Upload successful:", res.data);
+
+
+                console.log("validade", tempValidade);
                 setShowModal(false);
                 setTempValidade("");
                 setIsUploading(false);
@@ -152,7 +197,30 @@ const DocumentosList = ({
                     message: "Documento enviado com sucesso!",
                     type: "success",
                 });
-                // window.dispatchEvent(new CustomEvent('resetDocsStatus'));
+              
+                onRefresh(); 
+                setValidadeTemporaria(prev => ({
+                    ...prev,
+                    [docType]: tempValidade
+                }));
+                if (selectedWorker?.id) {
+                    setValidadeTemporariaTrabalhador(prev => ({
+                        ...prev,
+                        [docType]: tempValidade,
+                    }));
+                } else if (selectedEquipment?.id) {
+                    setValidadeTemporariaEquipamento(prev => ({
+                        ...prev,
+                        [docType]: tempValidade,
+                    }));
+                } else {
+                    setValidadeTemporaria(prev => ({
+                        ...prev,
+                        [docType]: tempValidade,
+                    }));
+                }
+
+
             })
             .catch((err) => {
                 console.error("Upload error:", err);
@@ -164,7 +232,6 @@ const DocumentosList = ({
             });
     };
 
-
     useEffect(() => {
         if (showModal && !deveExibirInput) {
             handleConfirmUpload();
@@ -172,9 +239,8 @@ const DocumentosList = ({
     }, [showModal, deveExibirInput]);
 
 
-
     return (
-        <div className="docs-list mt-4">
+        <div className="docs-list mt-4 animate__animated animate__fadeIn">
             <AlertModal
                 show={alertModal.show}
                 message={alertModal.message}
@@ -195,7 +261,9 @@ const DocumentosList = ({
                         <div className="modal-content">
                             <div className="modal-header">
                                 <h5 className="modal-title">
-                                    {deveExibirInput ? "Insira a Validade do Documento" : "A enviar documento..."}
+                                    {deveExibirInput
+                                        ? "Insira a Validade do Documento"
+                                        : "A enviar documento..."}
                                 </h5>
 
                                 <button
@@ -211,19 +279,25 @@ const DocumentosList = ({
                                         type="date"
                                         className="form-control"
                                         value={tempValidade}
-                                        onChange={(e) => setTempValidade(e.target.value)}
+                                        onChange={(e) =>
+                                            setTempValidade(e.target.value)
+                                        }
                                     />
                                 ) : (
                                     <div className="d-flex align-items-center justify-content-center gap-2 py-2">
-                                        <div className="spinner-border text-primary" role="status" />
-                                        <span className="text-primary fw-semibold">A enviar documento...</span>
+                                        <div
+                                            className="spinner-border text-primary"
+                                            role="status"
+                                        />
+                                        <span className="text-primary fw-semibold">
+                                            A enviar documento...
+                                        </span>
                                     </div>
                                 )}
                             </div>
 
                             {deveExibirInput && (
                                 <div className="modal-footer">
-                 
                                     <button
                                         type="button"
                                         className="btn btn-primary"
@@ -245,11 +319,8 @@ const DocumentosList = ({
                                     </button>
                                 </div>
                             )}
-
-
                         </div>
                     </div>
-
                 </div>
             )}
             <div className="row row-cols-1 row-cols-md-2 g-4">
@@ -257,7 +328,7 @@ const DocumentosList = ({
                     (doc, index) =>
                         doc && (
                             <div key={index} className="col">
-                                <div className="card h-100 border-0 shadow-sm">
+                                <div className="card h-100 border-0 shadow-sm hover-card">
                                     <div className="card-body">
                                         <div className="d-flex align-items-start gap-3">
                                             <div className="status-icon">
@@ -305,20 +376,25 @@ const DocumentosList = ({
                                                         entityData,
                                                         selectedWorker,
                                                         selectedEquipment,
-                                                    ) && (
-                                                            <span className="ms-2 text-muted">
-                                                                | Validade:{" "}
-                                                                {getValidityDate(
-                                                                    doc,
-                                                                    docsStatus?.[
-                                                                    doc
-                                                                    ],
-                                                                    entityData,
-                                                                    selectedWorker,
-                                                                    selectedEquipment,
-                                                                )}
+                                                    ) && (() => {
+                                                        const validityDate = getValidityDate(
+                                                            doc,
+                                                            docsStatus?.[doc],
+                                                            entityData,
+                                                            selectedWorker,
+                                                            selectedEquipment,
+                                                        );
+                                                        const [day, month, year] = validityDate.split('/');
+                                                        const date = new Date(year, month - 1, day);
+                                                        const isExpired = date < new Date();
+
+                                                        return (
+                                                            <span className={`ms-2 ${isExpired ? 'text-danger fw-bold' : 'text-muted'}`}>
+                                                                | Validade: {validityDate}
+                                                                {isExpired && " (Documento Caducado)"}
                                                             </span>
-                                                        )}
+                                                        );
+                                                    })()}
                                                 </p>
                                                 <div className="mt-2">
                                                     <input
@@ -345,7 +421,10 @@ const DocumentosList = ({
                                                                 } else if (
                                                                     selectedWorker
                                                                 ) {
-                                                                    console.log('Selected Worker:', selectedWorker); // <= AQUI!
+                                                                    console.log(
+                                                                        "Selected Worker:",
+                                                                        selectedWorker,
+                                                                    ); // <= AQUI!
                                                                     onUpload(
                                                                         doc,
                                                                         file,
@@ -366,14 +445,17 @@ const DocumentosList = ({
                                                                 } else if (
                                                                     selectedEquipment
                                                                 ) {
-                                                                    console.log('Selected Equipment:', selectedEquipment); // <= AQUI!
+                                                                    console.log(
+                                                                        "Selected Equipment:",
+                                                                        selectedEquipment,
+                                                                    ); // <= AQUI!
                                                                     onUpload(
                                                                         doc,
                                                                         file,
                                                                         {
                                                                             idEntidade:
                                                                                 selectedEquipment.id,
-                                                                            validade: 
+                                                                            validade:
                                                                                 new Date(
                                                                                     selectedEquipment.data_validade ||
                                                                                     Date.now(),
@@ -384,9 +466,7 @@ const DocumentosList = ({
                                                                                     )[0],
                                                                         },
                                                                     );
-                                                                }
-
-                                                                else {
+                                                                } else {
                                                                     if (
                                                                         entityData?.Nome
                                                                     ) {

@@ -1,3 +1,172 @@
+
+/* Animation imports */
+@import 'https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css';
+
+/* Enhanced card styles */
+.hover-card {
+    transition: all 0.3s ease-in-out;
+    border-radius: 16px;
+    overflow: hidden;
+    background: linear-gradient(145deg, #ffffff, #f5f5f5);
+    box-shadow: 5px 5px 10px #d9d9d9, -5px -5px 10px #ffffff;
+}
+
+    .hover-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 8px 8px 16px #d1d1d1, -8px -8px 16px #ffffff !important;
+        border: 1px solid rgba(59, 130, 246, 0.1);
+    }
+
+/* Improved header container */
+.header-container {
+    background: linear-gradient(135deg, #1a365d 0%, #2563eb 100%);
+    margin-bottom: 2rem;
+    padding: 2rem !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    border-bottom: 4px solid #3b82f6;
+}
+
+    .header-container h2 {
+        font-weight: 600;
+        letter-spacing: -0.5px;
+    }
+
+/* Document status badges */
+.status-badge {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+    .status-badge.text-success {
+        background-color: #dcfce7;
+        color: #15803d !important;
+    }
+
+    .status-badge.text-danger {
+        background-color: #fee2e2;
+        color: #b91c1c !important;
+    }
+
+/* Upload button styling */
+.btn-primary {
+    background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+    border: none;
+    padding: 10px 20px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.9rem;
+}
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    }
+
+/* Form controls enhancement */
+.form-control {
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    padding: 10px 16px;
+    transition: all 0.2s ease;
+}
+
+    .form-control:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+/* Nav pills improvement */
+.nav-pills .nav-link {
+    border-radius: 20px;
+    padding: 8px 20px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+    .nav-pills .nav-link.active {
+        background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    }
+
+
+/* Custom styles for UploadPage */
+.header-container {
+    background: linear-gradient(135deg, #0078d4 0%, #106ebe 100%);
+    border-radius: 15px;
+    transition: all 0.3s ease;
+}
+
+    .header-container:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+.nav-pills .nav-link {
+    color: #495057;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+    .nav-pills .nav-link:hover {
+        background-color: rgba(0,120,212,0.1);
+    }
+
+    .nav-pills .nav-link.active {
+        background-color: #0078d4;
+        color: white;
+    }
+
+.card {
+    border: none;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+.btn {
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+    .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+@media (max-width: 768px) {
+    .header-container {
+        padding: 1rem !important;
+    }
+
+        .header-container h2 {
+            font-size: 1.5rem;
+        }
+
+    .nav-pills {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 5px;
+    }
+
+        .nav-pills .nav-link {
+            white-space: nowrap;
+            padding: 0.5rem 1rem;
+        }
+}
+
 /* Reset and base styles */
 * {
     margin: 0;

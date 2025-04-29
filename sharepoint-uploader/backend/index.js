@@ -82,19 +82,19 @@ app.post("/upload", upload.single("file"), async (req, res) => {
             "Seguro",
         ];
 
-        if (workerDocs.includes(docType) && folderPath.includes("/Empresas")) {
+        if (workerDocs.includes(docType) && folderPath.includes("/Empresa")) {
             // Redirect to worker folder
-            folderPath = folderPath.replace("/Empresas", "/Trabalhadores");
+            folderPath = folderPath.replace("/Empresa", "/Trabalhadores");
             console.log(
                 "Redirecionando documento de trabalhador para:",
                 folderPath,
             );
         } else if (
             equipmentDocs.includes(docType) &&
-            folderPath.includes("/Empresas")
+            folderPath.includes("/Empresa")
         ) {
             // Redirect to equipment folder
-            folderPath = folderPath.replace("/Empresas", "/Equipamentos");
+            folderPath = folderPath.replace("/Empresa", "/Equipamentos");
             console.log(
                 "Redirecionando documento de equipamento para:",
                 folderPath,
@@ -423,7 +423,7 @@ app.put("/WebApi/SharePoint/InsertEquipamento", async (req, res) => {
 // ------------------- LISTAGEM -------------------
 // 🗂️ Documentos obrigatórios por categoria
 const requiredDocsByCategory = {
-    Empresas: [
+    Empresa: [
         "Certidão de não dívida às Finanças",
         "Certidão Permanente",
         "Folha de Remuneração Mensal à Segurança Social",
@@ -460,7 +460,7 @@ app.get("/files/:clienteId", async (req, res) => {
     try {
         const token = await getAccessToken();
         const clienteId = req.params.clienteId;
-        const category = req.query.category || "Empresas";
+        const category = req.query.category || "Empresa";
         const trabalhador = req.query.trabalhador;
 
         // Montar caminho
