@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import axios from 'axios'; // Import axios
+import React, { useState, useEffect } from "react";
+import axios from 'axios';
 
 const TrabalhadorForm = ({
     nomeCompleto,
@@ -15,14 +15,22 @@ const TrabalhadorForm = ({
     trabalhadoresExistentes,
     trabalhadorSelecionado,
     setTrabalhadorSelecionado,
-    entityid, // Added entityData prop
+    entityid,
 }) => {
     const [mode, setMode] = useState("select");
     const [isSaving, setIsSaving] = useState(false);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setLoading(false);
+        }, 1000); // Simula carregamento por 1 segundo
+        return () => clearTimeout(timer);
+    }, [trabalhadoresExistentes]);
 
     const handleTrabalhadorSelect = (e) => {
         const trabalhador = trabalhadoresExistentes.find(
-            (t) => t.nome === e.target.value,
+            (t) => t.nome === e.target.value
         );
         if (trabalhador) {
             setTrabalhadorSelecionado(trabalhador.nome);
@@ -52,13 +60,6 @@ const TrabalhadorForm = ({
     const handleSaveWorker = async () => {
         setIsSaving(true);
         try {
-
-
-            // Ensure segSocial is a valid number
-
-
-
-
             const newWorker = {
                 Nome: nomeCompleto.trim(),
                 Funcao: funcao.trim(),
@@ -66,27 +67,15 @@ const TrabalhadorForm = ({
                 NumSegurancaSocial: segSocial,
                 DataNascimento: dataNascimento,
                 IdEntidade: entityid,
-                Caminho1: "",
-                Caminho2: "",
-                Caminho3: "",
-                Caminho4: "",
-                Caminho5: "",
-                Anexo1: false,
-                Anexo2: false,
-                Anexo3: false,
-                Anexo4: false,
-                Anexo5: false
+                Caminho1: "", Caminho2: "", Caminho3: "", Caminho4: "", Caminho5: "",
+                Anexo1: false, Anexo2: false, Anexo3: false, Anexo4: false, Anexo5: false
             };
 
             console.log("Enviando dados do trabalhador:", newWorker);
             const response = await axios.put(
                 "http://localhost:5000/WebApi/SharePoint/InsertTrabalhador",
                 newWorker,
-                {
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                }
+                { headers: { 'Content-Type': 'application/json' } }
             );
 
             if (response.data) {
@@ -124,8 +113,16 @@ const TrabalhadorForm = ({
                     type="button"
                     className={`btn ${mode === 'select' ? 'btn-primary' : 'btn-outline-primary'}`}
                     onClick={() => handleModeChange('select')}
+                    disabled={loading}
                 >
-                    Selecionar Trabalhador Existente
+                    {loading ? (
+                        <>
+                            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            A carregar...
+                        </>
+                    ) : (
+                        'Selecionar Trabalhador Existente'
+                    )}
                 </button>
                 <button
                     type="button"
@@ -136,7 +133,13 @@ const TrabalhadorForm = ({
                 </button>
             </div>
 
-            {mode === 'select' && trabalhadoresExistentes && trabalhadoresExistentes.length > 0 ? (
+            {mode === 'select' && !loading && trabalhadoresExistentes?.length === 0 && (
+                <div className="alert alert-warning">
+                    Nenhum trabalhador encontrado. Crie um novo trabalhador primeiro.
+                </div>
+            )}
+
+            {mode === 'select' && !loading && trabalhadoresExistentes.length > 0 ? (
                 <div>
                     <div className="mb-3">
                         <label className="form-label">Selecione um Trabalhador:</label>
@@ -169,51 +172,26 @@ const TrabalhadorForm = ({
                                     <i className="bi bi-eye"></i> Ver/Ocultar
                                 </button>
                             </div>
-                            <div className="collapse" id="infoTrabalhador">
+                            <div className="collapse show" id="infoTrabalhador">
                                 <div className="mb-3">
                                     <label className="form-label">Nome Completo:</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={nomeCompleto}
-                                        disabled
-                                    />
+                                    <input type="text" className="form-control" value={nomeCompleto} disabled />
                                 </div>
                                 <div className="mb-3">
                                     <label className="form-label">Função:</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={funcao}
-                                        disabled
-                                    />
+                                    <input type="text" className="form-control" value={funcao} disabled />
                                 </div>
                                 <div className="mb-3">
                                     <label className="form-label">Contribuinte:</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={contribuinte}
-                                        disabled
-                                    />
+                                    <input type="text" className="form-control" value={contribuinte} disabled />
                                 </div>
                                 <div className="mb-3">
                                     <label className="form-label">Nº Segurança Social:</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={segSocial}
-                                        disabled
-                                    />
+                                    <input type="text" className="form-control" value={segSocial} disabled />
                                 </div>
                                 <div className="mb-3">
                                     <label className="form-label">Data de Nascimento:</label>
-                                    <input
-                                        type="date"
-                                        className="form-control"
-                                        value={dataNascimento}
-                                        disabled
-                                    />
+                                    <input type="date" className="form-control" value={dataNascimento} disabled />
                                 </div>
                             </div>
                         </div>
@@ -278,11 +256,7 @@ const TrabalhadorForm = ({
                         )}
                     </button>
                 </div>
-            ) : (
-                <div className="alert alert-info">
-                    Por favor, selecione um trabalhador existente ou crie um novo.
-                </div>
-            )}
+            ) : null}
         </div>
     );
 };

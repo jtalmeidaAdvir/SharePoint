@@ -8,8 +8,6 @@ import EmpresaForm from "../components/EmpresaForm";
 import TrabalhadorForm from "../components/TrabalhadorForm";
 import EquipamentoForm from "../components/EquipamentoForm";
 import AutorizacaoForm from "../components/AutorizacaoForm";
-import DocumentosSelector from "../components/DocumentosSelector";
-import FileUploader from "../components/FileUploader";
 import DocumentosList from "../components/DocumentosList";
 import AlertModal from "../components/AlertModal";
 
@@ -19,11 +17,6 @@ const UploadPage = () => {
 
     const [entityData, setEntityData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
-
-
-
-
-
 
     useEffect(() => {
         const isAuthenticated = localStorage.getItem("uploadAuth_" + clienteId);
@@ -60,7 +53,6 @@ const UploadPage = () => {
     const [file, setFile] = useState(null);
     const [message, setMessage] = useState("");
     const [docsStatus, setDocsStatus] = useState({});
-    const [mode, setMode] = useState("select"); // Add mode state
 
     // Empresa
     const [nomeEmpresa, setNomeEmpresa] = useState("");
@@ -462,7 +454,7 @@ const UploadPage = () => {
                 >
                     <span className="visually-hidden">A carregar...</span>
                 </div>
-                <p className="mt-3">A carregar informações da entidade...</p>
+                <p className="mt-3">A carregar informações...</p>
             </div>
         );
     }
@@ -608,6 +600,7 @@ const UploadPage = () => {
                             setTipoMaquina={setTipoMaquina}
                             numeroSerie={numeroSerie}
                             setNumeroSerie={setNumeroSerie}
+                            entityid={clienteId}
                         />
                     )}
 
@@ -627,7 +620,7 @@ const UploadPage = () => {
                         <p>{message}</p>
 
                         {((category !== "Trabalhadores" && category !== "Equipamentos") ||
-                            (category === "Trabalhadores" && mode === "select" && trabalhadorSelecionado) ||
+                            (category === "Trabalhadores"  && trabalhadorSelecionado) ||
                             (category === "Equipamentos" && equipamentoSelecionado)) && (
                                 <DocumentosList
                                     onUpload={(selectedDocType, selectedFile, newStatus) => {
@@ -680,7 +673,7 @@ const UploadPage = () => {
                                             .then(res => {
                                                 console.log('Resposta do servidor:', res.data);
                                                 setMessage("✅ " + res.data.message);
-                                                if (newStatus) {
+                                                if (newStatus && Object.keys(newStatus).length > 0) {
                                                     setDocsStatus(newStatus);
                                                 } else {
                                                     fetchDocsStatus();

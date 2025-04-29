@@ -8,6 +8,7 @@ const DocumentosList = ({
     docsStatus = {},
     entityData,
     selectedWorker,
+    selectedEquipment,
     marca,
     onUpload,
 }) => {
@@ -43,7 +44,7 @@ const DocumentosList = ({
         return match ? match[1] : null;
     };
 
-    const getValidityDate = (docName, status, entityData, selectedWorker) => {
+    const getValidityDate = (docName, status, entityData, selectedWorker, selectedEquipment) => {
         if (selectedWorker) {
             const docMap = {
                 "Cartão de Cidadão ou residência": selectedWorker.caminho1,
@@ -61,6 +62,19 @@ const DocumentosList = ({
                 if (validityMatch) return validityMatch[1];
             }
         }
+        if (selectedEquipment) {
+            const docMap = {
+                "Seguro": selectedEquipment.caminho5,
+            },
+                docStatus = docMap[docName];
+            if (docStatus) {
+                const validityMatch = docStatus.match(
+                    /&#40;Válido até&#58;\s*(\d{2}\/\d{2}\/\d{4})&#41;/,
+                );
+                if (validityMatch) return validityMatch[1];
+            }
+        }
+
 
         if (status?.includes("Válido até")) {
             const validity = extractValidityDate(status);
@@ -290,6 +304,7 @@ const DocumentosList = ({
                                                         docsStatus?.[doc],
                                                         entityData,
                                                         selectedWorker,
+                                                        selectedEquipment,
                                                     ) && (
                                                             <span className="ms-2 text-muted">
                                                                 | Validade:{" "}
@@ -300,6 +315,7 @@ const DocumentosList = ({
                                                                     ],
                                                                     entityData,
                                                                     selectedWorker,
+                                                                    selectedEquipment,
                                                                 )}
                                                             </span>
                                                         )}
@@ -329,6 +345,7 @@ const DocumentosList = ({
                                                                 } else if (
                                                                     selectedWorker
                                                                 ) {
+                                                                    console.log('Selected Worker:', selectedWorker); // <= AQUI!
                                                                     onUpload(
                                                                         doc,
                                                                         file,
@@ -346,7 +363,30 @@ const DocumentosList = ({
                                                                                     )[0],
                                                                         },
                                                                     );
-                                                                } else {
+                                                                } else if (
+                                                                    selectedEquipment
+                                                                ) {
+                                                                    console.log('Selected Equipment:', selectedEquipment); // <= AQUI!
+                                                                    onUpload(
+                                                                        doc,
+                                                                        file,
+                                                                        {
+                                                                            idEntidade:
+                                                                                selectedEquipment.id,
+                                                                            validade: 
+                                                                                new Date(
+                                                                                    selectedEquipment.data_validade ||
+                                                                                    Date.now(),
+                                                                                )
+                                                                                    .toISOString()
+                                                                                    .split(
+                                                                                        "T",
+                                                                                    )[0],
+                                                                        },
+                                                                    );
+                                                                }
+
+                                                                else {
                                                                     if (
                                                                         entityData?.Nome
                                                                     ) {

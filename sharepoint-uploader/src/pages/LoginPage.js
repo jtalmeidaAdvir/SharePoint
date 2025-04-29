@@ -17,38 +17,56 @@ const LoginPage = () => {
         const redirectPath = params.get('redirect');
 
         try {
+            console.log('Enviando solicitação de login...');
             const response = await axios.post('http://localhost:5000/verificar-credenciais', { username, password });
+            console.log('Resposta recebida:', response.data);
+
             if (response.data.valid) {
+                console.log('Credenciais válidas. Armazenando dados no localStorage...');
+
                 const expirationTime = Date.now() + (24 * 60 * 60 * 1000);
                 localStorage.setItem('isAuthenticated', 'true');
                 localStorage.setItem('authExpiration', expirationTime.toString());
+
                 if (response.data.erpToken) {
+                    console.log('ERP Token recebido:', response.data.erpToken);
                     localStorage.setItem('erpToken', response.data.erpToken);
                 }
 
                 if (response.data.isAdmin) {
+                    console.log('Usuário é admin. Redirecionando para /admin...');
                     localStorage.setItem('isAdmin', 'true');
                     navigate('/admin');
                 } else if (redirectPath && redirectPath.startsWith('/upload/')) {
+                    console.log('Redirecionamento para upload detectado:', redirectPath);
+
                     const clientId = redirectPath.replace('/upload/', '');
+                    console.log('Client ID extraído:', clientId);
+
                     if (response.data.id === clientId) {
+                        console.log('ID do cliente confere. Autorizando upload.');
                         localStorage.setItem('uploadAuth_' + clientId, 'true');
                         navigate(redirectPath);
                     } else {
+                        console.warn('ID do cliente NÃO confere. Exibindo alerta.');
                         setShowAlert(true);
                     }
                 } else {
+                    console.log('Usuário comum. Redirecionando para /admin...');
                     navigate('/admin');
                 }
             } else {
+                console.warn('Credenciais inválidas. Exibindo alerta.');
                 setShowAlert(true);
             }
         } catch (error) {
-            console.error("Login failed:", error);
+            console.error("Falha no login:", error);
             setShowAlert(true);
         } finally {
+            console.log('Finalizando processo de login...');
             setIsLoading(false);
         }
+
     };
 
 

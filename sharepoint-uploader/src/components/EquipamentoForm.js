@@ -1,5 +1,5 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 const EquipamentoForm = ({
     equipamentosExistentes,
@@ -10,18 +10,31 @@ const EquipamentoForm = ({
     tipoMaquina,
     setTipoMaquina,
     numeroSerie,
-    setNumeroSerie
+    setNumeroSerie,
+    entityid,
 }) => {
-    const [mode, setMode] = useState('select');
+    const [mode, setMode] = useState("select");
+    const [isSaving, setIsSaving] = useState(false);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setLoading(false);
+        }, 1000); // Simula carregamento por 1 segundo
+        return () => clearTimeout(timer);
+    }, [equipamentosExistentes]);
 
     const handleEquipamentoSelect = (e) => {
-        const equipamento = equipamentosExistentes.find(eq => eq.marca_modelo === e.target.value || eq.marca === e.target.value);
+        const equipamento = equipamentosExistentes.find(
+            (eq) =>
+                eq.marca_modelo === e.target.value || eq.marca === e.target.value
+        );
 
         if (equipamento) {
             setEquipamentoSelecionado(equipamento.marca_modelo || equipamento.marca);
             setMarcaModelo(equipamento.marca_modelo || equipamento.marca);
-            setTipoMaquina(equipamento.tipo_maquina || equipamento.tipo || '');
-            setNumeroSerie(equipamento.numero_serie || equipamento.serie || '');
+            setTipoMaquina(equipamento.tipo_maquina || equipamento.tipo || "");
+            setNumeroSerie(equipamento.numero_serie || equipamento.serie || "");
         }
     };
 
@@ -31,10 +44,10 @@ const EquipamentoForm = ({
             "Certificado ou Declaração",
             "Registos de Manutenção",
             "Manual de utilizador",
-            "Seguro"
+            "Seguro",
         ];
         const emptyStatus = {};
-        requiredDocs.forEach(doc => {
+        requiredDocs.forEach((doc) => {
             emptyStatus[doc] = "❌ Não enviado";
         });
         return emptyStatus;
@@ -42,14 +55,61 @@ const EquipamentoForm = ({
 
     const handleModeChange = (newMode) => {
         setMode(newMode);
-        if (newMode === 'create') {
-            setEquipamentoSelecionado('');
-            setMarcaModelo('');
-            setTipoMaquina('');
-            setNumeroSerie('');
-            window.dispatchEvent(new CustomEvent('resetDocsStatus', {
-                detail: resetDocsStatus()
-            }));
+        if (newMode === "create") {
+            setEquipamentoSelecionado("");
+            setMarcaModelo("");
+            setTipoMaquina("");
+            setNumeroSerie("");
+            window.dispatchEvent(
+                new CustomEvent("resetDocsStatus", {
+                    detail: resetDocsStatus(),
+                })
+            );
+        }
+    };
+
+    const handleSaveEquipamento = async () => {
+        setIsSaving(true);
+        console.log("id empresa", entityid);
+        try {
+            const novoEquipamento = {
+                Marca: marcaModelo.trim(),
+                Tipo: tipoMaquina.trim(),
+                Serie: numeroSerie.trim(),
+                IdEntidade: entityid,
+                Caminho1: "",
+                Caminho2: "",
+                Caminho3: "",
+                Caminho4: "",
+                Caminho5: "",
+                Anexo1: false,
+                Anexo2: false,
+                Anexo3: false,
+                Anexo4: false,
+                Anexo5: false,
+            };
+
+            const response = await axios.put(
+                "http://localhost:5000/WebApi/SharePoint/InsertEquipamento",
+                novoEquipamento,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+            if (response.data) {
+                alert("Equipamento inserido com sucesso!");
+                handleModeChange("select");
+            }
+        } catch (error) {
+            console.error("Erro ao salvar equipamento:", error);
+            const errorMsg =
+                error.response?.data?.error || "Erro ao inserir equipamento";
+            alert(errorMsg);
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -58,21 +118,35 @@ const EquipamentoForm = ({
             <div className="btn-group w-100 mb-3" role="group">
                 <button
                     type="button"
-                    className={`btn ${mode === 'select' ? 'btn-primary' : 'btn-outline-primary'}`}
-                    onClick={() => handleModeChange('select')}
+                    className={`btn ${mode === "select" ? "btn-primary" : "btn-outline-primary"}`}
+                    onClick={() => handleModeChange("select")}
+                    disabled={loading}
                 >
-                    Selecionar Equipamento Existente
+                    {loading ? (
+                        <>
+                            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            A carregar...
+                        </>
+                    ) : (
+                        "Selecionar Equipamento Existente"
+                    )}
                 </button>
                 <button
                     type="button"
-                    className={`btn ${mode === 'create' ? 'btn-primary' : 'btn-outline-primary'}`}
-                    onClick={() => handleModeChange('create')}
+                    className={`btn ${mode === "create" ? "btn-primary" : "btn-outline-primary"}`}
+                    onClick={() => handleModeChange("create")}
                 >
                     Criar Novo Equipamento
                 </button>
             </div>
 
-            {mode === 'select' && equipamentosExistentes && equipamentosExistentes.length > 0 ? (
+            {mode === "select" && !loading && equipamentosExistentes?.length === 0 && (
+                <div className="alert alert-info">
+                    Nenhum equipamento encontrado. Por favor, crie um novo equipamento.
+                </div>
+            )}
+
+            {mode === "select" && !loading && equipamentosExistentes?.length > 0 ? (
                 <div>
                     <div className="mb-3">
                         <label className="form-label">Selecione um Equipamento:</label>
@@ -105,39 +179,24 @@ const EquipamentoForm = ({
                                     <i className="bi bi-eye"></i> Ver/Ocultar
                                 </button>
                             </div>
-                            <div className="collapse" id="infoEquipamento">
+                            <div className="collapse show" id="infoEquipamento">
                                 <div className="mb-3">
                                     <label className="form-label">Marca / Modelo:</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={marcaModelo}
-                                        disabled
-                                    />
+                                    <input type="text" className="form-control" value={marcaModelo} disabled />
                                 </div>
                                 <div className="mb-3">
                                     <label className="form-label">Tipo de Máquina:</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={tipoMaquina}
-                                        disabled
-                                    />
+                                    <input type="text" className="form-control" value={tipoMaquina} disabled />
                                 </div>
                                 <div className="mb-3">
                                     <label className="form-label">Número de Série:</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={numeroSerie}
-                                        disabled
-                                    />
+                                    <input type="text" className="form-control" value={numeroSerie} disabled />
                                 </div>
                             </div>
                         </div>
                     )}
                 </div>
-            ) : mode === 'create' ? (
+            ) : mode === "create" ? (
                 <div className="card p-3">
                     <h5 className="card-title mb-3">Novo Equipamento</h5>
                     <div className="mb-3">
@@ -167,6 +226,24 @@ const EquipamentoForm = ({
                             onChange={(e) => setNumeroSerie(e.target.value)}
                         />
                     </div>
+                    <button
+                        onClick={handleSaveEquipamento}
+                        className="btn btn-success"
+                        disabled={isSaving}
+                    >
+                        {isSaving ? (
+                            <>
+                                <span
+                                    className="spinner-border spinner-border-sm me-2"
+                                    role="status"
+                                    aria-hidden="true"
+                                ></span>
+                                Salvando...
+                            </>
+                        ) : (
+                            "Salvar Equipamento"
+                        )}
+                    </button>
                 </div>
             ) : null}
         </div>

@@ -170,16 +170,7 @@ app.post("/upload", upload.single("file"), async (req, res) => {
             const isWorkerDoc = folderPath.includes("/Trabalhadores");
             const isEquipmentDoc = folderPath.includes("/Equipamentos");
 
-            console.log(
-                isWorkerDoc
-                    ? "Atualizando trabalhador no ERP..."
-                    : isEquipmentDoc
-                        ? "Atualizando equipamento no ERP..."
-                        : "Atualizando entidade no ERP...",
-            );
-            console.log("docType:", docType);
-            console.log("idEntidade:", idEntidade);
-            console.log("validade:", validade);
+
 
             const docTypeMappingValidacoes = {
                 // Documentos de Empresa
@@ -248,7 +239,6 @@ app.post("/upload", upload.single("file"), async (req, res) => {
 
             const docKeyAnexos = docTypeMappingAnexos[docType];
             const docKey = docTypeMappingValidacoes[docType];
-            console.log("Documento: ", docType, "=> Chave:", docKey);
 
             if (docKey) {
                 if (folderPath.includes("/Equipamentos")) {
@@ -257,12 +247,16 @@ app.post("/upload", upload.single("file"), async (req, res) => {
                     const dataOriginal = new Date(validade);
                     const validadeFormatada =
                         dataOriginal.toLocaleDateString("pt-PT");
-
+                    const formattedValidade =
+                        docType === "Cartão de Cidadão ou residência"
+                            ? `CartaoCidadao &#40;Válido até&#58; ${validadeFormatada}&#41;`
+                            : `${docType} &#40;Válido até&#58; ${validadeFormatada}&#41;`;
+                            console.log("Validade formatada:", formattedValidade);
                     await axios.put(
-                        `http://localhost:2018/WebApi/SharePoint/UpdateEquipamento`,
+                        `http://194.65.139.112:2018/WebApi/SharePoint/UpdateEquipamento`,
                         {
                             Documento: docKey,
-                            Validade: `${docType} &#40;Válido até&#58; ${validadeFormatada}&#41;`,
+                            Validade: formattedValidade,
                             Anexo: docKeyAnexos,
                             Marca: marca,
                             IdEntidade: idEntidade,
@@ -288,7 +282,7 @@ app.post("/upload", upload.single("file"), async (req, res) => {
                             : `${docType} &#40;Válido até&#58; ${validadeFormatada}&#41;`;
 
                     await axios.put(
-                        `http://localhost:2018/WebApi/SharePoint/UpdateTrabalhador`,
+                        `http://194.65.139.112:2018/WebApi/SharePoint/UpdateTrabalhador`,
                         {
                             Documento: docKey,
                             Validade: formattedValidade, // com texto "Cartão Cidadão (Válido até: ...)"
@@ -307,7 +301,7 @@ app.post("/upload", upload.single("file"), async (req, res) => {
                 } else {
                     // Use company update endpoint
                     await axios.put(
-                        `http://localhost:2018/WebApi/SharePoint/UpdateEntidade/${docKey}/${validade}/${docKeyAnexos}/${idEntidade}`,
+                        `http://194.65.139.112:2018/WebApi/SharePoint/UpdateEntidade/${docKey}/${validade}/${docKeyAnexos}/${idEntidade}`,
                         {},
                         {
                             headers: {
@@ -350,10 +344,10 @@ app.put("/WebApi/SharePoint/InsertTrabalhador", async (req, res) => {
 
     try {
         console.log(
-            "Fazendo requisição para o ERP em: http://localhost:2018/WebApi/SharePoint/InsertTrabalhador",
+            "Fazendo requisição para o ERP em: http://194.65.139.112:2018/WebApi/SharePoint/InsertTrabalhador",
         );
         const response = await axios.put(
-            `http://localhost:2018/WebApi/SharePoint/InsertTrabalhador`,
+            `http://194.65.139.112:2018/WebApi/SharePoint/InsertTrabalhador`,
             trabalhador,
             {
                 headers: {
@@ -381,6 +375,50 @@ app.put("/WebApi/SharePoint/InsertTrabalhador", async (req, res) => {
         });
     }
 });
+
+
+app.put("/WebApi/SharePoint/InsertEquipamento", async (req, res) => {
+    const token = await getERPToken();
+    if (!token) {
+        return res.status(401).json({ error: "Erro na autenticação ERP" });
+    }
+
+    const equipamento = req.body;
+    console.log(
+        "Inserindo novo equipamento:",
+        JSON.stringify(equipamento, null, 2),
+    );
+
+    try {
+        const erpUrl = "http://194.65.139.112:2018/WebApi/SharePoint/InsertEquipamento";
+        console.log("Fazendo requisição para o ERP em:", erpUrl);
+
+        const response = await axios.put(erpUrl, equipamento, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+        });
+
+        if (response.data) {
+            console.log("Equipamento inserido com sucesso:", response.data);
+            res.json(response.data);
+        } else {
+            throw new Error("Resposta vazia do ERP");
+        }
+    } catch (error) {
+        console.error("Erro ao inserir equipamento:", error.message);
+        if (error.response) {
+            console.error("Resposta do ERP:", error.response.data);
+        }
+        res.status(500).json({
+            error: "Erro ao inserir equipamento no ERP",
+            details: error.response?.data || error.message,
+            data: equipamento,
+        });
+    }
+});
+
 
 // ------------------- LISTAGEM -------------------
 // 🗂️ Documentos obrigatórios por categoria
@@ -534,7 +572,6 @@ app.get("/equipamentos/:clienteId", async (req, res) => {
 
 // Armazenamento temporário (em produção, use um banco de dados)
 let subempreiteiros = [];
-let nextId = 1;
 
 app.get("/subempreiteiros", (req, res) => {
     res.json({ subempreiteiros });
@@ -571,33 +608,42 @@ app.listen(PORT, () =>
 );
 async function getERPToken() {
     try {
-        logSuccess("Iniciando autenticação no ERP");
-        //localhost - JPA
-        //localhost - Advir
+        console.log("==========================================");
+        console.log("🚀 Iniciando autenticação no ERP...");
+
+        const payload = new URLSearchParams({
+            username: "Advir",
+            password: "Code495@",
+            company: "CLNJPA2",
+            instance: "DEFAULT",
+            line: "Professional",
+            grant_type: "password",
+        });
+
+        console.log("📤 Payload de autenticação ERP montado:", Object.fromEntries(payload.entries()));
+
         const tokenResponse = await axios.post(
-            `http://localhost:2018/WebApi/token`,
-            new URLSearchParams({
-                username: "jtalm",
-                password: "123",
-                company: "JPA",
-                instance: "DEFAULT",
-                line: "Evolution",
-                grant_type: "password",
-            }),
+            `http://194.65.139.112:2018/WebApi/token`,
+            payload,
             {
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded",
                 },
-            },
+            }
         );
 
+        console.log("📥 Resposta recebida do ERP:", tokenResponse.data);
+
         if (tokenResponse.data.access_token) {
-            logSuccess("Token ERP obtido com sucesso");
+            console.log("✅ Token ERP obtido com sucesso!");
+            console.log("🔑 Token:", tokenResponse.data.access_token);
+            console.log("==========================================\n");
             return tokenResponse.data.access_token;
         } else {
             console.error(
-                "\x1b[41m\x1b[37m ERRO \x1b[0m Token ERP não encontrado na resposta",
+                "\x1b[41m\x1b[37m ERRO \x1b[0m Token ERP não encontrado na resposta:", tokenResponse.data
             );
+            console.log("==========================================\n");
             return null;
         }
     } catch (error) {
@@ -605,9 +651,12 @@ async function getERPToken() {
             "\x1b[41m\x1b[37m ERRO \x1b[0m Falha na autenticação ERP:",
             error.response?.data || error.message,
         );
+        console.log("==========================================\n");
         return null;
     }
 }
+
+
 app.get("/listar-entidades", async (req, res) => {
     try {
         const token = await getERPToken();
@@ -616,7 +665,7 @@ app.get("/listar-entidades", async (req, res) => {
         }
 
         const response = await axios.get(
-            "http://localhost:2018/WebApi/SharePoint/ListarEntidadesSGS",
+            "http://194.65.139.112:2018/WebApi/SharePoint/ListarEntidadesSGS",
             {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -641,7 +690,7 @@ app.get("/entidade/:id", async (req, res) => {
         }
 
         const response = await axios.get(
-            `http://localhost:2018/WebApi/SharePoint/GetEntidade/${req.params.id}`,
+            `http://194.65.139.112:2018/WebApi/SharePoint/GetEntidade/${req.params.id}`,
             {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -669,7 +718,7 @@ app.get("/entidade/:id/trabalhadores", async (req, res) => {
 
         console.log(`Buscando trabalhadores para entidade ${req.params.id}`);
         const response = await axios.get(
-            `http://localhost:2018/WebApi/SharePoint/ListarTrabalhadores/${req.params.id}`,
+            `http://194.65.139.112:2018/WebApi/SharePoint/ListarTrabalhadores/${req.params.id}`,
             {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -725,7 +774,7 @@ app.put(
             };
 
             const response = await axios.put(
-                `http://localhost:2018/WebApi/SharePoint/UpdateEntidade/${idEntidade}`,
+                `http://194.65.139.112:2018/WebApi/SharePoint/UpdateEntidade/${idEntidade}`,
                 updateData,
                 {
                     headers: {
@@ -768,8 +817,11 @@ app.put(
                 Contribuinte: contribuinte,
             };
 
+            console.log("Objeto de atualização que será enviado:");
+            console.log(updateData);
+
             const response = await axios.put(
-                `http://localhost:2018/WebApi/SharePoint/UpdateTrabalhador/${idEntidade}`,
+                `http://194.65.139.112:2018/WebApi/SharePoint/UpdateTrabalhador/${idEntidade}`,
                 updateData,
                 {
                     headers: {
@@ -809,7 +861,7 @@ app.put("/WebApi/SharePoint/UpdateEquipamento", async (req, res) => {
         });
 
         const response = await axios.put(
-            `http://localhost:2018/WebApi/SharePoint/UpdateEquipamento`,
+            `http://194.65.139.112:2018/WebApi/SharePoint/UpdateEquipamento`,
             {
                 Documento,
                 Validade,
@@ -845,7 +897,7 @@ app.get("/entidade/:id/equipamentos", async (req, res) => {
 
         console.log(`Buscando equipamentos para entidade ${req.params.id}`);
         const response = await axios.get(
-            `http://localhost:2018/WebApi/SharePoint/ListarEquipamentos/${req.params.id}`,
+            `http://194.65.139.112:2018/WebApi/SharePoint/ListarEquipamentos/${req.params.id}`,
             {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -882,16 +934,18 @@ app.get("/entidade/:id/equipamentos", async (req, res) => {
 
 app.post("/verificar-credenciais", async (req, res) => {
     const { username, password } = req.body;
-    console.log("Tentativa de login:", { username, password });
-    console.log("Subempreiteiros cadastrados:", subempreiteiros);
+    console.log("==========================================");
+    console.log("🔐 Tentativa de login recebida:", { username, password });
+    console.log("📋 Lista de subempreiteiros cadastrados:", subempreiteiros);
 
     const subempreiteiro = subempreiteiros.find(
         (s) => s.username === username && s.password === password,
     );
 
     if (subempreiteiro) {
+        console.log(`✅ Login bem-sucedido! Usuário: ${subempreiteiro.nome} (ID: ${subempreiteiro.id})`);
         const erpToken = await getERPToken();
-        console.log("Login bem sucedido para:", subempreiteiro.nome);
+        console.log("🔑 ERP Token gerado para subempreiteiro:", erpToken);
         res.json({
             valid: true,
             id: subempreiteiro.id,
@@ -900,15 +954,18 @@ app.post("/verificar-credenciais", async (req, res) => {
         });
     } else {
         if (username === "admin" && password === "admin123") {
+            console.log("✅ Login admin bem-sucedido!");
             const erpToken = await getERPToken();
-            console.log("Login admin bem sucedido");
+            console.log("🔑 ERP Token gerado para admin:", erpToken);
             res.json({ valid: true, isAdmin: true, erpToken });
         } else {
-            console.log("Login falhou");
+            console.warn("❌ Falha no login: Credenciais inválidas para usuário:", username);
             res.json({ valid: false });
         }
     }
+    console.log("==========================================\n");
 });
+
 
 app.delete("/subempreiteiros/:id", (req, res) => {
     const id = parseInt(req.params.id);
