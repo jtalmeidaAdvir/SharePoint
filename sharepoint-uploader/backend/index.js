@@ -104,14 +104,14 @@ app.post("/upload", upload.single("file"), async (req, res) => {
         const { idEntidade, validade, contribuinte, marca } =
             req.body;
 
-        console.log("📤 Upload iniciado:");
+      /*  console.log("📤 Upload iniciado:");
         console.log("- Cliente folderPath:", folderPath);
         console.log("- Tipo de documento:", docType);
         console.log("- Ficheiro original:", file.originalname);
         console.log("- ID Entidade:", idEntidade);
         console.log("- Validade:", validade);
         console.log("- contribuinte:", contribuinte);
-        console.log("- Marca/Modelo:", marca);
+        console.log("- Marca/Modelo:", marca);*/
         // Log equipment data if present
 
         const renamedFileName = `${docType}.txt`;
@@ -128,7 +128,7 @@ app.post("/upload", upload.single("file"), async (req, res) => {
 
         const uploadUrl = `https://graph.microsoft.com/v1.0/sites/${process.env.SITE_ID}/drive/root:/${folderPath}/${renamedFileName}:/content`;
 
-        console.log("- Upload para o SharePoint em:", uploadUrl);
+       // console.log("- Upload para o SharePoint em:", uploadUrl);
 
         const maxRetries = 3;
         let retryCount = 0;
@@ -166,11 +166,12 @@ app.post("/upload", upload.single("file"), async (req, res) => {
         logSuccess("Upload concluído e ficheiro local apagado");
 
         // Atualizar documento no ERP
-        if (idEntidade && validade) {
+        if (idEntidade) {
             const isWorkerDoc = folderPath.includes("/Trabalhadores");
             const isEquipmentDoc = folderPath.includes("/Equipamentos");
 
-
+            console.log("isequipmentDoc", isEquipmentDoc);
+            console.log("isWorkerDoc", isWorkerDoc);
 
             const docTypeMappingValidacoes = {
                 // Documentos de Empresa
@@ -245,13 +246,25 @@ app.post("/upload", upload.single("file"), async (req, res) => {
                     // Use equipment update endpoint
                     console.log("Atualizando equipamento no ERP...");
                     const dataOriginal = new Date(validade);
-                    const validadeFormatada =
-                        dataOriginal.toLocaleDateString("pt-PT");
-                    const formattedValidade =
-                        docType === "Cartão de Cidadão ou residência"
-                            ? `CartaoCidadao &#40;Válido até&#58; ${validadeFormatada}&#41;`
-                            : `${docType} &#40;Válido até&#58; ${validadeFormatada}&#41;`;
-                            console.log("Validade formatada:", formattedValidade);
+                    let formattedValidade = "";
+
+                    if (!isNaN(dataOriginal.getTime())) {
+                        const validadeFormatada = dataOriginal.toLocaleDateString("pt-PT");
+                        formattedValidade =
+                            docType === "Cartão de Cidadão ou residência"
+                                ? `CartaoCidadao &#40;Válido até&#58; ${validadeFormatada}&#41;`
+                                : `${docType} &#40;Válido até&#58; ${validadeFormatada}&#41;`;
+
+                        console.log("Validade formatada:", formattedValidade);
+                    } else {
+                        console.error("Data inválida:", validade);
+                        formattedValidade =
+                            docType === "Cartão de Cidadão ou residência"
+                                ? "CartaoCidadao"
+                                : docType;
+                    }
+
+            
                     await axios.put(
                         `http://194.65.139.112:2018/WebApi/SharePoint/UpdateEquipamento`,
                         {
