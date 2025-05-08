@@ -28,7 +28,7 @@ const UploadPage = () => {
                 try {
                     const token = localStorage.getItem("token");
                     const response = await axios.get(
-                        `http://localhost:5000/entidade/${clienteId}`,
+                        `http://51.254.116.237:5000/entidade/${clienteId}`,
                         {
                             headers: {
                                 Authorization: `Bearer ${token}`,
@@ -50,6 +50,13 @@ const UploadPage = () => {
     const [docType, setDocType] = useState("");
     const [file, setFile] = useState(null);
     const [message, setMessage] = useState("");
+    useEffect(() => {
+        // Add viewport meta tag for better mobile responsiveness
+        const viewport = document.querySelector("meta[name=viewport]");
+        if (viewport) {
+            viewport.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0";
+        }
+    }, []);
     const [docsStatus, setDocsStatus] = useState({});
 
     // Empresa
@@ -80,7 +87,7 @@ const UploadPage = () => {
         if (category === "Trabalhadores" && entityData?.EntidadeId) {
             axios
                 .get(
-                    `http://localhost:5000/entidade/${clienteId}/trabalhadores`,
+                    `http://51.254.116.237:5000/entidade/${clienteId}/trabalhadores`,
                 )
                 .then((res) =>
                     setTrabalhadoresExistentes(res.data.DataSet.Table),
@@ -90,7 +97,7 @@ const UploadPage = () => {
                 );
         } else if (category === "Equipamentos" && entityData?.EntidadeId) {
             axios
-                .get(`http://localhost:5000/entidade/${clienteId}/equipamentos`)
+                .get(`http://51.254.116.237:5000/entidade/${clienteId}/equipamentos`)
                 .then((res) =>
                     setEquipamentosExistentes(res.data.DataSet.Table),
                 )
@@ -138,7 +145,7 @@ const UploadPage = () => {
     const fetchDocsStatus = async () => {
         try {
             console.log("🔁 fetchDocsStatus chamado!");
-            let endpoint = `http://localhost:5000/files/${entityData?.Nome}?category=${category}`;
+            let endpoint = `http://51.254.116.237:5000/files/${entityData?.Nome}?category=${category}`;
 
             if (category === "Trabalhadores") {
                 const nome = trabalhadorSelecionado || nomeCompleto;
@@ -341,7 +348,7 @@ const UploadPage = () => {
                         : `Subempreiteiros/${entityData?.Nome}/${category}`;
 
             const res = await axios.post(
-                `http://localhost:5000/upload?folder=${encodeURIComponent(folderPath)}`,
+                `http://51.254.116.237:5000/upload?folder=${encodeURIComponent(folderPath)}`,
                 formData,
             );
 
@@ -405,7 +412,7 @@ const UploadPage = () => {
                         : `Subempreiteiros/${entityData?.Nome}/${category}`;
 
             const res = await axios.post(
-                `http://localhost:5000/upload?folder=${encodeURIComponent(folderPath)}`,
+                `http://51.254.116.237:5000/upload?folder=${encodeURIComponent(folderPath)}`,
                 formData,
             );
             setMessage("✅ " + res.data.message);
@@ -547,12 +554,12 @@ const UploadPage = () => {
                                 >
                                     <i
                                         className={`bi bi-${cat === "Empresas"
-                                                ? "building"
-                                                : cat === "Trabalhadores"
-                                                    ? "person"
-                                                    : cat === "Equipamentos"
-                                                        ? "tools"
-                                                        : "file-earmark"
+                                            ? "building"
+                                            : cat === "Trabalhadores"
+                                                ? "person"
+                                                : cat === "Equipamentos"
+                                                    ? "tools"
+                                                    : "file-earmark"
                                             } me-2`}
                                     ></i>
                                     {cat}
@@ -623,8 +630,8 @@ const UploadPage = () => {
                                 trabalhadorSelecionado) ||
                             (category === "Equipamentos" &&
                                 equipamentoSelecionado)) && (
-                            <DocumentosList
-                                onRefresh={fetchDocsStatus}
+                                <DocumentosList
+                                    onRefresh={fetchDocsStatus}
                                     onUpload={(
                                         selectedDocType,
                                         selectedFile,
@@ -691,7 +698,7 @@ const UploadPage = () => {
 
                                         axios
                                             .post(
-                                                `http://localhost:5000/upload?folder=${encodeURIComponent(folderPath)}`,
+                                                `http://51.254.116.237:5000/upload?folder=${encodeURIComponent(folderPath)}`,
                                                 formData,
                                             )
                                             .then((res) => {
@@ -742,9 +749,9 @@ const UploadPage = () => {
                                             )
                                             : null
                                     }
-                                marca={marcaModelo}
-                                validade={validade}
-                                setValidade={setValidade}
+                                    marca={marcaModelo}
+                                    validade={validade}
+                                    setValidade={setValidade}
                                 />
                             )}
                     </div>

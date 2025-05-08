@@ -15,7 +15,7 @@ const DocumentosCaducadosPage = () => {
 
     const fetchDocumentosCaducados = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/documentos-caducados');
+            const response = await axios.get('http://51.254.116.237:5000/documentos-caducados');
             setDocumentosCaducados(response.data);
             setLoading(false);
         } catch (error) {
@@ -32,7 +32,7 @@ const DocumentosCaducadosPage = () => {
         formData.append('docId', docId);
 
         try {
-            await axios.post('http://localhost:5000/atualizar-documento', formData);
+            await axios.post('http://51.254.116.237:5000/atualizar-documento', formData);
             await fetchDocumentosCaducados();
             setFile(null);
             setSelectedDoc(null);
@@ -42,59 +42,101 @@ const DocumentosCaducadosPage = () => {
     };
 
     if (loading) {
-        return <div className="text-center mt-5"><div className="spinner-border text-primary" /></div>;
+        return (
+            <div className="d-flex justify-content-center align-items-center min-vh-100">
+                <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Carregando...</span>
+                </div>
+            </div>
+        );
     }
 
     return (
-        <div className="container mt-4">
-            <h2 className="mb-4">Documentos Caducados</h2>
-            <div className="row">
-                {documentosCaducados.map((doc) => (
-                    <div key={doc.id} className="col-md-6 mb-4">
-                        <div className="card hover-card">
-                            <div className="card-body">
-                                <h5 className="card-title">{doc.nome}</h5>
-                                <p className="card-text text-danger">
-                                    Data de Validade: {doc.validade}
-                                </p>
-                                <p className="card-text">
-                                    Entidade: {doc.entidade}
-                                </p>
-                                <div className="mt-3">
-                                    {selectedDoc === doc.id ? (
-                                        <div>
-                                            <input
-                                                type="file"
-                                                className="form-control mb-2"
-                                                onChange={(e) => setFile(e.target.files[0])}
-                                            />
+        <div className="container-fluid p-4">
+            <div className="row mb-4 align-items-center">
+                <div className="col">
+                    <h2 className="mb-0">Documentos Caducados</h2>
+                </div>
+                <div className="col-auto">
+                    <button
+                        className="btn btn-outline-primary"
+                        onClick={fetchDocumentosCaducados}
+                    >
+                        <i className="bi bi-arrow-clockwise me-2"></i>
+                        Atualizar Lista
+                    </button>
+                </div>
+            </div>
+
+            {documentosCaducados.length === 0 ? (
+                <div className="alert alert-info">
+                    <i className="bi bi-info-circle me-2"></i>
+                    Não existem documentos caducados.
+                </div>
+            ) : (
+                <div className="row g-4">
+                    {documentosCaducados.map((doc) => (
+                        <div key={doc.id} className="col-12 col-md-6 col-lg-4">
+                            <div className="card h-100 shadow-sm hover-card">
+                                <div className="card-body">
+                                    <div className="d-flex justify-content-between align-items-start mb-3">
+                                        <h5 className="card-title text-break mb-0">{doc.nome}</h5>
+                                        <span className="badge bg-danger">Caducado</span>
+                                    </div>
+
+                                    <div className="mb-3">
+                                        <small className="text-muted d-block mb-2">
+                                            <i className="bi bi-building me-2"></i>
+                                            {doc.entidade}
+                                        </small>
+                                        <small className="text-danger d-block">
+                                            <i className="bi bi-calendar-x me-2"></i>
+                                            Válido até: {doc.validade}
+                                        </small>
+                                    </div>
+
+                                    <div className="d-grid gap-2">
+                                        {selectedDoc === doc.id ? (
+                                            <>
+                                                <div className="input-group mb-2">
+                                                    <input
+                                                        type="file"
+                                                        className="form-control"
+                                                        onChange={(e) => setFile(e.target.files[0])}
+                                                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                                                    />
+                                                </div>
+                                                <button
+                                                    className="btn btn-primary w-100"
+                                                    onClick={() => handleFileUpload(doc.id)}
+                                                >
+                                                    <i className="bi bi-cloud-upload me-2"></i>
+                                                    Atualizar
+                                                </button>
+                                                <button
+                                                    className="btn btn-outline-secondary w-100"
+                                                    onClick={() => setSelectedDoc(null)}
+                                                >
+                                                    <i className="bi bi-x-lg me-2"></i>
+                                                    Cancelar
+                                                </button>
+                                            </>
+                                        ) : (
                                             <button
-                                                className="btn btn-primary me-2"
-                                                onClick={() => handleFileUpload(doc.id)}
+                                                className="btn btn-outline-primary w-100"
+                                                onClick={() => setSelectedDoc(doc.id)}
                                             >
-                                                Atualizar
+                                                <i className="bi bi-arrow-up-circle me-2"></i>
+                                                Substituir Documento
                                             </button>
-                                            <button
-                                                className="btn btn-secondary"
-                                                onClick={() => setSelectedDoc(null)}
-                                            >
-                                                Cancelar
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <button
-                                            className="btn btn-outline-primary"
-                                            onClick={() => setSelectedDoc(doc.id)}
-                                        >
-                                            Substituir Documento
-                                        </button>
-                                    )}
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                ))}
-            </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 };

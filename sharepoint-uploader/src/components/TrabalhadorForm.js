@@ -73,7 +73,7 @@ const TrabalhadorForm = ({
 
             console.log("Enviando dados do trabalhador:", newWorker);
             const response = await axios.put(
-                "http://localhost:5000/WebApi/SharePoint/InsertTrabalhador",
+                "http://51.254.116.237:5000/WebApi/SharePoint/InsertTrabalhador",
                 newWorker,
                 { headers: { 'Content-Type': 'application/json' } }
             );

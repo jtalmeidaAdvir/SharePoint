@@ -18,7 +18,7 @@ const LoginPage = () => {
 
         try {
             console.log('Enviando solicitação de login...');
-            const response = await axios.post('http://localhost:5000/verificar-credenciais', { username, password });
+            const response = await axios.post('http://51.254.116.237:5000/verificar-credenciais', { username, password });
             console.log('Resposta recebida:', response.data);
 
             if (response.data.valid) {

@@ -176,7 +176,7 @@ const DocumentosList = ({
 
         axios
             .post(
-                `http://localhost:5000/upload?folder=${encodeURIComponent(folderPath)}`,
+                `http://51.254.116.237:5000/upload?folder=${encodeURIComponent(folderPath)}`,
                 formData,
             )
             .then((res) => {
@@ -184,7 +184,7 @@ const DocumentosList = ({
 
                 // **Só para a empresa** (sem trabalhador nem equipamento), actualiza o estado de validade
                 setValidade(tempValidade);
-                
+
                 console.log("Upload successful:", res.data);
 
 
@@ -197,8 +197,8 @@ const DocumentosList = ({
                     message: "Documento enviado com sucesso!",
                     type: "success",
                 });
-              
-                onRefresh(); 
+
+                onRefresh();
                 setValidadeTemporaria(prev => ({
                     ...prev,
                     [docType]: tempValidade
@@ -254,10 +254,16 @@ const DocumentosList = ({
                     className="modal"
                     style={{
                         display: "block",
-                        backgroundColor: "rgba(0,0,0,0.5)",
+                        backgroundColor: "rgba(0,0,0,0.7)",
+                        position: "fixed",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        zIndex: 9999,
                     }}
                 >
-                    <div className="modal-dialog">
+                    <div className="modal-dialog modal-dialog-centered" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center' }}>
                         <div className="modal-content">
                             <div className="modal-header">
                                 <h5 className="modal-title">
@@ -327,11 +333,11 @@ const DocumentosList = ({
                 {requiredDocs?.map(
                     (doc, index) =>
                         doc && (
-                            <div key={index} className="col">
-                                <div className="card h-100 border-0 shadow-sm hover-card">
+                            <div key={index} className="col-12">
+                                <div className="card h-100 border-0 shadow-sm hover-card mb-3">
                                     <div className="card-body">
-                                        <div className="d-flex align-items-start gap-3">
-                                            <div className="status-icon">
+                                        <div className="d-flex flex-column flex-md-row align-items-start gap-3">
+                                            <div className="status-icon mb-2 mb-md-0">
                                                 {docsStatus &&
                                                     doc &&
                                                     docsStatus[doc]?.includes(
@@ -346,8 +352,8 @@ const DocumentosList = ({
                                                     </span>
                                                 )}
                                             </div>
-                                            <div className="flex-grow-1">
-                                                <h6 className="mb-2 fw-bold text-dark">
+                                            <div className="flex-grow-1 w-100">
+                                                <h6 className="mb-2 fw-bold text-dark text-break">
                                                     {doc}
                                                 </h6>
                                                 <p className="mb-0 small">
@@ -391,12 +397,11 @@ const DocumentosList = ({
                                                         return (
                                                             <span className={`ms-2 ${isExpired ? 'text-danger fw-bold' : 'text-muted'}`}>
                                                                 | Validade: {validityDate}
-                                                                {isExpired && " (Documento Caducado)"}
                                                             </span>
                                                         );
                                                     })()}
                                                 </p>
-                                                <div className="mt-2">
+                                                <div className="mt-3 d-grid d-md-block">
                                                     <input
                                                         type="file"
                                                         id={`file-${index}`}
@@ -496,7 +501,7 @@ const DocumentosList = ({
                                                         accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                                                     />
                                                     <button
-                                                        className="btn btn-primary btn-sm"
+                                                        className="btn btn-primary btn-sm w-100 w-md-auto"
                                                         onClick={() =>
                                                             document
                                                                 .getElementById(
